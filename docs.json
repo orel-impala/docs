@@ -3,23 +3,14 @@
   "theme": "mint",
   "name": "Impala AI Documentation",
   "colors": {
-    "primary": "#a6272e",
-    "light": "#ffdcaf",
-    "dark": "#8c2328"
+    "primary": "#2563eb",
+    "light": "#7aa7f5",
+    "dark": "#1d4ed8"
   },
   "background": {
     "decoration": "gradient"
   },
   "navigation": {
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Blog",
-          "icon": "newspaper",
-          "href": "https://getimpala.ai/blog"
-        }
-      ]
-    },
     "tabs": [
       {
         "tab": "Overview",
@@ -98,6 +89,10 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "Blog",
+        "href": "https://www.getimpala.ai/blog"
+      },
       {
         "label": "Support",
         "href": "mailto:orel@getimpala.ai"
