@@ -23,11 +23,9 @@ Authentication is the same bearer token you use for inference.
 
 ## How a sync progresses
 
-```
-Ready ──POST /upload──▶ Uploading weights ──POST /reload──▶ Reloading weights
-  ▲                                                                  │
-  └──────────────────────── new weights live ◀───────────────────────┘
-```
+<Frame>
+  ![Weight sync API state machine: Ready, POST /upload to Uploading weights, POST /reload to Reloading weights, then new weights live and back to Ready. GET /status is readable throughout.](/weight-sync-api.png)
+</Frame>
 
 `GET /imp/v1/weights/status` is valid at any point and reports which state the fleet is in.
 
