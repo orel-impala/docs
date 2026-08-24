@@ -19,7 +19,13 @@
           "introduction",
           "async-inference",
           "deployment-options",
-          "glossary"
+          {
+            "group": "Reference",
+            "icon": "book",
+            "pages": [
+              "glossary"
+            ]
+          }
         ]
       },
       {
