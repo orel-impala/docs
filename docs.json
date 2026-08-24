@@ -40,26 +40,17 @@
         "icon": "book-open",
         "pages": [
           {
-            "group": "Getting Started",
-            "icon": "rocket",
-            "pages": [
-              "getting-started-infrastructure-setup",
-              "exposing_the_openai_api_endpoint_service",
-              "aws_service_quotas_for_Impala_data_plane_deployment"
-            ]
-          },
-          {
             "group": "Batch Inference",
             "icon": "layer-group",
             "pages": [
-              "jobs-and-job-ids",
               "run-your-first-batch",
+              "jobs-and-job-ids",
               "pass_images_with_image_url"
             ]
           },
           {
-            "group": "Agentic workloads",
-            "icon": "robot",
+            "group": "Serverless Inference",
+            "icon": "bolt",
             "pages": [
               "send-a-request"
             ]
@@ -77,6 +68,15 @@
             "icon": "arrows-rotate",
             "pages": [
               "weight-sync"
+            ]
+          },
+          {
+            "group": "Bring Your Own Cloud",
+            "icon": "cloud",
+            "pages": [
+              "getting-started-infrastructure-setup",
+              "exposing_the_openai_api_endpoint_service",
+              "aws_service_quotas_for_Impala_data_plane_deployment"
             ]
           }
         ]
