@@ -45,8 +45,7 @@
             "pages": [
               "getting-started-infrastructure-setup",
               "exposing_the_openai_api_endpoint_service",
-              "aws_service_quotas_for_Impala_data_plane_deployment",
-              "connect-litellm"
+              "aws_service_quotas_for_Impala_data_plane_deployment"
             ]
           },
           {
@@ -59,7 +58,7 @@
             ]
           },
           {
-            "group": "Single requests",
+            "group": "Online inference",
             "icon": "bolt",
             "pages": [
               "send-a-request"
@@ -69,6 +68,7 @@
             "group": "Integrations",
             "icon": "plug",
             "pages": [
+              "connect-litellm",
               "anthropic-sdk"
             ]
           },
