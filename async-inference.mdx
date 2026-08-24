@@ -1,6 +1,6 @@
 ---
 title: "Async inference"
-description: "Impala runs inference for work nobody is waiting on. That single fact sets the metric, the architecture, and the cost per token."
+description: "Impala runs inference for work nobody is waiting on. That single fact changes which numbers you measure and how you should call the API."
 ---
 
 Impala is built for **async inference**: model calls where no human is reading tokens as they arrive.
@@ -8,6 +8,34 @@ Impala is built for **async inference**: model calls where no human is reading t
 Background coding agents. Research agents working through a question. Multi-step automations. Enrichment pipelines. Evaluation sweeps. Classification across a corpus.
 
 This work still has deadlines. The deadline is on the **task**, not on the token. A research agent that takes four minutes is fine. Paying interactive prices for those four minutes is not.
+
+## What this changes for you
+
+Four things to do differently, before anything else on this page:
+
+- **Raise your timeouts.** SDK defaults are tuned for interactive providers and will abort early. Expect seconds rather than milliseconds, and longer under load.
+- **Turn off automatic retries.** Retrying a queued request adds load without shortening the wait.
+- **Benchmark a whole task, not a single request.** One request tells you almost nothing about how the workload will perform.
+- **Count your turns.** For an agent, total time is per-step time multiplied by the number of steps — so turn count is usually a bigger lever than any individual call.
+
+## Where the time goes
+
+```mermaid
+gantt
+    dateFormat X
+    axisFormat %s
+    section Interactive
+    Prefill                          :0, 1
+    Decode — a person reads each token :1, 6
+    section Async agent task
+    Step 1                           :0, 4
+    Tool call                        :4, 5
+    Step 2                           :5, 9
+    Tool call                        :9, 10
+    Step 3                           :10, 14
+```
+
+The interactive request is short and every millisecond of it is experienced. The async task is longer and none of it is. Shortening the interactive bar improves a product; shortening the async bar mostly means running fewer steps.
 
 ## The metric is tasks per dollar
 
@@ -19,9 +47,7 @@ Notably absent: time to first token.
 
 ## How this differs from interactive inference
 
-Interactive AI puts a person in the loop reading output as it streams — chat, copilots, autocomplete. There, the experience *is* the latency, so the system is measured by interactivity SLOs: TTFT, TPOT, inter-token latency, end-to-end request time.
-
-Hitting those targets means keeping capacity **ready** rather than busy. Idle headroom is the product.
+Interactive AI puts a person in the loop reading output as it streams — chat, copilots, autocomplete. There, the experience *is* the latency, so the system is measured by interactivity SLOs and has to keep capacity **ready** rather than busy. Idle headroom is the product.
 
 | | Interactive | Async |
 | --- | --- | --- |
@@ -33,31 +59,11 @@ Bring interactive instincts to async work and you'll optimize the wrong number �
 
 ## Why throughput sets the price
 
-A GPU costs the same per hour saturated or idle. What changes is how many tokens come out of it. That makes cost per token a throughput problem rather than a procurement problem, and the arithmetic is lopsided:
+A GPU costs the same per hour saturated or idle. What changes is how many tokens come out of it — which makes cost per token a throughput problem, and the arithmetic lopsided: double throughput on the same hardware and cost per million tokens falls by roughly half, while halving your electricity price moves it about five percent.
 
-- **Double throughput** on the same hardware and cost per million tokens falls by roughly half.
-- **Halve your electricity price** and it moves about five percent.
+So Impala runs hot instead of holding capacity in reserve. Keeping GPUs saturated means the scheduler is always packing work, and a request arriving into a busy, well-packed fleet waits longer than one arriving into an idle machine held ready for it. That wait is the price of the utilization that produces the cost per token. For async work it's paid in a currency you don't spend.
 
-Power doesn't scale linearly with work either. A device draws between an idle floor and a thermal ceiling, and inference usually runs below that ceiling — leaving room for throughput to grow faster than watts, so tokens per watt improve as the fleet gets busier.
-
-This is why Impala runs hot instead of holding capacity in reserve. The full argument is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot).
-
-## What throughput costs
-
-Keeping GPUs saturated means the scheduler is always packing work — batching requests together, interleaving prefill and decode, reordering against what the fleet is doing right now.
-
-A request arriving into a busy, well-packed fleet waits longer than one arriving into an idle machine held ready for it. That wait is the price of the utilization that produces the cost per token. For async work it's paid in a currency you don't spend.
-
-## What you actually feel
-
-Task completion time, not per-request latency.
-
-For a batch run, that's dominated by throughput and by the capacity behind your job. For an agent, it's per-step time multiplied by the number of steps — which is why turn count is usually a bigger lever than any individual call.
-
-Two consequences worth designing around:
-
-- Benchmarking a single request tells you very little. Measure a whole task or a whole run.
-- Client defaults are tuned for interactive providers. Raise your timeouts and disable automatic retries — retrying a queued request adds load without shortening the wait.
+The full argument, with the numbers, is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot).
 
 ## Where the throughput comes from
 
