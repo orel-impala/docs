@@ -7,19 +7,7 @@ The shortest route from nothing to a response, and the fastest way to confirm yo
 
 Impala's endpoint is OpenAI-compatible, so if you have OpenAI code, the change is the base URL, the key, and the model name.
 
-## What you need
-
-Impala provides these ahead of time:
-
-| Value | What it is |
-| --- | --- |
-| `BASE_URL` | Your endpoint, ending in `/v1` |
-| `API_KEY` | Your bearer token. Treat it like a password. |
-| `MODEL` | The model your endpoint is provisioned for |
-
-<Info>
-  Nothing to sign up for and no key to create — your endpoint is provisioned before you start. If you don't have these three values, ask your Impala contact.
-</Info>
+You'll need your `BASE_URL`, `API_KEY` and `MODEL`. If you don't have them yet, start at [Set up Impala Cloud](/impala-cloud-setup).
 
 ## 1. Install the SDK
 
@@ -51,7 +39,7 @@ print(resp.choices[0].message.content)
 ```
 
 <Warning>
-  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [How Impala works](/how-impala-works).
+  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [Async inference](/async-inference).
 </Warning>
 
 ## 3. Check it worked
@@ -125,7 +113,7 @@ Everything else works as it does with the OpenAI SDK.
   <Card title="Run your first batch" href="/run-your-first-batch">
     File in, results out, at the lowest cost per token.
   </Card>
-  <Card title="How Impala works" href="/how-impala-works">
+  <Card title="Async inference" href="/async-inference">
     Why Impala trades latency for throughput and cost.
   </Card>
 </CardGroup>

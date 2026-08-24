@@ -35,6 +35,13 @@
         "pages": [
           "deployment-options",
           {
+            "group": "Impala Cloud",
+            "icon": "bolt",
+            "pages": [
+              "impala-cloud-setup"
+            ]
+          },
+          {
             "group": "Bring Your Own Cloud",
             "icon": "cloud",
             "pages": [
@@ -50,19 +57,19 @@
         "icon": "book-open",
         "pages": [
           {
+            "group": "Serverless Inference",
+            "icon": "bolt",
+            "pages": [
+              "send-a-request"
+            ]
+          },
+          {
             "group": "Batch Inference",
             "icon": "layer-group",
             "pages": [
               "run-your-first-batch",
               "jobs-and-job-ids",
               "pass_images_with_image_url"
-            ]
-          },
-          {
-            "group": "Serverless Inference",
-            "icon": "bolt",
-            "pages": [
-              "send-a-request"
             ]
           },
           {

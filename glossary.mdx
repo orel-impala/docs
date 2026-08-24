@@ -5,56 +5,52 @@ description: "The vocabulary these docs use for async inference, agent workloads
 
 ## Workloads
 
-**Interactive AI** — a person reads tokens as they stream. Measured by interactivity SLOs.
-
-**Async AI** — no human waiting on each token: background agents, research agents, multi-step automations, enrichment jobs. The target is tasks per dollar.
-
-**Agent / harness** — the software running the loop: calls the model, executes tools, branches, retries, fans out, decides when it's done.
-
-**Subagent / fan-out** — a child agent spawned by a parent, usually grounded in a shared parent context and often running alongside siblings.
+| Term | Meaning |
+| --- | --- |
+| **Interactive AI** | A person reads tokens as they stream. Measured by interactivity SLOs. |
+| **Async AI** | No human waiting on each token — background agents, research agents, multi-step automations, enrichment jobs. The target is tasks per dollar. |
+| **Agent / harness** | The software running the loop: calls the model, executes tools, branches, retries, fans out, decides when it's done. |
+| **Subagent / fan-out** | A child agent spawned by a parent, usually grounded in a shared parent context and often running alongside siblings. |
 
 ## Units of work
 
-**Trace** (rollout) — one full agent run: an ordered sequence of model calls, reasoning and tool executions, where each step's output feeds the next step's input.
-
-**Step** (turn) — a single round inside a trace: one model generation, typically followed by one tool call.
-
-**Tool-call gap** — the idle stretch between issuing a tool call and getting its result back.
-
-**Prefix** — the shared, growing input every step re-reads: system prompt, tool schemas, accumulated trace history.
+| Term | Meaning |
+| --- | --- |
+| **Trace** (rollout) | One full agent run: an ordered sequence of model calls, reasoning and tool executions, where each step's output feeds the next step's input. |
+| **Step** (turn) | A single round inside a trace: one model generation, typically followed by one tool call. |
+| **Tool-call gap** | The idle stretch between issuing a tool call and getting its result back. |
+| **Prefix** | The shared, growing input every step re-reads: system prompt, tool schemas, accumulated trace history. |
 
 ## Metrics
 
-**Tasks per dollar** — cost per completed task. The economic SLO for async work.
-
-**Task completion time** — wall-clock from submitting a task to completion.
-
-**Throughput** — how fast the cluster turns work out at scale.
-
-**TTFT / TPOT / ITL** — time to first token, time per output token, inter-token latency. Interactive SLOs; not the target here.
+| Term | Meaning |
+| --- | --- |
+| **Tasks per dollar** | Cost per completed task. The economic SLO for async work. |
+| **Task completion time** | Wall-clock from submitting a task to completion. |
+| **Throughput** | How fast the cluster turns work out at scale. |
+| **TTFT / TPOT / ITL** | Time to first token, time per output token, inter-token latency. Interactive SLOs — not the target here. |
 
 ## Runtime
 
-**KV cache** — the per-request intermediate state the model carries across tokens.
-
-**Prefix caching** — reusing KV state across steps and traces that share an input prefix, instead of recomputing it.
-
-**Continuous batching** — requests join and leave a running batch rather than waiting for a batch boundary.
-
-**Tiered memory** — KV blocks live on different memory tiers and move between them as needed.
+| Term | Meaning |
+| --- | --- |
+| **KV cache** | The per-request intermediate state the model carries across tokens. |
+| **Prefix caching** | Reusing KV state across steps and traces that share an input prefix, instead of recomputing it. |
+| **Continuous batching** | Requests join and leave a running batch rather than waiting for a batch boundary. |
+| **Tiered memory** | KV blocks live on different memory tiers and move between them as needed. |
 
 ## Impala objects
 
-**Job** — a model plus a configuration, provisioned for your account, identified by a `job_id`. Batch requests are addressed to a job. See [Jobs](/jobs-and-job-ids).
-
-**Run** — one execution of a batch against a job. What the Run tab lists.
-
-**Batch** — the API object created by `POST /v1/batches`, moving through `validating` → `in_progress` → `finalizing` → `completed`.
-
-**Data plane** — the components that actually run inference: model servers, scheduler, and the storage they read and write.
+| Term | Meaning |
+| --- | --- |
+| **Job** | A model plus a configuration, provisioned for your account, identified by a `job_id`. Batch requests are addressed to a job. See [Jobs](/jobs-and-job-ids). |
+| **Run** | One execution of a batch against a job. What the Run tab lists. |
+| **Batch** | The API object created by `POST /v1/batches`, moving through `validating` → `in_progress` → `finalizing` → `completed`. |
+| **Data plane** | The components that actually run inference: model servers, scheduler, and the storage they read and write. |
 
 ## Aliases you may hear
 
-**Serverless** — inference on Impala's cloud, no install.
-
-**BYOC** — Impala's data plane running inside your own cloud. See [Deployments](/deployment-options).
+| Term | Meaning |
+| --- | --- |
+| **Serverless** | Inference on Impala's cloud, no install. See [Choosing a deployment](/deployment-options). |
+| **BYOC** | Impala's data plane running inside your own cloud. See [Choosing a deployment](/deployment-options). |

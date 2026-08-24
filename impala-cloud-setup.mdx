@@ -1,0 +1,87 @@
+---
+title: "Set up Impala Cloud"
+description: "Get your endpoint, create a key, and make one authenticated call. Nothing to install."
+---
+
+Impala Cloud has nothing to deploy. You get an endpoint, you create a key, and your existing OpenAI code points at it.
+
+## 1. Get your endpoint
+
+Impala provisions your endpoint before you start — there is no self-serve signup today.
+
+| Value | What it is | Where it comes from |
+| --- | --- | --- |
+| `BASE_URL` | Your inference endpoint | Provided by your Impala contact |
+| `MODEL` | The model your endpoint serves | Provided by your Impala contact |
+| `JOB_ID` | Model plus configuration, reserved for your account. Batch only. | Provided by your Impala contact |
+
+If you don't have these, ask your Impala contact.
+
+## 2. Create an API key
+
+Create a key in **Settings** on [app.getimpala.ai](https://app.getimpala.ai), and send it as a bearer token on every request.
+
+<Warning>
+  Treat the key like a password. Don't commit it, and ask us to rotate it any time.
+</Warning>
+
+## 3. Point your client at Impala
+
+The endpoint is OpenAI-compatible, so the change is the base URL, the key, and the model name.
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
+    timeout=600.0,
+)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "<BASE_URL>",
+  apiKey: "<API_KEY>",
+  timeout: 600_000,
+});
+```
+
+```bash Environment
+export OPENAI_BASE_URL="<BASE_URL>"
+export OPENAI_API_KEY="<API_KEY>"
+```
+
+</CodeGroup>
+
+The long timeout is deliberate. SDK defaults are tuned for interactive providers and will abort early — see [Async inference](/async-inference).
+
+## 4. Confirm it works
+
+```bash
+curl "$BASE_URL/chat/completions" \
+  -H "Authorization: Bearer $IMPALA_API_KEY" \
+  -H "Content-Type: application/json" \
+  --max-time 600 \
+  -d '{
+    "model": "'"$MODEL"'",
+    "messages": [{"role": "user", "content": "What is 17 times 3?"}]
+  }'
+```
+
+A response with no error means your endpoint, key and model are working end to end.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Send a request" icon="bolt" href="/send-a-request">
+    Streaming, timeouts, and what each part does.
+  </Card>
+  <Card title="Run a batch" icon="layer-group" href="/run-your-first-batch">
+    File in, results out, at the lowest cost per token.
+  </Card>
+</CardGroup>
