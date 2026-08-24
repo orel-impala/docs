@@ -61,15 +61,15 @@
             "group": "Agentic workloads",
             "icon": "robot",
             "pages": [
-              "send-a-request",
-              "anthropic-sdk"
+              "send-a-request"
             ]
           },
           {
             "group": "Integrations",
             "icon": "plug",
             "pages": [
-              "connect-litellm"
+              "connect-litellm",
+              "anthropic-sdk"
             ]
           },
           {
