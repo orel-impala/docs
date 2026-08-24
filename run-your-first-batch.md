@@ -1,5 +1,5 @@
 ---
-title: "Upload and run your first batch"
+title: "Run a batch"
 description: "This guide shows how to submit batch inference to your Impala endpoint using the OpenAI-compatible API. You’ll upload an input file, then create a batch."
 ---
 
