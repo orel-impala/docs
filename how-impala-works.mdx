@@ -19,14 +19,13 @@ If a workload genuinely needs sub-second responses, Impala is the wrong tool and
 
 **Batch** is the primary path. Upload a JSONL file of requests, create a batch against a job, collect results when the run finishes. This is where the economics land — ETL enrichment, classification and labeling, document processing, embedding backfills, synthetic data, eval rollouts.
 
-**Single requests** go to `/v1/chat/completions` one at a time, with optional streaming. Use them while you're shaping a prompt, or when a framework only speaks the chat completions API.
+**Single requests** go to `/v1/chat/completions`, with optional streaming. Each call returns its own response, which is what you need when the next step depends on the last — agent loops, tool calling — or when a framework only speaks chat completions.
 
 | | Batch | Single requests |
 | --- | --- | --- |
 | Input | JSONL file | Request body |
 | Results | Output file, keyed by `custom_id` | Returned inline |
 | Model selection | `job_id` | `model` name |
-| Rate limits | None | Apply |
 | Cost per token | Lowest | Higher |
 
 Both speak the OpenAI API. If you have OpenAI code, what changes is the base URL, the credential, and the model or job identifier.
@@ -36,7 +35,7 @@ Both speak the OpenAI API. If you have OpenAI code, what changes is the base URL
 - Raise your client timeouts. SDK defaults are tuned for fast providers and will abort early.
 - Turn off automatic retries. Retrying a slow request multiplies load without helping.
 - Stream if a person is watching. It doesn't finish sooner, but tokens start moving.
-- If you're driving concurrency from your own client to get through a workload, that's the signal to use Batch instead.
+- If you're driving concurrency to get through a *fixed* set of requests whose results you could collect later, Batch will do it cheaper. If each call depends on the one before it, single requests are the right shape.
 
 ## Vocabulary
 

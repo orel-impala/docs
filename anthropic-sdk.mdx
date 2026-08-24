@@ -138,7 +138,7 @@ Export them in the same shell you launch from.
 
 **Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [How Impala works](/how-impala-works) before building around it.
 
-**Single requests only.** For volume, use [Batch](/run-your-first-batch) directly — see [Connect LLM Gateway to Impala (LiteLLM)](/connect-litellm) for LiteLLM's batch pass-through routes. If your agent work is a rollout over a fixed input set, such as an eval sweep, run it as a batch instead of looping live.
+**This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a batch; see [LiteLLM](/connect-litellm) for its batch pass-through routes.
 
 ## Need help?
 
