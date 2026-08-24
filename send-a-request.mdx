@@ -1,0 +1,139 @@
+---
+title: "Send a single request"
+description: "One chat completion to confirm your endpoint, key and model work. Two minutes, one block of Python."
+---
+
+The fastest way to confirm your credentials work end to end. This isn't the path you'll run production volume on — for that, see [Batch](/run-your-first-batch) — but it's the shortest route from nothing to a response.
+
+Impala's endpoint is OpenAI-compatible, so if you have OpenAI code, the change is the base URL, the key, and the model name.
+
+## What you need
+
+Impala provides these ahead of time:
+
+| Value | What it is |
+| --- | --- |
+| `BASE_URL` | Your endpoint, ending in `/v1` |
+| `API_KEY` | Your bearer token. Treat it like a password. |
+| `MODEL` | The model your endpoint is provisioned for |
+
+<Info>
+  Nothing to sign up for and no key to create — your endpoint is provisioned before you start. If you don't have these three values, ask your Impala contact.
+</Info>
+
+## 1. Install the SDK
+
+```bash
+pip install openai
+```
+
+## 2. Send a request
+
+Save this as `hello.py`, fill in your three values, and run `python hello.py`.
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
+    timeout=600.0,
+)
+
+resp = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "What is 17 times 3? Answer with just the number."},
+    ],
+)
+print(resp.choices[0].message.content)
+```
+
+<Warning>
+  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [Introduction](/introduction).
+</Warning>
+
+## 3. Check it worked
+
+A response prints to your terminal. If you get output with no error, your key, endpoint and model are working end to end.
+
+## From the shell instead
+
+```bash
+curl "$BASE_URL/chat/completions" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  --max-time 600 \
+  -d '{
+    "model": "'"$MODEL"'",
+    "messages": [{"role": "user", "content": "What is 17 times 3?"}]
+  }'
+```
+
+## Keep the key out of your source
+
+The OpenAI SDK reads these environment variables automatically:
+
+```bash
+export OPENAI_BASE_URL="<BASE_URL>"
+export OPENAI_API_KEY="<API_KEY>"
+```
+
+Which lets your code drop the explicit arguments:
+
+```python
+from openai import OpenAI
+
+client = OpenAI()  # reads OPENAI_BASE_URL and OPENAI_API_KEY
+
+resp = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[{"role": "user", "content": "Ping"}],
+)
+```
+
+## Streaming
+
+Set `stream=True` and iterate. Streaming doesn't make the work finish sooner, but it gets tokens moving rather than leaving the connection silent:
+
+```python
+stream = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[{"role": "user", "content": "Write a haiku about batch inference."}],
+    stream=True,
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)
+```
+
+## What each part does
+
+- **`base_url`** routes your requests to Impala instead of `api.openai.com`.
+- **`api_key`** authenticates you.
+- **`model`** names the model your endpoint serves.
+- **`messages`** is the standard OpenAI chat format — a system message sets behavior, the user message is the prompt.
+
+Everything else works as it does with the OpenAI SDK.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Run your first batch" href="/run-your-first-batch">
+    The path for actual volume: file in, results out, lowest cost per token.
+  </Card>
+  <Card title="Introduction" href="/introduction">
+    Why Impala trades latency for throughput and cost.
+  </Card>
+</CardGroup>
+
+## Security
+
+Don't commit your key or share it outside your team. Ask us to rotate it any time.
+
+## Need help?
+
+Reach out to your Impala contact directly.

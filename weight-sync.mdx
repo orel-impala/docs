@@ -1,0 +1,98 @@
+---
+title: "Weight sync API"
+description: "Upload new model weights and swap them onto a running fleet without redeploying."
+---
+
+The weight sync API replaces the weights a running deployment serves. You upload a checkpoint, trigger a reload, and the fleet starts serving the new weights — no redeploy, no new endpoint.
+
+Use it when you retrain or fine-tune on your own cadence and need the serving fleet to follow.
+
+## Endpoints
+
+Impala splits inference from management. Inference runs on the OpenAI-compatible surface; weight sync is an Impala-specific operation and lives under `/imp/v1`.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/imp/v1/weights/upload` | Stage a checkpoint from your S3 bucket |
+| `POST` | `/imp/v1/weights/reload` | Swap the staged checkpoint onto the fleet |
+| `GET` | `/imp/v1/weights/status` | Current state of the sync |
+
+Base URL: `https://inference.getimpala.ai`. The OpenAI-compatible endpoints sit alongside at `/open-ai/v1/`.
+
+Authentication is the same bearer token you use for inference.
+
+## How a sync progresses
+
+```
+Ready ──POST /upload──▶ Uploading weights ──POST /reload──▶ Reloading weights
+  ▲                                                                  │
+  └──────────────────────── new weights live ◀───────────────────────┘
+```
+
+`GET /imp/v1/weights/status` is valid at any point and reports which state the fleet is in.
+
+**Ready** — serving current weights, nothing in flight.
+**Uploading weights** — the checkpoint is transferring from your bucket. Serving continues on the old weights.
+**Reloading weights** — engines are swapping to the new checkpoint.
+**Back to Ready** — the new weights are live.
+
+Upload is the long step and scales with checkpoint size and available bandwidth. The reload itself is fast by comparison.
+
+## Uploading a checkpoint
+
+Both `upload` and `reload` take a map of model identifier to S3 URI, so a fleet serving more than one model can be updated per model.
+
+```bash
+curl -X POST https://inference.getimpala.ai/imp/v1/weights/upload \
+  -H "Authorization: Bearer $IMPALA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "weights": {
+      "<model-serve-name>": "s3://your-bucket/checkpoints/2026-08-20/"
+    }
+  }'
+```
+
+Poll until the upload completes:
+
+```bash
+curl https://inference.getimpala.ai/imp/v1/weights/status \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+## Reloading
+
+```bash
+curl -X POST https://inference.getimpala.ai/imp/v1/weights/reload \
+  -H "Authorization: Bearer $IMPALA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "weights": {
+      "<model-serve-name>": "s3://your-bucket/checkpoints/2026-08-20/"
+    }
+  }'
+```
+
+Poll `/status` until the fleet returns to `Ready`, then send a test request through your normal inference endpoint to confirm the new weights are answering.
+
+## Things to know
+
+**The checkpoint has to be loadable onto the running engines.** A checkpoint whose architecture or quantization differs from what the fleet is serving cannot be hot-swapped; it needs a new deployment. Impala validates this from the checkpoint's `safetensors` metadata before reloading.
+
+**Failed steps retry automatically**, up to three attempts, before the sync is reported as failed.
+
+**Give Impala read access to the bucket** holding your checkpoints before your first sync.
+
+{/* TODO — confirm before publishing:
+     1. Is /imp/v1/weights/* live today, or still on the older scheme? Slack #proj-weight-reload
+        has three competing decisions (Aug 10 inference.getimpala.ai/weights/*, Aug 10
+        control.inference.getimpala.ai/weights/*, Aug 13 inference.getimpala.ai/imp/v1/weights/*).
+        This page uses the Aug 13 one, which Orel approved.
+     2. Exact request body key — "weights" is inferred from "key value map with the model ID /
+        model serve name". Need the real field name and an example response.
+     3. Is the manifest.json safety guard shipped, and does it block or warn?
+     4. Status response shape — the state names here come from the Weight Sync API slide. */}
+
+## Need help?
+
+Reach out to your Impala contact directly.
