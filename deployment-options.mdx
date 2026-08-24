@@ -5,13 +5,13 @@ description: "Impala runs in our cloud or inside your own AWS account. The API i
 
 Impala can run in two places. This is separate from which mode you use — batch runs in both.
 
-## Impala Cloud
+## Serverless
 
 We operate the infrastructure, scale GPU capacity, and schedule your requests. You get an endpoint and a credential. Nothing to install.
 
-Pick this to be running today, or when you'd rather not own capacity planning.
+Pick this to be running today, or when you'd rather not own capacity planning. See [Get your credentials](/impala-cloud-setup).
 
-## Your Cloud
+## Bring Your Own Cloud
 
 Impala's data plane is installed into your own AWS account and VPC. Your prompts, inputs and outputs stay inside your account, and traffic reaches the endpoint over AWS PrivateLink rather than the public internet.
 
@@ -21,13 +21,13 @@ Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC]
 
 ## What differs
 
-| | Impala Cloud | Your Cloud |
+| | Serverless | Bring Your Own Cloud |
 | --- | --- | --- |
 | Who operates the GPUs | Impala | You, with our data plane on top |
 | Where inputs and outputs live | Impala-managed storage | Your S3 buckets |
 | Network path | Public endpoint, authenticated | Private, over PrivateLink |
 | Setup | None | Terraform, ~30 min |
-| AWS quota increases | Not needed | Required first — see [Request service quotas](/aws_service_quotas_for_Impala_data_plane_deployment) |
+| AWS quota increases | Not needed | Required first — see [Raise AWS service quotas](/aws_service_quotas_for_Impala_data_plane_deployment) |
 
 ## What doesn't
 
