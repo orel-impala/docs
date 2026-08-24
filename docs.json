@@ -20,6 +20,7 @@
     "tabs": [
       {
         "tab": "Introduction",
+        "icon": "compass",
         "pages": [
           "introduction",
           "how-impala-works",
@@ -28,15 +29,18 @@
       },
       {
         "tab": "Product Updates",
+        "icon": "bullhorn",
         "pages": [
           "changelog"
         ]
       },
       {
         "tab": "Guides",
+        "icon": "book-open",
         "pages": [
           {
             "group": "Getting Started",
+            "icon": "rocket",
             "pages": [
               "getting-started-infrastructure-setup",
               "exposing_the_openai_api_endpoint_service",
@@ -46,6 +50,7 @@
           },
           {
             "group": "Batch Inference",
+            "icon": "layer-group",
             "pages": [
               "jobs-and-job-ids",
               "run-your-first-batch",
@@ -54,18 +59,21 @@
           },
           {
             "group": "Single requests",
+            "icon": "bolt",
             "pages": [
               "send-a-request"
             ]
           },
           {
             "group": "Integrations",
+            "icon": "plug",
             "pages": [
               "anthropic-sdk"
             ]
           },
           {
             "group": "Model management",
+            "icon": "arrows-rotate",
             "pages": [
               "weight-sync"
             ]
@@ -74,6 +82,7 @@
       },
       {
         "tab": "API Reference",
+        "icon": "code",
         "openapi": "openai-api-swagger.json"
       }
     ]
