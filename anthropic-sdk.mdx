@@ -136,7 +136,7 @@ Export them in the same shell you launch from.
 
 **Run the proxy where your key is safe.** The Impala key lives in the proxy's environment, not in your clients — which is the point. Give the proxy its own key for clients to present, and don't expose it to the public internet.
 
-**Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [Introduction](/introduction) before building around it.
+**Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [How Impala works](/how-impala-works) before building around it.
 
 **Single requests only.** For volume, use [Batch](/run-your-first-batch) directly — see [Connect LLM Gateway to Impala (LiteLLM)](/connect-litellm) for LiteLLM's batch pass-through routes. If your agent work is a rollout over a fixed input set, such as an eval sweep, run it as a batch instead of looping live.
 

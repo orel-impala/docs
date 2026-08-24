@@ -19,6 +19,14 @@
     },
     "tabs": [
       {
+        "tab": "Introduction",
+        "pages": [
+          "introduction",
+          "how-impala-works",
+          "deployment-options"
+        ]
+      },
+      {
         "tab": "Product Updates",
         "pages": [
           "changelog"
@@ -30,7 +38,6 @@
           {
             "group": "Getting Started",
             "pages": [
-              "introduction",
               "getting-started-infrastructure-setup",
               "exposing_the_openai_api_endpoint_service",
               "aws_service_quotas_for_Impala_data_plane_deployment",
