@@ -1,5 +1,5 @@
 ---
-title: "Anthropic SDK"
+title: "Anthropic SDKs and Claude Code"
 description: "Run Anthropic-format tooling — the Anthropic SDKs, the Claude Agent SDK, and Claude Code — against a model served by Impala, using LiteLLM to translate."
 ---
 
@@ -136,7 +136,7 @@ Export them in the same shell you launch from.
 
 **Run the proxy where your key is safe.** The Impala key lives in the proxy's environment, not in your clients — which is the point. Give the proxy its own key for clients to present, and don't expose it to the public internet.
 
-**Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [How Impala works](/how-impala-works) before building around it.
+**Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [Tasks per dollar, not tokens per second](/async-inference) before building around it.
 
 **This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a batch; see [LiteLLM](/connect-litellm) for its batch pass-through routes.
 

@@ -59,7 +59,7 @@
             ]
           },
           {
-            "group": "Bring your own cloud",
+            "group": "Bring your own cloud (BYOC)",
             "icon": "cloud",
             "pages": [
               "getting-started-infrastructure-setup",
