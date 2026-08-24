@@ -50,20 +50,19 @@
         "icon": "book-open",
         "pages": [
           {
-            "group": "Serverless Inference",
-            "icon": "bolt",
-            "pages": [
-              "impala-cloud-setup",
-              "send-a-request"
-            ]
-          },
-          {
             "group": "Batch Inference",
             "icon": "layer-group",
             "pages": [
               "run-your-first-batch",
               "jobs-and-job-ids",
               "pass_images_with_image_url"
+            ]
+          },
+          {
+            "group": "Serverless Inference",
+            "icon": "bolt",
+            "pages": [
+              "send-a-request"
             ]
           },
           {
@@ -104,12 +103,7 @@
         "label": "Support",
         "href": "mailto:orel@getimpala.ai"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Platform",
-      "href": "https://platform.getimpala.ai/"
-    }
+    ]
   },
   "contextual": {
     "options": [
