@@ -7,6 +7,9 @@
     "light": "#ffdcaf",
     "dark": "#460f12"
   },
+  "background": {
+    "decoration": "gradient"
+  },
   "navigation": {
     "global": {
       "anchors": [
@@ -23,8 +26,7 @@
         "icon": "compass",
         "pages": [
           "introduction",
-          "async-and-interactive",
-          "throughput-and-cost",
+          "async-inference",
           "deployment-options",
           "glossary"
         ]
