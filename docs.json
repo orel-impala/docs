@@ -29,6 +29,7 @@
       },
       {
         "tab": "Product Updates",
+        "hidden": true,
         "icon": "bullhorn",
         "pages": [
           "changelog"
