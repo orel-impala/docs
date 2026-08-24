@@ -31,12 +31,18 @@
       },
       {
         "tab": "Deployments",
-        "icon": "cloud",
+        "icon": "server",
         "pages": [
           "deployment-options",
-          "getting-started-infrastructure-setup",
-          "exposing_the_openai_api_endpoint_service",
-          "aws_service_quotas_for_Impala_data_plane_deployment"
+          {
+            "group": "Bring Your Own Cloud",
+            "icon": "cloud",
+            "pages": [
+              "getting-started-infrastructure-setup",
+              "exposing_the_openai_api_endpoint_service",
+              "aws_service_quotas_for_Impala_data_plane_deployment"
+            ]
+          }
         ]
       },
       {

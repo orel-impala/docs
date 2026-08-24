@@ -20,7 +20,10 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "System"
+        ]
       }
     },
     "/ready": {
@@ -37,7 +40,10 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "System"
+        ]
       }
     },
     "/v1/files": {
@@ -1383,6 +1389,10 @@
     {
       "name": "Batches",
       "description": "Create, monitor and cancel batch runs."
+    },
+    {
+      "name": "System",
+      "description": "Liveness and readiness probes."
     }
   ]
 }
