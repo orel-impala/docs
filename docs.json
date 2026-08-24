@@ -50,6 +50,14 @@
         "icon": "book-open",
         "pages": [
           {
+            "group": "Serverless Inference",
+            "icon": "bolt",
+            "pages": [
+              "impala-cloud-setup",
+              "send-a-request"
+            ]
+          },
+          {
             "group": "Batch Inference",
             "icon": "layer-group",
             "pages": [
@@ -59,10 +67,10 @@
             ]
           },
           {
-            "group": "Serverless Inference",
-            "icon": "bolt",
+            "group": "Bring your own model",
+            "icon": "cube",
             "pages": [
-              "send-a-request"
+              "weight-sync"
             ]
           },
           {
@@ -71,13 +79,6 @@
             "pages": [
               "connect-litellm",
               "anthropic-sdk"
-            ]
-          },
-          {
-            "group": "Model management",
-            "icon": "arrows-rotate",
-            "pages": [
-              "weight-sync"
             ]
           }
         ]
