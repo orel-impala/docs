@@ -30,6 +30,16 @@
         ]
       },
       {
+        "tab": "Deployments",
+        "icon": "cloud",
+        "pages": [
+          "deployment-options",
+          "getting-started-infrastructure-setup",
+          "exposing_the_openai_api_endpoint_service",
+          "aws_service_quotas_for_Impala_data_plane_deployment"
+        ]
+      },
+      {
         "tab": "Guides",
         "icon": "book-open",
         "pages": [
@@ -64,16 +74,6 @@
               "weight-sync"
             ]
           }
-        ]
-      },
-      {
-        "tab": "Deployments",
-        "icon": "cloud",
-        "pages": [
-          "deployment-options",
-          "getting-started-infrastructure-setup",
-          "exposing_the_openai_api_endpoint_service",
-          "aws_service_quotas_for_Impala_data_plane_deployment"
         ]
       },
       {
