@@ -1,0 +1,142 @@
+---
+title: "Connect LLM Gateway to Impala (LiteLLM)"
+description: "Point your LiteLLM gateway at your Impala Batch endpoint."
+---
+
+## Prerequisites
+
+Impala will provide these values to you ahead of time:
+
+- `IMPALA_BASE_URL` — the hostname of your Impala endpoint
+- `JOB_ID` — an identifier reserved for your account
+- `MODEL` — the name of the model you are running with Impala (e.g. Qwen2.5-0.5B-Instruct)
+
+You'll also need:
+
+- LiteLLM installed — either the SDK (`pip install litellm`) or the [LiteLLM Proxy Server](https://docs.litellm.ai/docs/proxy/configs) running in your environment, with access to your
+  - `LITELLM_BASE_URL`
+  - `config.yaml` file
+
+**Time to complete:** ~10 minutes
+
+---
+
+## Add Impala to LiteLLM
+
+Impala's endpoint is OpenAI-compatible, so LiteLLM can route to it like any other `openai/` provider. Update your `config.yaml` with an entry per model you're running on Impala:
+
+```yaml
+cat > ~/litellm-impala.yaml <<YAML
+model_list:
+  - model_name: ${MODEL}
+    litellm_params:
+      model: openai/${MODEL}
+      api_base: ${IMPALA_BASE_URL}/v1
+      api_key: reserved
+YAML
+```
+
+<Info>
+  Keep `model_name` clear as it will be used as an alias. Note: `model` must be prefixed with "openai/".
+</Info>
+
+---
+
+## Run batch workloads
+
+Batch runs through the same proxy using pass-through routes. Add these to your `config.yaml` alongside the `model_list` entry, then restart the proxy. `IMPALA_API_KEY` must be set in the environment where the proxy runs.
+
+```yaml
+cat >> ~/litellm-impala.yaml <<YAML
+
+general_settings:
+  pass_through_endpoints:
+    - path: "/impala-files"
+      target: "${IMPALA_BASE_URL}/v1/files"
+      include_subpath: true
+      headers:
+        Authorization: "Bearer os.environ/IMPALA_API_KEY"
+    - path: "/impala-batches"
+      target: "${IMPALA_BASE_URL}/v1/batches"
+      include_subpath: true
+      headers:
+        Authorization: "Bearer os.environ/IMPALA_API_KEY"
+YAML
+```
+
+Then start (or restart) the proxy in whichever way matches your environment.
+
+```bash
+litellm --config ~/litellm-impala.yaml
+```
+
+Now you can now follow [Upload and run your first batch](https://docs.getimpala.ai/run-your-first-batch). Below is a shortened version of this guide, for your convenience.
+
+### Step A — Upload the input file
+
+```bash
+curl -X POST ${LITELLM_BASE_URL}/impala-files \
+  -F "purpose=batch" \
+  -F "file=@demo.jsonl"
+```
+
+### Step B — Create the batch
+
+```bash
+curl -X POST ${LITELLM_BASE_URL}/impala-batches \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"input_file_id\": \"<FILE_ID>\",
+    \"endpoint\": \"/v1/chat/completions\",
+    \"completion_window\": \"unlimited\",
+    \"job_id\": \"${JOB_ID}\"
+  }"
+```
+
+<Info>
+  The `model` field inside every line of the JSONL input file must exactly match the model that `job_id` is bound to.
+</Info>
+
+### Step C — Poll for status
+
+```bash
+curl ${LITELLM_BASE_URL}/impala-batches/<BATCH_ID>
+```
+
+### Step D — Download results
+
+```bash
+curl ${LITELLM_BASE_URL}/impala-files/<OUTPUT_FILE_ID>/content
+```
+
+### Notes
+
+- Batch requests must use the pass-through routes above, not LiteLLM's native `/v1/batches`.
+- `api_key` in the `model_list` entry is only used for chat completions. The pass-through routes authenticate with their own `Authorization` header.
+
+### Advanced batch configurations (optional)
+
+Once you've validated the four curl steps above manually, you can wrap the whole lifecycle (validate, upload, create the batch, poll, download) behind a single CLI command or SDK call for production use. The snippets below are illustrative patterns, not runnable tools:
+
+```bash
+your-batch-cli run requests.jsonl --impala-job-id job-xxxxxxxx
+```
+
+or in Python:
+
+```python
+from your_batch_client import BatchAPI
+api = BatchAPI(base_url="<BASE_URL>")
+result = api.run_batch("requests.jsonl", job_id="job-xxxxxxxx", tags={"project": "my-project", "version": "3.1"})
+print(result.output_file)
+```
+
+**Tag batches**. Some deployments pass an optional `tags` object when creating a batch, which then surfaces in the Impala console for filtering runs by user, team or use case. Reach out to Impala to set this up.
+
+**Budget guardrails.** If you want to stop a run early — for example because it's burning through a budget you're tracking via LiteLLM — poll `GET /v1/batches/{batch_id}` as usual and call the documented [Cancel Batch](https://docs.getimpala.ai/api-reference/batches/cancel-batch) endpoint once your own threshold is hit. Output produced
+
+---
+
+## Need help?
+
+Reach out to your Impala contact directly.

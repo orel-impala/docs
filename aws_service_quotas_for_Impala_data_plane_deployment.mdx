@@ -1,0 +1,437 @@
+---
+title: "AWS service quotas for Impala data plane deployment"
+description: "Review and raise the AWS service quotas required before deploying the Impala data plane with ./deploy.sh."
+---
+
+Review and, where needed, request increases for the quotas below **before** running `./deploy.sh`.
+
+<Warning>
+  Quota increases that require AWS review can take 24–72 hours — request them in advance.
+</Warning>
+
+All quotas are per-region unless noted. Find them in the [AWS Service Quotas console](https://console.aws.amazon.com/servicequotas/home).
+
+## Summary table
+
+| Service | Quota name | Quota code | Default | Recommended target | Action required? |
+| --- | --- | --- | --- | --- | --- |
+| EC2 | Running On-Demand Standard (A,C,D,H,I,M,R,T,Z) instances (vCPUs) | L-1216C47A | 32 | **256** | **Yes — raise before deploy** |
+| EC2 | All G and VT Spot Instance Requests (vCPUs) | L-3819A6DF | 0–32 | **128** | **Yes — often 0 by default** |
+| EC2 | All P Spot Instance Requests (vCPUs) | L-7212CCBC | 0 | **384** | **Yes — always 0 by default** |
+| IAM | Managed policies attached to a role | L-0DA4ABF3 | 10 | **25** | **Yes — raise before deploy** |
+| VPC | VPCs per region | L-F678F1CE | 5 | **10** | Yes — raise proactively |
+| VPC | NAT gateways per Availability Zone | L-FE5A380F | 5 per AZ | **10** | Yes — raise proactively |
+| EC2 | Elastic IP addresses | L-0263D0A3 | 5 | **20** | Yes — raise proactively |
+| VPC | Interface endpoints per VPC | (see VPC service quotas) | 50 | **100** | Yes if using existing VPC |
+| S3 | Buckets | L-DC2B2D3D | 100 | **150** | Yes — raise proactively |
+| EC2 | Application Load Balancers | L-53DA6B97 | 20 | **50** | Yes — raise proactively |
+| EC2 | Network Load Balancers | L-69A177A2 | 20 | **50** | Yes — raise proactively |
+| EKS | Clusters per region | L-1194D53C | 100 | 100 | No |
+| IAM | Roles per account | L-FE177D64 | 1000 | 1000 | No |
+| IAM | Customer managed policies per account | L-E95E4862 | 1500 | 1500 | No |
+
+## Detailed breakdown
+
+### 1. EC2 On-Demand vCPUs (Standard instances) — raise this first
+
+Quota code: **L-1216C47A** · Default: 32 vCPUs
+
+The Terraform deployment creates two managed node groups, and Karpenter then launches additional CPU nodes from the `m`-family (gen 5\+, 2\+ vCPUs) to run Impala services.
+
+**Initial managed node groups (created by `./deploy.sh`):**
+
+| Node group | Instance type | vCPUs | Min → Desired → Max |
+| --- | --- | --- | --- |
+| CPU nodes | `m6a.4xlarge` | 16 | 0 → 1 → 2 |
+| Karpenter bootstrap | `c6a.large` / `m6a.large` / `c5a.large` / `r6a.large` | 2 | 0 → 1 → 2 |
+
+**Minimum at deploy time:** 18 vCPUs (1 × m6a.4xlarge \+ 1 Karpenter bootstrap node).
+
+After `./deploy.sh` completes, Karpenter launches additional `m`-family nodes to schedule Impala services (mongodb, rabbitmq, prometheus, openai-api, planner, deployer, scaler, etc.). These workloads collectively require several nodes; the On-Demand quota must cover the full steady-state fleet.
+
+**Recommended target: 256 vCPUs** — covers a full Impala service fleet plus headroom for Karpenter burst scaling without requiring another quota request mid-operation.
+
+All instance types above are "Standard" family and count against the same quota. GPU nodes use separate Spot quotas — see sections 2 and 3.
+
+### 2. GPU Spot instances — G family (`g6e`) — likely 0 by default
+
+Quota code: **L-3819A6DF** (`All G and VT Spot Instance Requests`) · Default: 0–32 vCPUs (varies by region; often 0)
+
+Karpenter's GPU node pool uses `g6e.xlarge` or `g6e.2xlarge` Spot instances for inference workloads:
+
+| Instance type | vCPUs | GPU | GPU memory | Spot vCPUs consumed |
+| --- | --- | --- | --- | --- |
+| `g6e.xlarge` | 4 | 1× NVIDIA L40S | 48 GB | 4 |
+| `g6e.2xlarge` | 8 | 1× NVIDIA L40S | 48 GB | 8 |
+
+Karpenter selects the cheapest available type. To run a single GPU node you need at least **8 vCPUs** in this quota (to allow either size to be selected).
+
+**Recommended target: 128 vCPUs** — enough for up to 16× g6e.xlarge or 16× g6e.2xlarge concurrently, giving Karpenter room to scale inference workloads without stalling on quota.
+
+Check your current quota:
+
+```bash
+aws service-quotas get-service-quota \
+  --service-code ec2 \
+  --quota-code L-3819A6DF \
+  --region us-east-1 \
+  --query 'Quota.Value'
+```
+
+<Note>
+  `g6e` instances are not available in all regions. Before requesting the quota, verify availability:
+
+  ```bash
+  aws ec2 describe-instance-type-offerings \
+    --filters Name=instance-type,Values=g6e.xlarge \
+    --query 'InstanceTypeOfferings[].Location' --output text
+  ```
+</Note>
+
+### 3. GPU Spot instances — P family (`p5`, `p5en`) — always 0 by default
+
+Quota code: **L-7212CCBC** (`All P Spot Instance Requests`) · Default: 0 vCPUs
+
+The GPU node pool also lists `p5.48xlarge` and `p5en.48xlarge` for high-end workloads. These have a default Spot quota of **0** and require a manual AWS review to increase.
+
+| Instance type | vCPUs | GPUs | GPU memory | Notes |
+| --- | --- | --- | --- | --- |
+| `p5.48xlarge` | 192 | 8× NVIDIA H100 SXM5 | 640 GB | Requires dedicated capacity |
+| `p5en.48xlarge` | 192 | 8× NVIDIA H100 | 640 GB | Requires dedicated capacity |
+
+**Recommended target: 384 vCPUs** (2× p5.48xlarge concurrently).
+
+**To use p5/p5en Spot instances:**
+
+1. Open a Service Quota increase request for `L-7212CCBC`.
+2. Include a brief justification (ML inference workloads).
+3. AWS typically responds within 1–5 business days; capacity is regionally limited.
+
+If p5/p5en Spot capacity is unavailable in your region, Karpenter will fall back to `g6e` instances automatically. If neither GPU family is available or quota is insufficient, GPU workloads will remain pending.
+
+### 4. VPC interface endpoints per VPC
+
+Quota name: **Interface endpoints per VPC** (search under the "Amazon VPC" service in the Service Quotas console) · Default: 50
+
+The networking stack creates **13 interface endpoints** by default, plus 1 more when Impala Connect is enabled (`enable_impala_connect = true`, which is the default):
+
+| Endpoint | AWS service |
+| --- | --- |
+| `ecr.dkr` | Container image pulls |
+| `ecr.api` | ECR management |
+| `sts` | IAM token exchange |
+| `eks` | EKS API plane |
+| `eks-auth` | EKS Pod Identity |
+| `ec2` | EC2 API (Karpenter, node groups) |
+| `sqs` | Karpenter interrupt queue |
+| `ssm` | Systems Manager on nodes |
+| `kms` | Encryption at rest |
+| `elasticloadbalancing` | ALB/NLB provisioning |
+| `xray` | Distributed tracing |
+| `logs` | CloudWatch Logs |
+| `route53` | Private DNS (cross-region, us-east-1) |
+| `impala_connect` | Impala Connect PrivateLink (default on) |
+
+**Total: 14 interface endpoints** with defaults. Each entry in `s3_cross_region_access_regions` adds one more S3 interface endpoint per configured region.
+
+This is well within the default quota of 50 for a fresh VPC. However, if you set `existing_vpc_id` to reuse an existing VPC that already hosts many endpoints, check your current count before deploying:
+
+```bash
+aws ec2 describe-vpc-endpoints \
+  --filters Name=vpc-id,Values=<your-vpc-id> Name=vpc-endpoint-type,Values=Interface \
+  --query 'length(VpcEndpoints)' --output text
+```
+
+**Recommended target: 100** — request this when creating a new VPC too, so future endpoint additions never require a second quota request.
+
+### 5. VPCs per region
+
+Quota code: **L-F678F1CE** · Default: 5
+
+`./deploy.sh` creates **1 new VPC** (CIDR `10.0.0.0/16` by default) unless you set `existing_vpc_id` to reuse an existing one.
+
+Check your current count:
+
+```bash
+aws ec2 describe-vpcs --query 'length(Vpcs)' --output text
+```
+
+**Recommended target: 10** — request this proactively regardless of current count.
+
+### 6. NAT gateways per Availability Zone
+
+Quota code: **L-FE5A380F** · Default: 5 per AZ
+
+The default deployment creates **1 NAT gateway** (single-AZ, cost-optimized). One Elastic IP is consumed per NAT gateway.
+
+Check your current count per AZ:
+
+```bash
+aws ec2 describe-nat-gateways \
+  --filter Name=state,Values=available \
+  --query 'NatGateways[].SubnetId' --output text
+```
+
+**Recommended target: 10 per AZ** — request this proactively. If you later switch to `single_nat_gateway = false` for HA, you need 3 NAT gateways across 3 AZs and no room for error at the default limit of 5.
+
+### 7. Elastic IP addresses
+
+Quota code: **L-0263D0A3** · Default: 5
+
+The deployment allocates **1 Elastic IP** for the NAT gateway (more if you set `single_nat_gateway = false`, one per AZ).
+
+Check your current allocation:
+
+```bash
+aws ec2 describe-addresses --query 'length(Addresses)' --output text
+```
+
+**Recommended target: 20** — request this proactively. HA NAT (3 AZs) consumes 3 EIPs; other AWS resources in the account share this pool.
+
+### 8. S3 buckets
+
+Quota code: **L-DC2B2D3D** · Default: 100 per account (account-wide, not per region)
+
+The Terraform storage stack creates 2 buckets. The Helm charts reference up to 2 additional customer-managed buckets (models storage and a dedicated batches bucket), for a total of **2–4 new buckets**:
+
+| Bucket | Created by | Purpose |
+| --- | --- | --- |
+| Resources bucket | Terraform (`storage` stack) | Batch metadata, logs, metrics |
+| Batches bucket | Terraform (`storage` stack) | Customer batch files |
+| Models bucket | Customer-provided (optional) | Tokenizer / model weights (read-only) |
+| Additional batches bucket | Customer-provided (optional) | Separate batches storage |
+
+Check your current count:
+
+```bash
+aws s3api list-buckets --query 'length(Buckets)' --output text
+```
+
+**Recommended target: 150** — request this proactively. The default 100 is account-wide and fills up faster than expected across environments.
+
+### 9. EBS volumes — persistent storage from Helm workloads
+
+EBS volumes are provisioned automatically by the EBS CSI driver when Helm charts are deployed. The following PersistentVolumeClaims are created by default (all `gp3`, encrypted):
+
+| Workload | Volume size | Note |
+| --- | --- | --- |
+| MongoDB | 20 Gi | Database data directory |
+| Prometheus | 50 Gi × 2 replicas | Metrics retention (15 days / 40 GB) |
+| RabbitMQ | 20 Gi | Message queue persistence |
+| Data-sync client | 1 Gi | State tracking |
+| Alertmanager | 10 Gi | Disabled by default; enabled if alerts are configured |
+
+**Minimum persistent storage at chart deploy time: ~141 GiB across 5 volumes.**
+
+Additionally, every Karpenter-provisioned node consumes an EBS root/data volume:
+
+- CPU nodes (Karpenter-managed): 30 Gi gp3 root volume per node
+- GPU nodes (`g6e`/`p5`): 4 Gi root (Bottlerocket OS) \+ 50 Gi data volume per node
+
+EBS volume count and total storage are unlikely to hit AWS quota limits (defaults are in the thousands of TiB), but gp3 IOPS and throughput reserved by the Prometheus and MongoDB volumes may matter on small instance types — both workloads benefit from their persistent volumes being on the same node as the pod (VolumeBindingMode: `WaitForFirstConsumer`).
+
+### 10. Load balancers (ALB \+ NLB)
+
+ALB quota code: **L-53DA6B97** · NLB quota code: **L-69A177A2** · Default: 20 each
+
+**Created by Terraform (`./deploy.sh`):**
+
+- 1 NLB — PrivateLink endpoint service (`enable_eks_api_privatelink = true` by default)
+
+**Created by Helm charts (via AWS Load Balancer Controller):**
+
+- 1 ALB — `impala-services` ingress (routes `deployer`, `scaler`, `hardware-estimator`)
+- 0–3 optional internal NLBs — one each for `deployer`, `mongodb`, and `prometheus` when `internalNLB.enabled: true` is set in their chart values (used for cross-region / satellite cluster connectivity)
+
+**Maximum total: 1 ALB \+ 4 NLBs.** The default limit of 20 feels comfortable, but the AWS Load Balancer Controller can create additional load balancers for other Kubernetes services over time.
+
+**Recommended target: 50 for both ALB and NLB** — request both proactively. Check current usage first:
+
+```bash
+aws elbv2 describe-load-balancers --query 'LoadBalancers[].Type' --output text | tr '\t' '\n' | sort | uniq -c
+```
+
+### 11. EKS clusters
+
+Quota code: **L-1194D53C** · Default: 100
+
+The deployment creates **1 EKS cluster**. The default limit is very unlikely to be an issue.
+
+### 12. IAM — roles, policies, and attachments per role
+
+#### 12a. IAM roles
+
+Quota code: **L-FE177D64** · Default: 1000 per account
+
+The deployment creates **12 IAM roles** in total (all features enabled):
+
+| Role | Stack | Conditional on |
+| --- | --- | --- |
+| `eks_cluster` | iam-base | Always |
+| `eks_nodes` | iam-base | Always |
+| `impala_access_role` | iam-base | Always |
+| `workload_role` | iam-oidc | OIDC provider available |
+| `karpenter` | iam-oidc | `enable_karpenter = true` \+ OIDC |
+| `vpc_cni_role` | iam-oidc | OIDC provider available |
+| `aws_load_balancer_controller` | iam-oidc | OIDC provider available |
+| `scaler` | iam-oidc | `enable_scaler = true` \+ OIDC |
+| `external_dns` | iam-oidc | OIDC provider available |
+| `ebs_csi` | eks-csi-roles | OIDC provider available |
+| `s3_csi` | eks-csi-roles | OIDC provider available |
+| `eni_reconcile` (Lambda) | privatelink | `enable_eks_api_privatelink = true` |
+
+Rarely a problem, but check if your account is near the limit:
+
+```bash
+aws iam list-roles --query 'length(Roles)' --output text
+```
+
+#### 12b. Customer managed policies
+
+Quota code: **L-E95E4862** · Default: 1500 per account
+
+The deployment creates **15 customer managed policies** (all features enabled):
+
+| Policy | Stack | Conditional on |
+| --- | --- | --- |
+| `ecr_read_access_policy` | iam-base | Always |
+| `service_quotas_readonly_policy` | iam-base | Always |
+| `models_s3_readonly_access_policy` | iam-base | Always |
+| `ec2_cluster_access_policy` | iam-base | Always |
+| `resources_s3_full_access_policy` | iam-base | `s3_resources_bucket_arn` provided |
+| `batches_s3_full_access_policy` | iam-base | `s3_batches_bucket_arn` provided |
+| `batches_s3_list_access_policy` | iam-base | `s3_batches_bucket_arn` provided |
+| `eks_admin_access_policy` | iam-base | `cluster_arn` provided |
+| `karpenter_cluster_access_policy` | iam-base | `enable_karpenter = true` \+ cluster\_arn |
+| `ec2_read_access_policy` | iam-oidc | OIDC provider available |
+| `aws_load_balancer_controller_policy` | iam-oidc | OIDC provider available |
+| `sqs_node_metrics_access_policy` | iam-oidc | `enable_node_monitoring = true` |
+| `sqs_node_lifecycle_access_policy` | iam-oidc | `enable_node_monitoring = true` |
+| `sqs_launch_failure_access_policy` | iam-oidc | `enable_node_monitoring = true` |
+| `scaler_eks_access_policy` | iam-oidc | `enable_scaler = true` |
+
+Check current count:
+
+```bash
+aws iam list-policies --scope Local --query 'length(Policies)' --output text
+```
+
+#### 12c. Managed policies attached to a role — raise this before deploy
+
+<Warning>
+  This is the most likely IAM quota to be hit. The deployment will fail at the `iam-base` apply step unless this quota is raised first.
+</Warning>
+
+Quota code: **L-0DA4ABF3** · Default: **10 per role**
+
+The `eks_nodes` role receives **11 managed policy attachments** when all default features are enabled:
+
+| # | Policy | Type |
+| --- | --- | --- |
+| 1 | `AmazonEKSWorkerNodePolicy` | AWS managed |
+| 2 | `AmazonEKS_CNI_Policy` | AWS managed |
+| 3 | `AmazonEBSCSIDriverPolicy` | AWS managed |
+| 4 | `AmazonSSMManagedInstanceCore` | AWS managed |
+| 5 | `AmazonEC2ContainerRegistryReadOnly` | AWS managed |
+| 6 | `ecr_read_access_policy` | Customer managed |
+| 7 | `ec2_cluster_access_policy` | Customer managed |
+| 8 | `models_s3_readonly_access_policy` | Customer managed |
+| 9 | `resources_s3_full_access_policy` | Customer managed (conditional) |
+| 10 | `batches_s3_full_access_policy` | Customer managed (conditional) |
+| 11 | `karpenter_cluster_access_policy` | Customer managed (conditional) |
+
+With the default configuration (`enable_karpenter = true`, S3 buckets provided), `eks_nodes` sits at 11 — one over the default limit of 10. **The deployment will fail at the `iam-base` apply step** unless this quota is raised first.
+
+**Recommended target: 25** — gives room for the current 11 attachments plus future policy additions without needing another quota request.
+
+**Request the increase:**
+
+```bash
+aws service-quotas request-service-quota-increase \
+  --service-code iam \
+  --quota-code L-0DA4ABF3 \
+  --desired-value 25 \
+  --region us-east-1
+```
+
+<Note>
+  IAM is a global service. The quota is account-wide, not per-region — request it once in `us-east-1` regardless of your deployment region.
+</Note>
+
+## Checking and requesting increases
+
+1. Open the [AWS Service Quotas console](https://console.aws.amazon.com/servicequotas/home) in the target region.
+2. Search for the quota by name or code.
+3. Select **Request quota increase** and enter the desired value.
+4. On-Demand EC2 vCPU increases are usually auto-approved within a few hours. Spot GPU quotas (especially P family) require manual AWS review — **submit these first, they take the longest**.
+
+Request via CLI (replace `<your-region>` with your deployment region):
+
+```bash
+# IAM: managed policies per role (global — request once in us-east-1)
+aws service-quotas request-service-quota-increase \
+  --service-code iam --quota-code L-0DA4ABF3 \
+  --desired-value 25 --region us-east-1
+
+# On-Demand Standard vCPUs
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 --quota-code L-1216C47A \
+  --desired-value 256 --region <your-region>
+
+# G/VT Spot vCPUs (g6e inference nodes)
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 --quota-code L-3819A6DF \
+  --desired-value 128 --region <your-region>
+
+# P Spot vCPUs (p5/p5en nodes)
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 --quota-code L-7212CCBC \
+  --desired-value 384 --region <your-region>
+
+# VPCs per region
+aws service-quotas request-service-quota-increase \
+  --service-code vpc --quota-code L-F678F1CE \
+  --desired-value 10 --region <your-region>
+
+# NAT gateways per AZ
+aws service-quotas request-service-quota-increase \
+  --service-code vpc --quota-code L-FE5A380F \
+  --desired-value 10 --region <your-region>
+
+# Elastic IP addresses
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 --quota-code L-0263D0A3 \
+  --desired-value 20 --region <your-region>
+
+# Application Load Balancers
+aws service-quotas request-service-quota-increase \
+  --service-code elasticloadbalancing --quota-code L-53DA6B97 \
+  --desired-value 50 --region <your-region>
+
+# Network Load Balancers
+aws service-quotas request-service-quota-increase \
+  --service-code elasticloadbalancing --quota-code L-69A177A2 \
+  --desired-value 50 --region <your-region>
+
+# S3 buckets (account-wide — request once in us-east-1)
+aws service-quotas request-service-quota-increase \
+  --service-code s3 --quota-code L-DC2B2D3D \
+  --desired-value 150 --region us-east-1
+```
+
+## Notes on configuration variants
+
+| Deployment option | Additional quota impact |
+| --- | --- |
+| `single_nat_gateway = false` (HA NAT) | 1 NAT gateway \+ 1 EIP **per AZ** (typically ×3) |
+| `enable_eks_api_privatelink = false` | Saves 1 NLB |
+| `enable_openai_api_privatelink = true` | \+1 NLB, \+1 VPC endpoint service |
+| `existing_vpc_id = ...` (bring your own VPC) | No new VPC or NAT gateway consumed |
+| `internalNLB.enabled: true` (per-chart) | \+1 NLB per enabled service (deployer, mongodb, prometheus) |
+| GPU nodes disabled (Karpenter GPU pool removed) | No G/VT or P Spot quota needed |
+| Alertmanager enabled | \+1 EBS volume (10 Gi gp3) |
+| Prometheus replicas \> 2 | \+1 × 50 Gi EBS per additional replica |
+
+## Need help?
+
+Reach out to your Impala contact directly.

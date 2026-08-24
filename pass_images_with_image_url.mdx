@@ -1,0 +1,89 @@
+---
+title: "Pass images with image_url"
+description: "Send images to batch chat-completion requests by S3 reference instead of inline base64."
+---
+
+This guide shows how to include images in your batch inference requests by **reference**, using an `image_url` content part whose `url` points to an object in S3 (`s3://…`) — instead of embedding a base64-encoded image inline in your JSONL.
+
+This works with the `/v1/chat/completions` endpoint and follows the OpenAI-compatible multimodal message format. If you haven't run a batch yet, start with [Upload and run your first batch](/run-your-first-batch).
+
+## Why image\_url instead of base64
+
+Base64 encoding inflates each image by ~33% and embeds the entire payload directly in your input file. For image-heavy workloads (computer vision, data labeling, document processing), that adds up fast.
+
+Referencing images by S3 URL instead means:
+
+- **Smaller JSONL** — each request carries a short URL, not a multi-megabyte string. Easier to stay under the input file limits (up to 50,000 requests and 200 MB per file).
+- **No encode/decode step** — point at images already in your bucket; no preprocessing pipeline to base64-encode them.
+- **Cross-region** — the source image can live in an S3 bucket in a different region than where the batch runs. See [Cross-Region Image URI](/changelog) (May 3, 2026).
+
+## Message format
+
+Set the message `content` to an **array** of parts. Use an `image_url` part for the image and a `text` part for the prompt:
+
+```json
+{
+  "role": "user",
+  "content": [
+    {
+      "type": "image_url",
+      "image_url": {
+        "url": "s3://my-bucket/parts/42/perfectFeb26/TSR/img_76121.png"
+      }
+    },
+    {
+      "type": "text",
+      "text": "Cluster the image to its matching category from the provided category list and output ONLY the JSON object in the specified format."
+    }
+  ]
+}
+```
+
+The `url` field accepts an `s3://<bucket>/<key>` URI. The bucket must be reachable by your Impala data plane (see [S3 access](#s3-access) below).
+
+## Full JSONL example
+
+Each line of your input file is one request. Here `input.jsonl` contains two image requests for `/v1/chat/completions`:
+
+```json
+{"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"your-model","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"s3://my-bucket/parts/img_76121.png"}},{"type":"text","text":"Cluster the image to its matching category and output ONLY the JSON object in the specified format."}]}]}}
+{"custom_id":"req-2","method":"POST","url":"/v1/chat/completions","body":{"model":"your-model","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"s3://my-bucket/parts/img_76122.png"}},{"type":"text","text":"Cluster the image to its matching category and output ONLY the JSON object in the specified format."}]}]}}
+```
+
+You can mix a system message and multiple images in a single request — the `content` array can hold any number of `image_url` and `text` parts.
+
+## Run it
+
+The rest of the flow is identical to a text-only batch — upload the file, create the batch against `/v1/chat/completions`, poll for status, then download the results:
+
+```bash
+# 1. Upload the input file
+curl -X POST "$BASE_URL/v1/files" \
+  -F "purpose=batch" \
+  -F "file=@input.jsonl"
+
+# 2. Create the batch (use the file id from step 1)
+curl -X POST "$BASE_URL/v1/batches" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input_file_id": "file-abc123",
+    "endpoint": "/v1/chat/completions",
+    "completion_window": "unlimited",
+    "job_id": "job-xxxxxxxx"
+  }'
+```
+
+For the full walkthrough — polling status and downloading the output file — see [Upload and run your first batch](/run-your-first-batch).
+
+## S3 access
+
+The bucket referenced in each `image_url` must be reachable by your Impala data plane:
+
+- The objects must exist and be readable by the role Impala uses to run your batch.
+- The source bucket may be in a different region than the batch — cross-region image URIs are supported, so your JSONL and the data plane no longer need to be co-located.
+
+If a request's image can't be fetched, that line fails and appears in the batch's `error_file_id` (other requests are unaffected).
+
+## Need help?
+
+Reach out to your Impala contact directly.

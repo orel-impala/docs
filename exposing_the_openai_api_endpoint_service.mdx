@@ -1,0 +1,128 @@
+---
+title: "Exposing the OpenAI API endpoint service"
+description: "Make your Impala OpenAI API proxy reachable to internal teams and workloads over AWS PrivateLink."
+---
+
+As part of your Impala installation, an **OpenAI API proxy** is deployed inside your AWS environment. It is exposed as an **AWS PrivateLink Endpoint Service** — all traffic to the OpenAI API travels over AWS's private network and never touches the public internet.
+
+The endpoint service name for your environment is shared during onboarding (format: `com.amazonaws.vpce.<region>.vpce-svc-<id>`).
+
+This guide covers the most common patterns for making it accessible to your internal teams and workloads.
+
+## What was provisioned
+
+The installation creates:
+
+- An **internal Network Load Balancer (NLB)** in your EKS VPC, routing traffic to the OpenAI API pods.
+- An **AWS VPC Endpoint Service** backed by that NLB, enabling PrivateLink-based access from other VPCs or accounts.
+
+The endpoint service is the entry point. Depending on where your consumers live, choose one of the options below.
+
+## Option 1 — Same VPC (simplest)
+
+**Use when:**
+
+- The workloads that need OpenAI API access run in (or have networking access to) the Impala VPC.
+- The identities that need OpenAI API access have access to the Impala VPC (via VPC peering or Site-to-Site VPN).
+
+No PrivateLink consumer endpoint is needed — the NLB is already reachable within the VPC.
+
+**Steps:**
+
+1. Retrieve the NLB DNS name from your Impala installation outputs (`openai_privatelink_nlb_dns` or equivalent).
+2. _(Optional)_ Create a **Route 53 private hosted zone record** in your VPC:
+   - Type: `CNAME`
+   - Name: e.g. `openai.<DOMAIN>`
+   - Value: the NLB DNS name
+3. Workloads call `http://openai.<DOMAIN>` — done.
+
+## Option 2 — Different VPC, same account
+
+**Use when:** consuming workloads or a corporate VPN terminate in a different VPC within the same AWS account.
+
+**2.1 — Add the target region to the endpoint service** _(only if the consumer VPC is in a different region)_
+
+1. AWS Console → switch to the EKS region → **VPC → Endpoint Services**.
+2. Open the `-openai` endpoint service → **Allowed regions** tab → **Allow regions** → add your target region.
+
+**2.2 — Create the consumer endpoint** _(in the consumer VPC's region)_
+
+1. **VPC → Endpoints → Create endpoint**.
+2. Type: **Endpoint services that use NLBs and GWLBs**.
+3. Service name: paste your endpoint service name → **Verify**.
+4. VPC: select the consumer VPC.
+5. Subnets: select **private subnets** in each AZ where consumers run.
+6. Security group: allow **inbound TCP 80** from the VPC CIDR (or tighter, scoped to specific security groups).
+7. Leave **Enable private DNS** unchecked.
+8. Create the endpoint.
+
+**2.3 — Approve the connection** _(back in the EKS region)_
+
+1. **VPC → Endpoint Services** → open the `-openai` service.
+2. **Endpoint connections** tab → select the pending request → **Actions → Accept**.
+
+**2.4 — DNS**
+
+1. Copy the endpoint's DNS name from **VPC → Endpoints → Details**.
+2. In Route 53, open or create a **private hosted zone** associated with the consumer VPC.
+3. Add a `CNAME` record: e.g. `openai.<DOMAIN>` → endpoint DNS name.
+
+## Option 3 — Different account (cross-account PrivateLink)
+
+**Use when:** the consuming team or workload is in a separate AWS account (e.g. a shared services account or a partner account).
+
+**3.1 — Allow the other account** _(in the endpoint service's account)_
+
+1. **VPC → Endpoint Services** → open the `-openai` service.
+2. **Allow principals** tab → **Allow principals** → add the consumer account root (or scope it to a specific IAM role for tighter control):
+   ```text
+   arn:aws:iam::<CONSUMER_ACCOUNT_ID>:root
+   ```
+
+**3.2 — Create the consumer endpoint** _(from the consumer account)_
+
+Same as steps 2.2–2.4 above, performed from the consumer account's console.
+
+**3.3 — Approve the connection** _(from the endpoint service's account)_
+
+Same as step 2.3 above.
+
+## Option 4 — Transit Gateway (hub-and-spoke)
+
+**Use when:** you have multiple VPCs across accounts or regions that all need access, and you want centralized routing rather than creating a consumer endpoint in every VPC.
+
+**Architecture:**
+
+- Create the consumer endpoint once in a **shared services VPC**.
+- Attach that VPC to your **Transit Gateway**.
+- All spoke VPCs route traffic to the shared services VPC via the TGW.
+- DNS resolves to the endpoint ENI in the shared VPC; traffic is routed through the TGW.
+
+This avoids per-VPC endpoint setup at the cost of Transit Gateway data processing charges.
+
+## Validating connectivity
+
+Once set up, test from a workload or machine in the consumer VPC:
+
+```bash
+# Confirm DNS resolves to a private IP
+nslookup openai.<DOMAIN>
+
+# Test connectivity against the health endpoint
+curl -v http://openai.<DOMAIN>/health
+```
+
+Expected: DNS resolves to a `10.x.x.x` address and the health check returns `200 OK`.
+
+## Summary
+
+| Option | Best for | Complexity |
+| --- | --- | --- |
+| Same VPC | Workloads in the EKS VPC | Low |
+| Different VPC, same account | Separate VPCs or VPN in same account | Medium |
+| Cross-account | Partner or multi-account orgs | Medium |
+| Transit Gateway | Large multi-VPC environments | High |
+
+## Need help?
+
+Reach out to your Impala contact directly.
