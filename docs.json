@@ -40,8 +40,27 @@
           {
             "group": "Batch Inference",
             "pages": [
+              "jobs-and-job-ids",
               "run-your-first-batch",
               "pass_images_with_image_url"
+            ]
+          },
+          {
+            "group": "Single requests",
+            "pages": [
+              "send-a-request"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "anthropic-sdk"
+            ]
+          },
+          {
+            "group": "Model management",
+            "pages": [
+              "weight-sync"
             ]
           }
         ]
@@ -71,15 +90,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
