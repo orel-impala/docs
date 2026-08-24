@@ -22,7 +22,7 @@
         ]
       },
       {
-        "tab": "Product Updates",
+        "tab": "Product updates",
         "hidden": true,
         "icon": "bullhorn",
         "pages": [
@@ -35,7 +35,7 @@
         "pages": [
           "deployment-options",
           {
-            "group": "Bring Your Own Cloud",
+            "group": "Bring your own cloud",
             "icon": "cloud",
             "pages": [
               "getting-started-infrastructure-setup",
@@ -50,7 +50,7 @@
         "icon": "book-open",
         "pages": [
           {
-            "group": "Serverless Inference",
+            "group": "Serverless inference",
             "icon": "bolt",
             "pages": [
               "impala-cloud-setup",
@@ -58,7 +58,7 @@
             ]
           },
           {
-            "group": "Batch Inference",
+            "group": "Batch inference",
             "icon": "layer-group",
             "pages": [
               "run-your-first-batch",
@@ -84,7 +84,7 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API reference",
         "icon": "code",
         "openapi": "openai-api-swagger.json"
       }
