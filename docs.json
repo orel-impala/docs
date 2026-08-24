@@ -19,12 +19,14 @@
     },
     "tabs": [
       {
-        "tab": "Introduction",
+        "tab": "Overview",
         "icon": "compass",
         "pages": [
           "introduction",
-          "how-impala-works",
-          "deployment-options"
+          "async-and-interactive",
+          "throughput-and-cost",
+          "deployment-options",
+          "glossary"
         ]
       },
       {

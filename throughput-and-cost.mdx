@@ -1,0 +1,54 @@
+---
+title: "Throughput, latency and cost"
+description: "Cost per token is a throughput problem. Why keeping GPUs busy is the whole design, and what it means for the requests you send."
+---
+
+A GPU costs the same per hour whether it is saturated or idle. What changes is how many tokens come out of it.
+
+That makes cost per token a throughput problem, not a procurement problem.
+
+## Throughput is the lever
+
+Production cost per million tokens is fully loaded hourly cost divided by tokens produced in that hour. The consequence is lopsided:
+
+- **Double throughput** on the same hardware and cost per million tokens falls by roughly half.
+- **Halve your electricity price** and it moves about five percent.
+
+Power doesn't scale linearly with work either. A device draws somewhere between an idle floor and its thermal ceiling, and inference usually runs below that ceiling — so there is room for throughput to grow faster than watts, which means tokens per watt improve as the fleet gets busier.
+
+This is why Impala runs hot rather than holding capacity in reserve. The full argument, with the arithmetic, is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot).
+
+## What throughput costs
+
+Keeping GPUs saturated means the scheduler is always packing work: batching requests together, interleaving prefill and decode, reordering against what the fleet is doing right now.
+
+A request that arrives into a busy, well-packed fleet waits longer than one arriving into an idle machine held ready for it. That wait is the price of the utilization that produces the cost per token.
+
+For [async work](/async-and-interactive), it's a price paid in a currency you don't spend — nobody is reading those tokens as they arrive.
+
+## What you actually feel
+
+Not per-request latency. **Task completion time** — wall-clock from submitting a task to getting the finished result.
+
+For a batch run, that's dominated by throughput and by how much capacity sits behind your job. For an agent, it's per-step time multiplied by the number of steps, which is why turn count is usually a bigger lever than any individual call.
+
+Two practical consequences:
+
+- Benchmarking a single request tells you almost nothing about how the workload will perform. Measure a whole task, or a whole run.
+- Client defaults are tuned for interactive providers. Raise your timeouts and turn off automatic retries — a retry on a queued request adds load without shortening the wait. See [Send a request](/send-a-request).
+
+## Where the throughput comes from
+
+**Continuous batching** — requests join and leave a running batch instead of waiting for a batch boundary, so the GPU rarely runs a partial workload.
+
+**Prefix reuse** — agents re-read a large shared prefix on every step: system prompt, tool schemas, accumulated history. Caching that KV state and routing steps to workers that already hold it removes most of the recomputation.
+
+**Dynamic scheduling** — routing and memory placement are decided continuously against live fleet signals rather than fixed at deploy time, so capacity follows the work.
+
+**Tiered memory** — KV state moves between faster and slower tiers instead of pinning everything to the most expensive memory.
+
+You don't configure any of this. It's the reason the cost per token looks the way it does.
+
+## The trade, stated plainly
+
+Impala gives up per-request latency guarantees and gets throughput and cost per token in return. For work with a person reading the output, that's a bad trade. For everything else, it's the whole point.

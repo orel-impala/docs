@@ -1,0 +1,39 @@
+---
+title: "Async and interactive inference"
+description: "Two kinds of AI workload, measured by different numbers. Impala is built for the one where nobody is reading tokens as they arrive."
+---
+
+Most inference infrastructure is designed for a person watching tokens appear. Impala isn't, and almost everything else about the platform follows from that.
+
+## Interactive
+
+A human is in the loop, reading output as it streams — chat, copilots, autocomplete. The experience *is* the latency, so the system is measured by interactivity SLOs: time to first token, time per output token, inter-token latency, end-to-end request time.
+
+To hit those targets, a runtime has to keep capacity ready rather than busy. Idle headroom is the product.
+
+## Async
+
+Nothing human is waiting on any individual token. Background coding agents, research agents, multi-step automations, enrichment pipelines, evaluation sweeps, classification over a corpus.
+
+Work still has a deadline, but it's a deadline on the **task**, not on the token. A research agent that takes four minutes is fine. What isn't fine is paying interactive prices for those four minutes.
+
+The metric that matters here is **tasks per dollar** — cost per completed task. The fleet-side counterpart is throughput: how fast the cluster turns work out at scale.
+
+## The difference in one table
+
+| | Interactive | Async |
+| --- | --- | --- |
+| Who's waiting | A person, per token | Nothing, until the task is done |
+| Measured by | TTFT, TPOT, ITL | Tasks per dollar, task completion time |
+| Capacity is | Held ready | Kept busy |
+| Optimizing for | Responsiveness | Cost per completed task |
+
+## Why this distinction earns its own page
+
+If you bring interactive instincts to async work, you will optimize the wrong number. You'll benchmark time to first token, tune for a p99 nobody experiences, and pay for idle headroom that only exists to serve an SLO your workload doesn't have.
+
+Async work has a different question: for a fixed budget, how many tasks finish? That question is answered by throughput — see [Throughput, latency and cost](/throughput-and-cost).
+
+<Info>
+  Async doesn't mean batch. An agent calling the model in a loop is async work — no one is reading its intermediate tokens — but each call still returns its own response. Both [Batch](/run-your-first-batch) and [single requests](/send-a-request) serve async workloads.
+</Info>
