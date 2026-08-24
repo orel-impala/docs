@@ -18,21 +18,6 @@
         "pages": [
           "introduction",
           "async-inference",
-          "glossary"
-        ]
-      },
-      {
-        "tab": "Product updates",
-        "hidden": true,
-        "icon": "bullhorn",
-        "pages": [
-          "changelog"
-        ]
-      },
-      {
-        "tab": "Deployments",
-        "icon": "server",
-        "pages": [
           "deployment-options",
           {
             "group": "Bring your own cloud",
@@ -42,7 +27,16 @@
               "exposing_the_openai_api_endpoint_service",
               "aws_service_quotas_for_Impala_data_plane_deployment"
             ]
-          }
+          },
+          "glossary"
+        ]
+      },
+      {
+        "tab": "Product updates",
+        "hidden": true,
+        "icon": "bullhorn",
+        "pages": [
+          "changelog"
         ]
       },
       {
