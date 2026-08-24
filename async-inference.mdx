@@ -20,41 +20,32 @@ Four things to do differently, before anything else on this page:
 
 ## Where the time goes
 
-<Frame>
-<svg viewBox="0 0 720 250" width="100%" role="img" aria-label="Timeline comparing an interactive request with a multi-step async agent task">
-  <g fill="currentColor" fontSize="13" fontWeight="600">
-    <text x="0" y="46">Interactive</text>
-    <text x="0" y="128">Async agent task</text>
-  </g>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
 
-  <g stroke="currentColor" opacity="0.15" strokeWidth="1">
-    <line x1="130" y1="20" x2="130" y2="200" />
-    <line x1="690" y1="20" x2="690" y2="200" />
-  </g>
+  <div>
+    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem' }}>Interactive request</div>
+    <div style={{ display: 'flex', width: '100%', height: '28px', gap: '2px' }}>
+      <div style={{ width: '7%', background: '#2563eb', opacity: 0.45, borderRadius: '3px' }} />
+      <div style={{ width: '36%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>decode</div>
+      <div style={{ flex: 1, fontSize: '0.72rem', opacity: 0.7, display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>a person reads every token</div>
+    </div>
+  </div>
 
-  <rect x="130" y="28" width="40" height="26" rx="3" fill="#2563eb" opacity="0.45" />
-  <rect x="170" y="28" width="160" height="26" rx="3" fill="#2563eb" />
-  <text x="178" y="46" fill="#ffffff" fontSize="12">decode</text>
-  <text x="340" y="46" fill="currentColor" fontSize="12" opacity="0.75">a person reads every token</text>
+  <div>
+    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem' }}>Async agent task</div>
+    <div style={{ display: 'flex', width: '100%', height: '28px', gap: '2px' }}>
+      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 1</div>
+      <div style={{ width: '7%', background: 'currentColor', opacity: 0.15, borderRadius: '3px' }} />
+      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 2</div>
+      <div style={{ width: '7%', background: 'currentColor', opacity: 0.15, borderRadius: '3px' }} />
+      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 3</div>
+    </div>
+    <div style={{ fontSize: '0.72rem', opacity: 0.7, marginTop: '0.4rem' }}>
+      Grey gaps are tool calls. The whole bar is task completion time — nobody is waiting on any of it.
+    </div>
+  </div>
 
-  <rect x="130" y="110" width="160" height="26" rx="3" fill="#2563eb" />
-  <text x="138" y="128" fill="#ffffff" fontSize="12">step 1</text>
-  <rect x="290" y="110" width="40" height="26" rx="3" fill="currentColor" opacity="0.12" />
-  <rect x="330" y="110" width="160" height="26" rx="3" fill="#2563eb" />
-  <text x="338" y="128" fill="#ffffff" fontSize="12">step 2</text>
-  <rect x="490" y="110" width="40" height="26" rx="3" fill="currentColor" opacity="0.12" />
-  <rect x="530" y="110" width="160" height="26" rx="3" fill="#2563eb" />
-  <text x="538" y="128" fill="#ffffff" fontSize="12">step 3</text>
-
-  <text x="292" y="103" fill="currentColor" fontSize="11" opacity="0.6">tool call</text>
-  <text x="492" y="103" fill="currentColor" fontSize="11" opacity="0.6">tool call</text>
-
-  <g stroke="currentColor" opacity="0.35" strokeWidth="1">
-    <line x1="130" y1="166" x2="690" y2="166" strokeDasharray="3 3" />
-  </g>
-  <text x="130" y="188" fill="currentColor" fontSize="12" opacity="0.75">task completion time — nobody is waiting on any of it</text>
-</svg>
-</Frame>
+</div>
 
 The interactive request is short and every millisecond of it is experienced. The async task is longer and none of it is. Shortening the interactive bar improves a product; shortening the async bar mostly means running fewer steps.
 
