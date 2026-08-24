@@ -20,20 +20,41 @@ Four things to do differently, before anything else on this page:
 
 ## Where the time goes
 
-```mermaid
-gantt
-    dateFormat X
-    axisFormat %s
-    section Interactive
-    Prefill                          :0, 1
-    Decode — a person reads each token :1, 6
-    section Async agent task
-    Step 1                           :0, 4
-    Tool call                        :4, 5
-    Step 2                           :5, 9
-    Tool call                        :9, 10
-    Step 3                           :10, 14
-```
+<Frame>
+<svg viewBox="0 0 720 250" width="100%" role="img" aria-label="Timeline comparing an interactive request with a multi-step async agent task">
+  <g fill="currentColor" fontSize="13" fontWeight="600">
+    <text x="0" y="46">Interactive</text>
+    <text x="0" y="128">Async agent task</text>
+  </g>
+
+  <g stroke="currentColor" opacity="0.15" strokeWidth="1">
+    <line x1="130" y1="20" x2="130" y2="200" />
+    <line x1="690" y1="20" x2="690" y2="200" />
+  </g>
+
+  <rect x="130" y="28" width="40" height="26" rx="3" fill="#2563eb" opacity="0.45" />
+  <rect x="170" y="28" width="160" height="26" rx="3" fill="#2563eb" />
+  <text x="178" y="46" fill="#ffffff" fontSize="12">decode</text>
+  <text x="340" y="46" fill="currentColor" fontSize="12" opacity="0.75">a person reads every token</text>
+
+  <rect x="130" y="110" width="160" height="26" rx="3" fill="#2563eb" />
+  <text x="138" y="128" fill="#ffffff" fontSize="12">step 1</text>
+  <rect x="290" y="110" width="40" height="26" rx="3" fill="currentColor" opacity="0.12" />
+  <rect x="330" y="110" width="160" height="26" rx="3" fill="#2563eb" />
+  <text x="338" y="128" fill="#ffffff" fontSize="12">step 2</text>
+  <rect x="490" y="110" width="40" height="26" rx="3" fill="currentColor" opacity="0.12" />
+  <rect x="530" y="110" width="160" height="26" rx="3" fill="#2563eb" />
+  <text x="538" y="128" fill="#ffffff" fontSize="12">step 3</text>
+
+  <text x="292" y="103" fill="currentColor" fontSize="11" opacity="0.6">tool call</text>
+  <text x="492" y="103" fill="currentColor" fontSize="11" opacity="0.6">tool call</text>
+
+  <g stroke="currentColor" opacity="0.35" strokeWidth="1">
+    <line x1="130" y1="166" x2="690" y2="166" strokeDasharray="3 3" />
+  </g>
+  <text x="130" y="188" fill="currentColor" fontSize="12" opacity="0.75">task completion time — nobody is waiting on any of it</text>
+</svg>
+</Frame>
 
 The interactive request is short and every millisecond of it is experienced. The async task is longer and none of it is. Shortening the interactive bar improves a product; shortening the async bar mostly means running fewer steps.
 
