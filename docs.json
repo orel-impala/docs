@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Impala AI Documentation",
   "colors": {
-    "primary": "#4e181a",
+    "primary": "#a6272e",
     "light": "#ffdcaf",
-    "dark": "#460f12"
+    "dark": "#8c2328"
   },
   "background": {
     "decoration": "gradient"
@@ -105,8 +105,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Platform",
+      "href": "https://platform.getimpala.ai/"
     }
   },
   "contextual": {
@@ -123,9 +123,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "linkedin": "https://www.linkedin.com/company/impala-ai/",
+      "website": "https://www.getimpala.ai/"
     }
   },
   "fonts": {
