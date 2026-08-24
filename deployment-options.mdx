@@ -1,5 +1,5 @@
 ---
-title: "Deployments"
+title: "Choosing a deployment"
 description: "Impala runs in our cloud or inside your own AWS account. The API is identical either way."
 ---
 
@@ -17,7 +17,7 @@ Impala's data plane is installed into your own AWS account and VPC. Your prompts
 
 Pick this when data residency or network isolation is a requirement, or when you have committed GPU capacity to use.
 
-Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC (AWS)](/getting-started-infrastructure-setup).
+Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC](/getting-started-infrastructure-setup).
 
 ## What differs
 
@@ -27,7 +27,7 @@ Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC 
 | Where inputs and outputs live | Impala-managed storage | Your S3 buckets |
 | Network path | Public endpoint, authenticated | Private, over PrivateLink |
 | Setup | None | Terraform, ~30 min |
-| AWS quota increases | Not needed | Required first — see [AWS service quotas](/aws_service_quotas_for_Impala_data_plane_deployment) |
+| AWS quota increases | Not needed | Required first — see [Request service quotas](/aws_service_quotas_for_Impala_data_plane_deployment) |
 
 ## What doesn't
 
