@@ -43,7 +43,7 @@
     "/v1/files": {
       "post": {
         "tags": [
-          "files"
+          "Files"
         ],
         "summary": "Upload File",
         "description": "Upload a file using true streaming without buffering to disk.",
@@ -119,7 +119,7 @@
       },
       "get": {
         "tags": [
-          "files"
+          "Files"
         ],
         "summary": "List Files",
         "description": "List all uploaded files.",
@@ -231,7 +231,7 @@
     "/v1/files/{file_id}": {
       "get": {
         "tags": [
-          "files"
+          "Files"
         ],
         "summary": "Get File",
         "description": "Retrieve metadata for a specific file.",
@@ -282,7 +282,7 @@
       },
       "delete": {
         "tags": [
-          "files"
+          "Files"
         ],
         "summary": "Delete File",
         "description": "Delete a specific file.",
@@ -335,7 +335,7 @@
     "/v1/files/{file_id}/content": {
       "get": {
         "tags": [
-          "files"
+          "Files"
         ],
         "summary": "Get File Content",
         "description": "Retrieve the content of a specific file.",
@@ -386,7 +386,7 @@
     "/v1/batches": {
       "post": {
         "tags": [
-          "batches"
+          "Batches"
         ],
         "summary": "Create Batch",
         "description": "Create a new batch of API requests.",
@@ -436,7 +436,7 @@
       },
       "get": {
         "tags": [
-          "batches"
+          "Batches"
         ],
         "summary": "List Batches",
         "description": "List all batches.",
@@ -515,7 +515,7 @@
     "/v1/batches/{batch_id}": {
       "get": {
         "tags": [
-          "batches"
+          "Batches"
         ],
         "summary": "Get Batch",
         "description": "Retrieve a specific batch.",
@@ -568,7 +568,7 @@
     "/v1/batches/{batch_id}/cancel": {
       "post": {
         "tags": [
-          "batches"
+          "Batches"
         ],
         "summary": "Cancel Batch",
         "description": "Cancel a batch.",
@@ -1374,5 +1374,15 @@
         "title": "ValidationError"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Files",
+      "description": "Upload and manage batch input and output files."
+    },
+    {
+      "name": "Batches",
+      "description": "Create, monitor and cancel batch runs."
+    }
+  ]
 }
