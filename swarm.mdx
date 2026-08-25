@@ -17,7 +17,7 @@ That's the distinction from the rest of the platform. With [single requests](/se
 
 **Prefix reuse across siblings.** Subagents spawned from one parent share a large prompt prefix — system prompt, tool schemas, the parent's accumulated context. When the loop runs next to the fleet, that KV state is already resident rather than being re-sent and recomputed per child. This is the mechanism described in [Impala Herd](/impala-herd), applied to fan-out.
 
-**Cost per completed task, not per call.** A swarm is the clearest case of the argument in [Tasks per dollar, not tokens per second](/async-inference): nobody is reading the intermediate tokens, dozens of children are in flight, and the only number that matters is what the finished task cost.
+**Cost per completed task, not per call.** A swarm is the clearest case of the argument in [Building for async inference](/async-inference): nobody is reading the intermediate tokens, dozens of children are in flight, and the only number that matters is what the finished task cost.
 
 {/* TODO — other benefits worth claiming, once confirmed:
      - concurrency ceiling vs. a client-side harness

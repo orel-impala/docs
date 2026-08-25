@@ -39,7 +39,7 @@ print(resp.choices[0].message.content)
 ```
 
 <Warning>
-  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [Tasks per dollar, not tokens per second](/async-inference).
+  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [Building for async inference](/async-inference).
 </Warning>
 
 ## 3. Check it worked
@@ -113,7 +113,7 @@ Everything else works as it does with the OpenAI SDK.
   <Card title="Run your first batch" href="/run-your-first-batch">
     File in, results out, at the lowest cost per token.
   </Card>
-  <Card title="Tasks per dollar, not tokens per second" href="/async-inference">
+  <Card title="Building for async inference" href="/async-inference">
     Why Impala trades latency for throughput and cost.
   </Card>
 </CardGroup>
