@@ -1,0 +1,28 @@
+---
+title: "Further reading"
+description: "Impala's engineering writing on inference economics, kernels and expert parallelism — the arguments behind how the platform behaves."
+---
+
+The docs explain what Impala does. These explain why it's built that way. All on the [Impala blog](https://www.getimpala.ai/blog).
+
+## Cost and utilization
+
+**[Run It Hot](https://www.getimpala.ai/blog/run-it-hot)** — Why utilization, not electricity price, is the lever on cost per token. Doubling throughput halves cost per million tokens; halving your power price moves it about five percent. The arithmetic behind [Tasks per dollar, not tokens per second](/async-inference).
+
+## Workload shape
+
+**[Nobody's Waiting: Common Use Cases for Async AI](https://www.getimpala.ai/blog/nobodys-waiting-common-use-cases-for-async-ai)** — The share of inference where no human is reading the output, and what that changes.
+
+**[Inference for Agentic Workloads Is Different](https://www.getimpala.ai/blog/inference-for-agentic-workloads-is-different-heres-what-that-means-for-your-stack)** — Why agent traces break the assumptions interactive serving is built on.
+
+## Engine internals
+
+**[DBO, Kernel Crossover, and the Real Hardware Cliff](https://www.getimpala.ai/blog/wide-ep-dbo-deepep-hardware-cliff)** — Where kernel choice stops scaling and what replaces it.
+
+**[Wide-EP failure modes, load balancing, and portability](https://www.getimpala.ai/blog/wide-ep-load-balancing-portability)** — Expert parallelism at fleet scale, and how it fails.
+
+## Building the platform
+
+**[IaC You Can Reason About](https://www.getimpala.ai/blog/iac-you-can-reason-about)** — Part 1 of the DevOps series.
+
+**[What Full BYOC Actually Takes](https://www.getimpala.ai/blog/what-full-byoc-actually-takes)** — Part 2. Relevant if you're deploying into [your own cloud](/getting-started-infrastructure-setup).

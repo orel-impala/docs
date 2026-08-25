@@ -24,11 +24,7 @@
             "icon": "book",
             "pages": [
               "glossary",
-              {
-                "anchor": "Blog",
-                "icon": "newspaper",
-                "href": "https://www.getimpala.ai/blog"
-              }
+              "further-reading"
             ]
           }
         ]
