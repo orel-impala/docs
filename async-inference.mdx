@@ -25,7 +25,7 @@ That is the traffic Impala is built for. Async inference means model calls where
 - **Raise your timeouts.** SDK defaults are tuned for interactive providers and will abort early. Expect seconds rather than milliseconds, and longer under load.
 - **Turn off automatic retries.** Retrying a queued request adds load without shortening the wait.
 - **Benchmark a whole task, not a single request.** One request tells you almost nothing about how the workload will perform.
-- **Count your turns.** For an agent, total time is per-step time multiplied by the number of steps, so turn count is usually a bigger lever than any individual call.
+- **Count your turns.** For an agent, total time is per-step time multiplied by the number of steps — and production traces average around 20 tool steps, with tails past 200. Turn count is usually a bigger lever than any individual call.
 
 ## The metric is tasks per dollar
 
@@ -37,7 +37,7 @@ For async work the economic question is: for a fixed budget, how many tasks fini
 | Measured by | TTFT, TPOT, ITL | Tasks per dollar, task completion time |
 | Capacity is | Held ready | Kept busy |
 
-A GPU costs the same per hour saturated or idle, so cost per token is a throughput problem: double throughput on the same hardware and cost per million tokens falls by roughly half. So Impala runs hot instead of holding capacity in reserve, which is why a request can wait longer here than at an interactive provider — a cost async work doesn't pay. The argument with the numbers is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot); the engine that delivers it is [Impala Herd](/impala-herd).
+Those two are not a trade against each other: **faster and cheaper, not faster or cheaper**. A single request may sit longer here than at an interactive provider, while the task it belongs to finishes sooner and costs less — because the scheduler works the whole trace rather than each call in isolation. A GPU costs the same per hour saturated or idle, so cost per token is a throughput problem: double throughput on the same hardware and cost per million tokens falls by roughly half. The argument with the numbers is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot); the engine that delivers it is [Impala Herd](/impala-herd).
 
 <Info>
   Async is not a synonym for batch. An agent calling the model in a loop is async work — nobody reads its intermediate tokens — but each call still returns its own response. Both [Batch](/run-your-first-batch) and [single requests](/send-a-request) serve async workloads.
