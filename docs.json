@@ -24,6 +24,7 @@
             "icon": "book",
             "pages": [
               "glossary",
+              "security",
               "further-reading"
             ]
           }
