@@ -1,15 +1,17 @@
 ---
-title: "Weight sync API"
-description: "Upload new model weights and swap them onto a running fleet without redeploying."
+title: "Impala Leap"
+description: "Impala Leap swaps model weights in seconds, with no redeploy. Upload a checkpoint, reload it, and the running fleet serves it."
 ---
 
-The weight sync API replaces the weights a running deployment serves. You upload a checkpoint, trigger a reload, and the fleet starts serving the new weights — no redeploy, no new endpoint.
+**Impala Leap** changes the weights a running deployment serves, in seconds, without a redeploy. You upload a checkpoint, trigger a reload, and the fleet starts serving the new weights on the same endpoint.
 
-Use it when you retrain or fine-tune on your own cadence and need the serving fleet to follow.
+Herd runs your inference. Leap changes your weights.
+
+Use Leap when you retrain or fine-tune on your own cadence and need the serving fleet to follow — RL loops, post-training iteration, or any workflow where new weights ship more often than new infrastructure.
 
 ## Endpoints
 
-Impala splits inference from management. Inference runs on the OpenAI-compatible surface; weight sync is an Impala-specific operation and lives under `/imp/v1`.
+Impala splits inference from management. Inference runs on the OpenAI-compatible surface; Leap is an Impala-specific operation and lives under `/imp/v1`.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
