@@ -1,35 +1,25 @@
 ---
 title: "Security & data handling"
-description: "Where your content goes, what Impala retains, and how deployments are isolated. Facts for a security review, not claims."
+description: "Impala runs single-tenant, in our cloud or in yours, so your data stays isolated and isn't retained."
 ---
 
 <Card title="Impala Trust Center" icon="shield-check" href="https://trust.getimpala.ai">
   SOC 2 Type II status, security controls, subprocessors and documents. Self-serve and current.
 </Card>
 
-## What Impala does with your content
+## What Impala does with your data
 
 **Prompts are not persisted.** Inputs and outputs are processed to serve your request. They are not retained as prompt data.
 
-**Your content is never used for training.** Not for model training, not for fine-tuning, not for model improvement.
+**Your data is never used for training.** Not for model training, not for fine-tuning, not for model improvement.
 
-**Telemetry describes the workload, not the content.** What Impala retains and acts on is workload shape — prompt lengths, concurrency, burstiness, cache reuse. That's what [Herd](/impala-herd) profiles to tune the execution plan. It is not your prompts or completions.
-
-## Where content lives
-
-Batch necessarily involves a file: you upload a JSONL and retrieve a results file. Where those files sit depends on your deployment.
-
-| | Serverless | Bring your own cloud |
-| --- | --- | --- |
-| Batch input and output files | Impala-managed storage, for the life of the batch | Your own S3 buckets |
-| Content leaves your cloud | Yes, to Impala's endpoint | No |
-| Network path | Public endpoint, authenticated | Private, over AWS PrivateLink |
-
-**Bring your own cloud is the option where content never leaves your account.** The data plane runs inside your VPC, reads and writes your buckets, and reaches the endpoint over PrivateLink rather than the public internet. Batch runs in both models — a VPC install is not a prerequisite for batch. See [Run in our cloud, or yours](/deployment-options).
+**Telemetry describes the workload, not your prompts.** What Impala retains and acts on is workload shape — prompt lengths, concurrency, burstiness, cache reuse. That's what [Herd](/impala-herd) profiles to tune the execution plan.
 
 ## Isolation
 
-Deployments are **single-tenant**. Your deployment is logically isolated from other customers, in Impala's cloud or in yours. In a Bring your own cloud install, the control plane and data plane are split, with the data plane inside your VPC.
+Deployments are **single-tenant**. Your deployment is logically isolated from other customers, so your data and operations remain separate and secure — in Impala's cloud or in yours.
+
+In a [Bring your own cloud](/deployment-options) install, the control plane and data plane are split, with the data plane inside your own VPC. Your prompts, inputs and outputs stay inside your account.
 
 On-premises deployment is supported, subject to compatibility testing by Impala's solutions team.
 
@@ -49,4 +39,4 @@ Current attestations, control descriptions and the subprocessor list are in the 
 
 ## Questions this page doesn't answer
 
-For anything specific to your environment — data residency in a particular region, a signed DPA, a custom retention requirement, or a security questionnaire — talk to your Impala contact.
+For anything specific to your environment, refer to our [Trust Center](https://trust.getimpala.ai) or talk to your Impala contact.
