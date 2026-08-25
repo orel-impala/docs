@@ -20,57 +20,16 @@ That is the traffic Impala is built for. Async inference means model calls where
      Impala's contribution is that running those models is cheap. Keeping that split explicit
      is what makes the "better quality" half of the title checkable rather than a boast. */}
 
-## What this changes for you
-
-Four things to do differently, before anything else on this page:
+## What to do differently
 
 - **Raise your timeouts.** SDK defaults are tuned for interactive providers and will abort early. Expect seconds rather than milliseconds, and longer under load.
 - **Turn off automatic retries.** Retrying a queued request adds load without shortening the wait.
 - **Benchmark a whole task, not a single request.** One request tells you almost nothing about how the workload will perform.
-- **Count your turns.** For an agent, total time is per-step time multiplied by the number of steps — so turn count is usually a bigger lever than any individual call.
-
-## Where the time goes
-
-<div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
-
-  <div>
-    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem' }}>Interactive request</div>
-    <div style={{ display: 'flex', width: '100%', height: '28px', gap: '2px' }}>
-      <div style={{ width: '7%', background: '#2563eb', opacity: 0.45, borderRadius: '3px' }} />
-      <div style={{ width: '36%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>decode</div>
-      <div style={{ flex: 1, fontSize: '0.72rem', opacity: 0.7, display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>a person reads every token</div>
-    </div>
-  </div>
-
-  <div>
-    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem' }}>Async agent task</div>
-    <div style={{ display: 'flex', width: '100%', height: '28px', gap: '2px' }}>
-      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 1</div>
-      <div style={{ width: '7%', background: 'currentColor', opacity: 0.15, borderRadius: '3px' }} />
-      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 2</div>
-      <div style={{ width: '7%', background: 'currentColor', opacity: 0.15, borderRadius: '3px' }} />
-      <div style={{ width: '28%', background: '#2563eb', borderRadius: '3px', color: '#fff', fontSize: '0.72rem', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>step 3</div>
-    </div>
-    <div style={{ fontSize: '0.72rem', opacity: 0.7, marginTop: '0.4rem' }}>
-      Grey gaps are tool calls. The whole bar is task completion time — nobody is waiting on any of it.
-    </div>
-  </div>
-
-</div>
-
-The interactive request is short and every millisecond of it is experienced. The async task is longer and none of it is. Shortening the interactive bar improves a product; shortening the async bar mostly means running fewer steps.
+- **Count your turns.** For an agent, total time is per-step time multiplied by the number of steps, so turn count is usually a bigger lever than any individual call.
 
 ## The metric is tasks per dollar
 
-For async work the economic question is: for a fixed budget, how many tasks finish?
-
-That's **tasks per dollar** — cost per completed task. Its fleet-side counterpart is **throughput**: how fast the cluster turns work out at scale. The wall-clock number that matters is **task completion time**, from submitting a task to holding the finished result.
-
-Notably absent: time to first token.
-
-## How this differs from interactive inference
-
-Interactive AI puts a person in the loop reading output as it streams — chat, copilots, autocomplete. There, the experience *is* the latency, so the system is measured by interactivity SLOs and has to keep capacity **ready** rather than busy. Idle headroom is the product.
+For async work the economic question is: for a fixed budget, how many tasks finish? That's **tasks per dollar** — cost per completed task. Its fleet-side counterpart is **throughput**, how fast the cluster turns work out at scale. The wall-clock number that matters is **task completion time**, from submitting a task to holding the finished result. Time to first token is not on the list.
 
 | | Interactive | Async |
 | --- | --- | --- |
@@ -78,31 +37,7 @@ Interactive AI puts a person in the loop reading output as it streams — chat, 
 | Measured by | TTFT, TPOT, ITL | Tasks per dollar, task completion time |
 | Capacity is | Held ready | Kept busy |
 
-Bring interactive instincts to async work and you'll optimize the wrong number — benchmarking time to first token, tuning a p99 nobody experiences, paying for idle headroom that serves an SLO your workload doesn't have.
-
-## Why throughput sets the price
-
-A GPU costs the same per hour saturated or idle. What changes is how many tokens come out of it — which makes cost per token a throughput problem, and the arithmetic lopsided: double throughput on the same hardware and cost per million tokens falls by roughly half, while halving your electricity price moves it about five percent.
-
-So Impala runs hot instead of holding capacity in reserve. Keeping GPUs saturated means the scheduler is always packing work, and a request arriving into a busy, well-packed fleet waits longer than one arriving into an idle machine held ready for it. That wait is the price of the utilization that produces the cost per token. For async work it's paid in a currency you don't spend.
-
-The full argument, with the numbers, is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot).
-
-## Where the throughput comes from
-
-**Continuous batching** — requests join and leave a running batch instead of waiting for a batch boundary, so the GPU rarely runs a partial workload.
-
-**Prefix reuse** — agents re-read a large shared prefix every step: system prompt, tool schemas, accumulated history. Caching that KV state and routing steps to workers already holding it removes most of the recomputation.
-
-**Dynamic scheduling** — routing and memory placement are decided continuously against live fleet signals rather than fixed at deploy time.
-
-**Tiered memory** — KV state moves between faster and slower tiers instead of pinning everything to the most expensive memory.
-
-None of this is yours to configure. It's the reason the cost per token looks the way it does.
-
-## The trade, stated plainly
-
-Impala gives up per-request latency guarantees and gets throughput and cost per token in return. For work with a person reading the output, that's a bad trade. For everything else, it's the point.
+A GPU costs the same per hour saturated or idle, so cost per token is a throughput problem: double throughput on the same hardware and cost per million tokens falls by roughly half. So Impala runs hot instead of holding capacity in reserve, which is why a request can wait longer here than at an interactive provider — a cost async work doesn't pay. The argument with the numbers is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot); the engine that delivers it is [Impala Herd](/impala-herd).
 
 <Info>
   Async is not a synonym for batch. An agent calling the model in a loop is async work — nobody reads its intermediate tokens — but each call still returns its own response. Both [Batch](/run-your-first-batch) and [single requests](/send-a-request) serve async workloads.
