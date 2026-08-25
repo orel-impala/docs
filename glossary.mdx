@@ -43,6 +43,7 @@ description: "The vocabulary these docs use for async inference, agent workloads
 
 | Term | Meaning |
 | --- | --- |
+| **Herd** | Impala's inference engine. Profiles your live traffic and re-tunes its execution plan against it — kernels, batching, decoding. Every workload runs on it; nothing about it is yours to configure. See [Impala Herd](/impala-herd). |
 | **Job** | A model plus a configuration, provisioned for your account, identified by a `job_id`. Batch requests are addressed to a job. See [Jobs](/jobs-and-job-ids). |
 | **Run** | One execution of a batch against a job. What the Run tab lists. |
 | **Batch** | The API object created by `POST /v1/batches`, moving through `validating` → `in_progress` → `finalizing` → `completed`. |

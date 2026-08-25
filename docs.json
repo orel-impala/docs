@@ -23,7 +23,12 @@
             "group": "Reference",
             "icon": "book",
             "pages": [
-              "glossary"
+              "glossary",
+              {
+                "anchor": "Blog",
+                "icon": "newspaper",
+                "href": "https://www.getimpala.ai/blog"
+              }
             ]
           }
         ]
