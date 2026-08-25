@@ -1,0 +1,56 @@
+---
+title: "Impala Swarm"
+description: "Run an agent swarm on Impala — the harness, the fan-out and the model calls in one place, next to your data."
+---
+
+{/* DRAFT — Orel to fill in. Do not publish until the TODO blocks below are resolved. */}
+
+<Info>
+  **Draft.** The shape of this page is settled; the mechanics are not. Sections marked TODO are waiting on the API reference.
+</Info>
+
+**Impala Swarm** is a way to run an agent swarm on Impala: a parent agent that fans out into many subagents over a shared context, with the loop itself executing on Impala rather than in your application.
+
+That's the distinction from the rest of the platform. With [single requests](/send-a-request), you run the harness and Impala serves the calls. With Swarm, the harness runs on Impala.
+
+## Why run the swarm here
+
+**Prefix reuse across siblings.** Subagents spawned from one parent share a large prompt prefix — system prompt, tool schemas, the parent's accumulated context. When the loop runs next to the fleet, that KV state is already resident rather than being re-sent and recomputed per child. This is the mechanism described in [Impala Herd](/impala-herd), applied to fan-out.
+
+**Cost per completed task, not per call.** A swarm is the clearest case of the argument in [Tasks per dollar, not tokens per second](/async-inference): nobody is reading the intermediate tokens, dozens of children are in flight, and the only number that matters is what the finished task cost.
+
+{/* TODO — other benefits worth claiming, once confirmed:
+     - concurrency ceiling vs. a client-side harness
+     - tool-call round trips staying inside the cluster
+     - scheduling/placement of siblings on cache-warm workers
+     Do not add these until someone confirms they're real. */}
+
+## Where it runs
+
+Swarm runs in [Bring your own cloud](/getting-started-infrastructure-setup) deployments. The swarm's state and every intermediate result stay inside your own VPC and buckets.
+
+For high-fan-out, long-running agent work that touches a lot of your data, that's the point rather than a limitation — see [Security and data handling](/security).
+
+## Defining a swarm
+
+{/* TODO — how a swarm is specified. Parent prompt, subagent definitions, fan-out
+     width, termination conditions, tool wiring. Needs the API reference. */}
+
+## Endpoints
+
+{/* TODO — request/response shapes, auth, whether this lives under /imp/v1 like Leap
+     or on the OpenAI-compatible surface. */}
+
+## Watching a run
+
+{/* TODO — how progress is observed: polling, streaming, a run object with states
+     (compare the Batch object lifecycle), what a partial failure looks like. */}
+
+## Limits
+
+{/* TODO — max fan-out width, max depth, per-swarm timeout, what happens when a
+     subagent fails or loops. */}
+
+## Need help?
+
+Reach out to your Impala contact directly.

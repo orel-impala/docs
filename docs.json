@@ -60,6 +60,14 @@
             ]
           },
           {
+            "group": "Agent orchestration",
+            "icon": "sitemap",
+            "hidden": true,
+            "pages": [
+              "swarm"
+            ]
+          },
+          {
             "group": "Optimization",
             "icon": "gauge",
             "pages": [
