@@ -1,42 +1,16 @@
 ---
 title: "Security & data handling"
-description: "Impala runs single-tenant, in our cloud or in yours, so your data stays isolated and isn't retained."
+description: "Impala runs single-tenant, in our cloud or in yours. Your data stays isolated and isn't stored."
 ---
+
+Every Impala deployment is **single-tenant** and logically isolated from other customers, so your data and operations remain separate and secure. That is true in both [deployment shapes](/deployment-options): an isolated deployment in Impala's cloud, or Impala's data plane inside your own AWS account and VPC, where your prompts, inputs and outputs never leave your account.
+
+Either way, **prompts are not persisted** and **your data is never used for training** — not for model training, not for fine-tuning, not for model improvement. What Impala keeps is the shape of the workload, not what's in it: prompt lengths, concurrency, burstiness, cache reuse. That's what [Herd](/impala-herd) profiles to tune the execution plan.
+
+Impala is certified under **SOC 2 Type II** and security-tested on a regular cadence, including vulnerability assessments and penetration testing.
 
 <Card title="Impala Trust Center" icon="shield-check" href="https://trust.getimpala.ai">
   SOC 2 Type II status, security controls, subprocessors and documents. Self-serve and current.
 </Card>
 
-## What Impala does with your data
-
-**Prompts are not persisted.** Inputs and outputs are processed to serve your request. They are not retained as prompt data.
-
-**Your data is never used for training.** Not for model training, not for fine-tuning, not for model improvement.
-
-**Telemetry describes the workload, not your prompts.** What Impala retains and acts on is workload shape — prompt lengths, concurrency, burstiness, cache reuse. That's what [Herd](/impala-herd) profiles to tune the execution plan.
-
-## Isolation
-
-Deployments are **single-tenant**. Your deployment is logically isolated from other customers, so your data and operations remain separate and secure — in Impala's cloud or in yours.
-
-In a [Bring your own cloud](/deployment-options) install, the control plane and data plane are split, with the data plane inside your own VPC. Your prompts, inputs and outputs stay inside your account.
-
-On-premises deployment is supported, subject to compatibility testing by Impala's solutions team.
-
-## Authentication
-
-Requests carry a bearer token. The same credential authenticates the OpenAI-compatible inference endpoints and Impala-specific operations such as [Impala Leap](/weight-sync). Keys are issued per account — see [Get your credentials](/impala-cloud-setup).
-
-If you front Impala with a gateway such as [LiteLLM](/connect-litellm), the Impala key lives in the proxy's environment and your clients present a separate key to the proxy. That is the point of running one.
-
-## Compliance and testing
-
-Impala is certified under **SOC 2 Type II**, covering controls for security, availability, processing integrity, confidentiality and privacy.
-
-The platform is security-tested on a regular cadence, including vulnerability assessments and penetration testing.
-
-Current attestations, control descriptions and the subprocessor list are in the [Trust Center](https://trust.getimpala.ai). Impala's [security overview](https://www.getimpala.ai/security) covers the same posture at a higher level.
-
-## Questions this page doesn't answer
-
-For anything specific to your environment, refer to our [Trust Center](https://trust.getimpala.ai) or talk to your Impala contact.
+For anything specific to your environment, refer to the Trust Center or talk to your Impala contact.
