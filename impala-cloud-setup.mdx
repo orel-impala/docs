@@ -7,21 +7,16 @@ description: "Get your endpoint, create a key, and make one authenticated call. 
 
 Sign up at [platform.getimpala.ai](https://platform.getimpala.ai) to get a serverless endpoint. New accounts are reviewed before they are activated, so if you need it sooner, talk to your Impala contact.
 
-| Value | What it is | Where it comes from |
-| --- | --- | --- |
-| `BASE_URL` | Your inference endpoint | The platform, once your account is active |
-| `MODEL` | The model your endpoint serves | The platform, once your account is active |
-| `JOB_ID` | Model plus configuration, reserved for your account. Batch only. | Provided by your Impala contact |
+| Value | What it is |
+| --- | --- |
+| `BASE_URL` | Your inference endpoint |
+| `MODEL` | The model your endpoint serves |
 
-If you cannot find these, ask your Impala contact.
+Both come from Impala. If you cannot find them, ask your Impala contact.
 
 ## 2. Create an API key
 
 Create a key in **Settings** on [platform.getimpala.ai](https://platform.getimpala.ai), and send it as a bearer token on every request.
-
-<Warning>
-  Treat the key like a password. Don't commit it, and ask us to rotate it any time.
-</Warning>
 
 ## 3. Point your client at Impala
 
