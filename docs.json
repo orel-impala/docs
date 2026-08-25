@@ -23,9 +23,9 @@
             "group": "Reference",
             "icon": "book",
             "pages": [
-              "glossary",
               "security",
-              "further-reading"
+              "further-reading",
+              "glossary"
             ]
           }
         ]
@@ -62,7 +62,6 @@
           {
             "group": "Agent orchestration",
             "icon": "sitemap",
-            "hidden": true,
             "pages": [
               "swarm"
             ]
