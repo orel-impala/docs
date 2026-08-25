@@ -102,7 +102,7 @@ Export them in the same shell you launch from.
 
 **Set `ANTHROPIC_MODEL` explicitly.** Clients that discover available models at startup expect Anthropic's own catalog. Naming the model yourself avoids that lookup entirely.
 
-**Raise your timeouts.** A call takes seconds and can take minutes under load, and an agent making many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn counts low — see [Building for async inference](/async-inference).
+**Raise your timeouts.** A call takes seconds and can take minutes under load, and an agent making many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn counts low — see [Cheaper inference, better quality](/async-inference).
 
 **This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a [batch](/run-your-first-batch).
 

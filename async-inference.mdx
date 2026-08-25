@@ -1,13 +1,24 @@
 ---
-title: "Building for async inference"
-description: "Impala runs inference for work nobody is waiting on. That single fact changes which numbers you measure and how you should call the API."
+title: "Cheaper inference, better quality"
+description: "Open-weight models are genuinely good now. The work you want to run on them is work nobody is waiting on. Together those collapse the cost of a finished task."
 ---
 
-Impala is built for **async inference**: model calls where no human is reading tokens as they arrive.
+Two things are moving at once. Open-weight models are genuinely good now — and still improving. And the work most teams want to run on them is work **nobody is waiting on**. Together those collapse the cost of a finished task.
 
-Background coding agents. Research agents working through a question. Multi-step automations. Enrichment pipelines. Evaluation sweeps. Classification across a corpus.
+Impala is built for the second half of that: **async inference**, model calls where no human is reading tokens as they arrive. Background coding agents. Research agents working through a question. Multi-step automations. Enrichment pipelines. Evaluation sweeps. Classification across a corpus.
 
 This work still has deadlines. The deadline is on the **task**, not on the token. A research agent that takes four minutes is fine. Paying interactive prices for those four minutes is not.
+
+## Quality
+
+{/* TODO — Orel writing this section.
+
+     Note for whoever drafts it: everything else in the docs makes a quality-*neutrality*
+     claim, not an improvement claim. Herd says it lifts throughput "while preserving your
+     target model's behavior" and "serves the model you asked for, with its behavior intact."
+     So the improvement to attribute is the open-weight frontier, not Impala's serving —
+     Impala's contribution is that running those models is cheap. Keeping that split explicit
+     is what makes the "better quality" half of the title checkable rather than a boast. */}
 
 ## What this changes for you
 
