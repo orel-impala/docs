@@ -1,13 +1,13 @@
 ---
 title: "Cheaper inference, better quality"
-description: "Open-weight models are genuinely good now. The work you want to run on them is work nobody is waiting on. Together those collapse the cost of a finished task."
+description: "Frontier open-source models are cheap to run when nobody is waiting on the output. That is the work Impala is built for."
 ---
 
-Two things are moving at once. Open-weight models are genuinely good now — and still improving. And the work most teams want to run on them is work **nobody is waiting on**. Together those collapse the cost of a finished task.
+Open-source models are good now. The expensive part of production AI is no longer the model, it is the volume of tokens you push through it.
 
-Impala is built for the second half of that: **async inference**, model calls where no human is reading tokens as they arrive. Background coding agents. Research agents working through a question. Multi-step automations. Enrichment pipelines. Evaluation sweeps. Classification across a corpus.
+Most of that volume runs with nobody watching: coding agents grinding through a repo overnight, research agents that take four minutes to come back with an answer, nightly jobs classifying a few million records. The deadline in all of these applies to the finished task, so paying interactive prices for a fast first token buys you nothing.
 
-This work still has deadlines. The deadline is on the **task**, not on the token. A research agent that takes four minutes is fine. Paying interactive prices for those four minutes is not.
+That is the traffic Impala is built for. Async inference means model calls where no human reads the tokens as they arrive.
 
 ## Quality
 
