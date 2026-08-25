@@ -1,68 +1,38 @@
 ---
 title: "Anthropic SDKs and Claude Code"
-description: "Run Anthropic-format tooling — the Anthropic SDKs, the Claude Agent SDK, and Claude Code — against a model served by Impala, using LiteLLM to translate."
+description: "Impala serves the Anthropic Messages API alongside the OpenAI-compatible endpoints. Point the Anthropic SDKs, the Claude Agent SDK, or Claude Code straight at your endpoint."
 ---
 
-Impala speaks the OpenAI API. Anthropic's SDKs speak the Messages API. To run Anthropic-format tooling against an Impala model, put a [LiteLLM](https://docs.litellm.ai) proxy in front: it exposes an Anthropic-compatible `/v1/messages` endpoint and translates to Impala's OpenAI-compatible endpoint underneath.
+Impala serves **`/v1/messages`**, the Anthropic Messages API, alongside its OpenAI-compatible endpoints. Anthropic-format tooling talks to Impala directly — no proxy, no translation layer, no code changes.
 
-This is what makes the **Claude Agent SDK** and **Claude Code** work against Impala.
-
-<Info>
-  Impala does not serve `/v1/messages` natively today. LiteLLM is the supported path.
-</Info>
+That covers the Anthropic SDKs, the **Claude Agent SDK**, and **Claude Code**.
 
 ## What you need
 
-- `IMPALA_BASE_URL` and `IMPALA_API_KEY` — your endpoint and key
+- `BASE_URL` — your Impala endpoint
+- `API_KEY` — your Impala key
 - `MODEL` — the model your endpoint serves
-- LiteLLM proxy: `pip install 'litellm[proxy]'`
-
-**Time to complete:** about 10 minutes.
-
-***
-
-## 1. Configure the proxy
-
-LiteLLM routes to Impala as an `openai/` provider. Create `impala.yaml`:
-
-```yaml
-model_list:
-  - model_name: impala-model
-    litellm_params:
-      model: openai/<MODEL>
-      api_base: <IMPALA_BASE_URL>
-      api_key: os.environ/IMPALA_API_KEY
-```
 
 <Info>
-  `model` must carry the `openai/` prefix. `model_name` is the alias your Anthropic-format client will ask for.
+  The Anthropic SDKs append `/v1/messages` to whatever base URL you give them. Pass the host root, not a URL that already ends in `/v1`.
 </Info>
-
-## 2. Start it
-
-```bash
-export IMPALA_API_KEY="<your key>"
-litellm --config impala.yaml
-```
-
-The proxy listens on port 4000 and serves `/v1/messages` alongside its OpenAI routes.
 
 ***
 
 ## Anthropic SDK
 
-Point `base_url` at the proxy and use your alias as the model:
+Point `base_url` at Impala and use your Impala key:
 
 ```python
 import anthropic
 
 client = anthropic.Anthropic(
-    base_url="http://0.0.0.0:4000",
-    api_key="<LITELLM_KEY>",
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
 )
 
 message = client.messages.create(
-    model="impala-model",
+    model="<MODEL>",
     max_tokens=256,
     messages=[{"role": "user", "content": "Summarize this ticket in one line."}],
 )
@@ -75,12 +45,12 @@ TypeScript is the same shape:
 import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
-  baseURL: "http://0.0.0.0:4000",
-  apiKey: process.env.LITELLM_KEY,
+  baseURL: process.env.BASE_URL,
+  apiKey: process.env.API_KEY,
 });
 
 const message = await client.messages.create({
-  model: "impala-model",
+  model: process.env.MODEL,
   max_tokens: 256,
   messages: [{ role: "user", content: "Summarize this ticket in one line." }],
 });
@@ -89,11 +59,11 @@ const message = await client.messages.create({
 Or directly:
 
 ```bash
-curl -X POST 'http://0.0.0.0:4000/v1/messages' \
-  -H 'content-type: application/json' \
-  -H 'x-api-key: <LITELLM_KEY>' \
+curl -X POST "$BASE_URL/v1/messages" \
+  -H "content-type: application/json" \
+  -H "x-api-key: $API_KEY" \
   -d '{
-    "model": "impala-model",
+    "model": "'"$MODEL"'",
     "max_tokens": 256,
     "messages": [{"role": "user", "content": "Hello"}]
   }'
@@ -103,24 +73,24 @@ curl -X POST 'http://0.0.0.0:4000/v1/messages' \
 
 ## Claude Agent SDK
 
-The Agent SDK reads the same Anthropic environment variables, so it needs no code change — point it at the proxy:
+The Agent SDK reads the standard Anthropic environment variables, so it needs no code change:
 
 ```bash
-export ANTHROPIC_BASE_URL="http://0.0.0.0:4000"
-export ANTHROPIC_AUTH_TOKEN="<LITELLM_KEY>"
-export ANTHROPIC_MODEL="impala-model"
+export ANTHROPIC_BASE_URL="<BASE_URL>"
+export ANTHROPIC_AUTH_TOKEN="<API_KEY>"
+export ANTHROPIC_MODEL="<MODEL>"
 ```
 
-Then run your agent as usual. Tool calling flows through the translation layer — the SDK sends Anthropic-format tool definitions, LiteLLM converts them to OpenAI-format function calls, and Impala serves them.
+Then run your agent as usual. Tool calling works as it does against any Messages API endpoint — the SDK sends Anthropic-format tool definitions and Impala serves them.
 
 ## Claude Code
 
 Same variables, then launch:
 
 ```bash
-export ANTHROPIC_BASE_URL="http://0.0.0.0:4000"
-export ANTHROPIC_AUTH_TOKEN="<LITELLM_KEY>"
-export ANTHROPIC_MODEL="impala-model"
+export ANTHROPIC_BASE_URL="<BASE_URL>"
+export ANTHROPIC_AUTH_TOKEN="<API_KEY>"
+export ANTHROPIC_MODEL="<MODEL>"
 claude
 ```
 
@@ -130,15 +100,15 @@ Export them in the same shell you launch from.
 
 ## Things to know
 
-**Pin a LiteLLM version you've tested.** The Anthropic-to-OpenAI translation layer moves quickly. One example of the class of issue: Anthropic permits longer tool names than OpenAI's 64-character limit, and older LiteLLM builds passed them through unmodified and failed ([issue #17904](https://github.com/BerriAI/litellm/issues/17904), since resolved). Test your own tool set against your chosen version before relying on it.
+**Set `ANTHROPIC_MODEL` explicitly.** Clients that discover available models at startup expect Anthropic's own catalog. Naming the model yourself avoids that lookup entirely.
 
-**Model discovery is opt-in.** If your client queries the gateway for available models at startup, recent Claude Code versions need `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Otherwise set `ANTHROPIC_MODEL` explicitly, as above.
+**Raise your timeouts.** A call takes seconds and can take minutes under load, and an agent making many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn counts low — see [Tasks per dollar, not tokens per second](/async-inference).
 
-**Run the proxy where your key is safe.** The Impala key lives in the proxy's environment, not in your clients — which is the point. Give the proxy its own key for clients to present, and don't expose it to the public internet.
+**This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a [batch](/run-your-first-batch).
 
-**Expect agent turns to be slow.** This path goes through Impala's single-request endpoint, where a call takes seconds and can take minutes under load. An agent making many sequential turns multiplies that. Raise the timeouts in whatever runs your agent, keep turn counts low, and read [Tasks per dollar, not tokens per second](/async-inference) before building around it.
+## When you'd still want a gateway
 
-**This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a batch; see [LiteLLM](/connect-litellm) for its batch pass-through routes.
+Nothing here requires a proxy. You'd add one for reasons of your own: routing across several providers, keeping the Impala key out of client environments, or central budget and rate controls. See [LiteLLM](/connect-litellm) if that's what you're building.
 
 ## Need help?
 
