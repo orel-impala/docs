@@ -58,6 +58,13 @@
             ]
           },
           {
+            "group": "Optimization",
+            "icon": "gauge",
+            "pages": [
+              "impala-herd"
+            ]
+          },
+          {
             "group": "Bring your own model",
             "icon": "cube",
             "pages": [

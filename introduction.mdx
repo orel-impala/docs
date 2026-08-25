@@ -30,11 +30,20 @@ Impala is **vertically integrated across the entire stack** — optimizing end-t
 
 ## Use cases
 
-- Nightly ETL with AI-enriched transformations
-- Data curation and labeling pipelines (computer vision, NLP)
-- Compliance report generation (financial services, AML/CTF analysis)
-- Document processing and summarization at volume
-- Web scraping and content enrichment
-- MCP agent orchestration
-- Code review / analysis pipelines
-- Multi-step agentic workflows (planning, executing, evaluating, retrying)
+Agents and multi-step pipelines, where each step is its own request:
+
+- **Background coding agents** — repo-wide refactors, dependency migrations, test generation, automated PR review
+- **Research agents** that plan, search and synthesize across dozens of turns
+- **Agentic pipelines** that plan, execute, evaluate and retry until the task is done
+- **MCP tool orchestration** across many servers and long-running sessions
+- **Subagent fan-out**, where one parent spawns dozens of children over a shared context
+
+Bulk work, where the whole input set is known up front:
+
+- **Evaluation sweeps and rollouts** — the same harness over a fixed set, run to completion
+- **Corpus-scale extraction and summarization** across document stores
+- **Classification and enrichment** over millions of records
+- **Training-data curation and labeling**, including synthetic generation
+- **Scheduled reporting** — compliance and risk analysis, AI-enriched nightly ETL
+
+Both shapes run on the same platform and the same API. The first is usually a stream of [single requests](/send-a-request); the second is cheaper as a [batch](/run-your-first-batch).
