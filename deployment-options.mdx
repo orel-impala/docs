@@ -7,25 +7,10 @@ description: "Impala runs in our cloud or inside your own AWS account."
 
 We source the GPUs and run your inference on them. You get an endpoint and an API key.
 
-Pick this to be running today, or when you'd rather not own capacity planning. See [Get your credentials](/impala-cloud-setup).
+Pick this to be running today, or when you'd rather not own capacity planning. Sign up at [platform.getimpala.ai](https://platform.getimpala.ai) to get an endpoint and a key, then see [Get your credentials](/impala-cloud-setup).
 
 ## Bring Your Own Cloud
 
 Impala's data plane is installed into your own AWS account and VPC. Your prompts, inputs and outputs stay inside your account. Inside your cloud, Impala scales across GPU types and across regions, which keeps availability high and puts each workload on the cheapest capable hardware available at the time.
 
-Pick this when data residency or network isolation is a requirement, or when you have committed GPU capacity to use. Setup is a Terraform apply, roughly 30 minutes: see [Install Impala in your VPC](/getting-started-infrastructure-setup).
-
-## What differs
-
-{/* TO CHECK before publishing:
-     - "Impala-managed storage" for serverless inputs/outputs: confirm what this actually is
-       and whether we want to name it.
-     - BYOC network path: the PrivateLink claim was removed from this page, so the row needs
-       a real answer. Orel gave "Public endpoint, authenticated, VPN optional" for serverless. */}
-
-| | Serverless | Bring Your Own Cloud |
-| --- | --- | --- |
-| Whose account the GPUs sit in | Impala's | Yours |
-| Who operates them | Impala | Impala |
-| Where inputs and outputs live | Impala-managed storage | Your S3 buckets |
-| Network path | Public endpoint, authenticated, VPN optional | To confirm |
+Pick this when data residency or network isolation is a requirement, or when you have committed GPU capacity to use. Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC](/getting-started-infrastructure-setup).
