@@ -1,17 +1,17 @@
 ---
-title: "Cheaper inference, better quality"
-description: "Frontier open-source models are cheap to run when nobody is waiting on the output. That is the work Impala is built for."
+title: "Run async and open source"
+description: "Cheaper inference, better quality: the best open-source models cost far less to run when your workload can tolerate latency."
 ---
 
 Open-source models are good now. The expensive part of production AI is no longer the model, it is the volume of tokens you push through it.
 
 Most of that volume runs with nobody watching: coding agents grinding through a repo overnight, research agents that take four minutes to come back with an answer, nightly jobs classifying a few million records. The deadline in all of these applies to the finished task, so paying interactive prices for a fast first token buys you nothing.
 
-That is the traffic Impala is built for. Async inference means model calls where no human reads the tokens as they arrive.
+That is the traffic Impala is built for. Async inference means model calls where no human reads the tokens as they arrive — and latency you aren't using is the one thing you can trade for a much lower price on the same model. Cheap enough that you stop rationing turns and context.
 
 ## The metric is tasks per dollar
 
-For async work the economic question is: for a fixed budget, how many tasks finish? That's **tasks per dollar** — cost per completed task. Its fleet-side counterpart is **throughput**, how fast the cluster turns work out at scale. The wall-clock number that matters is **task completion time**, from submitting a task to holding the finished result. Time to first token is not on the list.
+For async work the question is: for a fixed budget, how many tasks finish? That's **tasks per dollar** — the cost of one completed task. Two numbers feed it: **throughput**, how many tokens the fleet produces, and **task completion time**, how long one task takes end to end.
 
 | | Interactive | Async |
 | --- | --- | --- |
