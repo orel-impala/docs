@@ -61,10 +61,6 @@ curl "<BASE_URL>/chat/completions" \
 
 </CodeGroup>
 
-<Warning>
-  Expect this to take seconds rather than milliseconds, and longer under load. The generous timeout is deliberate — SDK defaults are tuned for interactive providers and will abort early.
-</Warning>
-
 ## 4. Check it worked
 
 A response with no error means your endpoint, key and model are working end to end.
