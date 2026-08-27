@@ -13,8 +13,14 @@ That is the traffic Impala is built for: **async inference**, meaning model call
 | Measured by | TTFT, TPOT, ITL | Tasks per dollar, task completion time |
 | Capacity is | Held ready | Kept busy |
 
+Impala's own usage view reports latency in seconds, because that is the range async work runs in.
+
+<Frame>
+  ![The Usage view on the Impala platform, showing throughput in requests per minute and latency at p50, p90 and p95 measured in seconds](/platform-usage.png)
+</Frame>
+
 ## The metric is tasks per dollar
 
 For async work the question is: for a fixed budget, how many tasks finish? That's **tasks per dollar** — the cost of one completed task. Two numbers feed it: **throughput**, how many tokens the fleet produces, and **task completion time**, how long one task takes end to end.
 
-Those two are not a trade against each other: **faster and cheaper, not faster or cheaper**. A single request may sit longer here than at an interactive provider, while the task it belongs to finishes sooner and costs less — because the scheduler works the whole trace rather than each call in isolation. A GPU costs the same per hour saturated or idle, so cost per token is a throughput problem: double throughput on the same hardware and cost falls by roughly half. The argument with the numbers is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot); the engine that delivers it is [Impala Herd](/impala-herd).
+Throughput and task completion time aren't a trade against each other: **faster and cheaper, not faster or cheaper**. A single request may sit longer here than at an interactive provider, while the task it belongs to finishes sooner and costs less — because the scheduler works the whole trace rather than each call in isolation. A GPU costs the same per hour saturated or idle, so cost per token is a throughput problem: double throughput on the same hardware and cost falls by roughly half. The argument with the numbers is in [Run It Hot](https://www.getimpala.ai/blog/run-it-hot); the engine that delivers it is [Impala Herd](/impala-herd).
