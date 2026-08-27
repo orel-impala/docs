@@ -3,9 +3,7 @@ title: "Chat completions"
 description: "The request shape, the parameters that matter for async work, and what changes from OpenAI."
 ---
 
-Impala serves `POST /chat/completions` in the OpenAI format. If you have OpenAI code, the change is the base URL, the key, and the model name — see [Quickstart](/impala-cloud-setup) for those three values.
-
-This is the endpoint behind agent loops and anything else that needs a response per request rather than a file of results.
+Impala serves an OpenAI-compatible `/chat/completions` endpoint. The change is the base URL, the key, and the model name — see [Quickstart](/impala-cloud-setup) for those three values.
 
 ## The request
 
@@ -30,7 +28,7 @@ messages=[
 ]
 ```
 
-`base_url` routes your requests to Impala instead of `api.openai.com`. Pass it exactly as provided — endpoints differ between accounts. `model` names the model your endpoint is provisioned for.
+`base_url` routes your requests to Impala. Pass it exactly as provided — endpoints differ between accounts. `model` names the model your endpoint is provisioned for.
 
 ## Timeouts and retries
 
@@ -38,35 +36,18 @@ Two settings matter more here than at an interactive provider.
 
 **Raise your timeouts.** A call takes seconds, and minutes under load. SDK defaults are tuned for interactive providers and will abort a request that would have succeeded.
 
-**Turn off automatic retries.** Retrying a request that is already queued adds load to the fleet without shortening your wait.
+**Reduce automatic retries.** The SDK can't tell a slow request from a failed one, so its default retries fire on timeouts for requests that are still running — adding load without shortening your wait. Lower the count and raise the timeout instead. Set it to `0` if your own harness handles retries.
 
 ```python
 client = OpenAI(
     base_url="<BASE_URL>",
     api_key="<API_KEY>",
     timeout=600.0,
-    max_retries=0,
+    max_retries=1,
 )
 ```
 
 For an agent, total time is per-step time multiplied by the number of steps, so turn count is usually a bigger lever than any individual call. See [Run async and open source](/async-inference).
-
-## Streaming
-
-Set `stream=True` and iterate. Streaming doesn't make the work finish sooner, but it gets tokens moving rather than leaving the connection silent:
-
-```python
-stream = client.chat.completions.create(
-    model="<MODEL>",
-    messages=[{"role": "user", "content": "Write a haiku about batch inference."}],
-    stream=True,
-)
-
-for chunk in stream:
-    delta = chunk.choices[0].delta.content
-    if delta:
-        print(delta, end="", flush=True)
-```
 
 ## Keep the key out of your source
 
@@ -90,7 +71,7 @@ resp = client.chat.completions.create(
 )
 ```
 
-Don't commit your key or share it outside your team. Ask us to rotate it any time.
+Don't commit your key or share it outside your team. You can rotate it under **API Keys** on the platform.
 
 ## Other parameters
 
