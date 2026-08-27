@@ -87,6 +87,18 @@ a TODO rather than filling the gap.
 - `platform.getimpala.ai` is the customer platform — sign-up, endpoints, API keys.
 - State what is supported. Don't enumerate what isn't.
 
+## The API reference
+
+The API reference tab is generated from the OpenAPI spec, so editing the spec edits the reference —
+there's no separate system.
+
+- **`openai-api-swagger.json` is the live spec.** It's the only one `docs.json` reads.
+- **`openapi.json` is a stale duplicate — don't edit it.** Same title, same version, same eight
+  paths, but nothing references it. Edits there change nothing and look like they shipped.
+- The spec currently covers `/v1/files` and `/v1/batches` only. **Chat completions is not in it**,
+  so the inference endpoint every serverless customer hits isn't in the API reference at all. If
+  you're adding it, that's the gap.
+
 ## Gotchas found the hard way
 
 1. **`{"anchor": …, "href": …}` inside a group's `pages` array is invalid and silently breaks the
