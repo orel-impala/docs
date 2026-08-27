@@ -1,44 +1,72 @@
 ---
-title: "Send a request"
-description: "The OpenAI SDK against your Impala endpoint: streaming, timeouts, and what each argument does."
+title: "Chat completions"
+description: "The request shape, the parameters that matter for async work, and what changes from OpenAI."
 ---
 
-Impala's endpoint is OpenAI-compatible, so if you have OpenAI code, the change is the base URL, the key, and the model name. It's the same endpoint behind agent loops and anything else that needs a response per request rather than a file of results.
+Impala serves `POST /chat/completions` in the OpenAI format. If you have OpenAI code, the change is the base URL, the key, and the model name — see [Quickstart](/impala-cloud-setup) for those three values.
 
-You'll need your `BASE_URL`, `API_KEY` and `MODEL` — see [Get your credentials](/impala-cloud-setup).
+This is the endpoint behind agent loops and anything else that needs a response per request rather than a file of results.
 
-## 1. Install the SDK
+## The request
 
-```bash
-pip install openai
-```
-
-## 2. Send a request
-
-Save this as `hello.py`, fill in your three values, and run `python hello.py`.
+`model` and `messages` are the only required fields.
 
 ```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="<BASE_URL>",
-    api_key="<API_KEY>",
-    timeout=600.0,
-)
-
 resp = client.chat.completions.create(
     model="<MODEL>",
-    messages=[
-        {"role": "system", "content": "You are a concise assistant."},
-        {"role": "user", "content": "What is 17 times 3? Answer with just the number."},
-    ],
+    messages=[{"role": "user", "content": "Summarize this ticket in one line."}],
 )
 print(resp.choices[0].message.content)
 ```
 
-<Warning>
-  Expect this to take seconds rather than milliseconds, and longer under load. The generous `timeout` above is deliberate — SDK defaults are tuned for interactive providers and will abort early. See [Run async and open source](/async-inference).
-</Warning>
+`messages` is the standard OpenAI chat format. A `system` message sets behavior, `user` carries the prompt, and `assistant` carries prior model turns when you're replaying a conversation:
+
+```python
+messages=[
+    {"role": "system", "content": "You are a concise assistant."},
+    {"role": "user", "content": "What changed in this diff?"},
+    {"role": "assistant", "content": "Two functions were renamed."},
+    {"role": "user", "content": "Which ones?"},
+]
+```
+
+`base_url` routes your requests to Impala instead of `api.openai.com`. Pass it exactly as provided — endpoints differ between accounts. `model` names the model your endpoint is provisioned for.
+
+## Timeouts and retries
+
+Two settings matter more here than at an interactive provider.
+
+**Raise your timeouts.** A call takes seconds, and minutes under load. SDK defaults are tuned for interactive providers and will abort a request that would have succeeded.
+
+**Turn off automatic retries.** Retrying a request that is already queued adds load to the fleet without shortening your wait.
+
+```python
+client = OpenAI(
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
+    timeout=600.0,
+    max_retries=0,
+)
+```
+
+For an agent, total time is per-step time multiplied by the number of steps, so turn count is usually a bigger lever than any individual call. See [Run async and open source](/async-inference).
+
+## Streaming
+
+Set `stream=True` and iterate. Streaming doesn't make the work finish sooner, but it gets tokens moving rather than leaving the connection silent:
+
+```python
+stream = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[{"role": "user", "content": "Write a haiku about batch inference."}],
+    stream=True,
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)
+```
 
 ## Keep the key out of your source
 
@@ -64,43 +92,24 @@ resp = client.chat.completions.create(
 
 Don't commit your key or share it outside your team. Ask us to rotate it any time.
 
-## Streaming
+## Other parameters
 
-Set `stream=True` and iterate. Streaming doesn't make the work finish sooner, but it gets tokens moving rather than leaving the connection silent:
+The endpoint accepts the standard OpenAI chat completion fields, and everything else works as it does with the OpenAI SDK.
 
-```python
-stream = client.chat.completions.create(
-    model="<MODEL>",
-    messages=[{"role": "user", "content": "Write a haiku about batch inference."}],
-    stream=True,
-)
-
-for chunk in stream:
-    delta = chunk.choices[0].delta.content
-    if delta:
-        print(delta, end="", flush=True)
-```
-
-## What each part does
-
-- `base_url` routes your requests to Impala instead of `api.openai.com`. Pass it exactly as provided — endpoints differ between accounts.
-- `api_key` authenticates you.
-- `model` names the model your endpoint is provisioned for.
-- `messages` is the standard OpenAI chat format — a system message sets behavior, the user message is the prompt.
-
-Everything else works as it does with the OpenAI SDK.
+{/* TODO — needs the API reference before we state it:
+     - which optional fields Impala honours (temperature, top_p, max_tokens, stop, seed,
+       response_format, tools/tool_choice, logprobs) and which are accepted but ignored
+     - whether the inference endpoint appears in the API reference tab at all; the OpenAPI
+       spec in this repo covers only /v1/files and /v1/batches
+     - error response shapes and status codes under load */}
 
 ## Next
 
 <CardGroup cols={2}>
-  <Card title="Run a batch" href="/run-your-first-batch">
+  <Card title="Run a batch" icon="layer-group" href="/run-your-first-batch">
     File in, results out, at the lowest cost per token.
   </Card>
-  <Card title="Run async and open source" href="/async-inference">
-    Why the metric is tasks per dollar.
+  <Card title="Anthropic SDKs and Claude Code" icon="plug" href="/anthropic-sdk">
+    The same endpoint in Anthropic format.
   </Card>
 </CardGroup>
-
-## Need help?
-
-Reach out to your Impala contact directly.
