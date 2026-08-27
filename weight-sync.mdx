@@ -3,9 +3,7 @@ title: "Impala Leap"
 description: "Impala Leap swaps model weights in seconds, with no redeploy. Upload a checkpoint, reload it, and the running fleet serves it."
 ---
 
-**Impala Leap** changes the weights a running deployment serves, in seconds, without a redeploy. You upload a checkpoint, trigger a reload, and the fleet starts serving the new weights on the same endpoint.
-
-Herd runs your inference. Leap changes your weights.
+**Impala Leap** changes the weights a running deployment serves, in seconds, without a redeploy. You upload a checkpoint, trigger a reload, and the fleet starts serving the new weights on the same endpoint, through the same engine ([Impala Herd](/impala-herd)).
 
 Use Leap when you retrain or fine-tune on your own cadence and need the serving fleet to follow — RL loops, post-training iteration, or any workflow where new weights ship more often than new infrastructure.
 
