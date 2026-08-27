@@ -1,63 +1,25 @@
 ---
 title: "Get your credentials"
-description: "Get your endpoint, create a key, and make one authenticated call. Nothing to install."
+description: "Get your endpoint and key, then make one authenticated call. Nothing to install."
 ---
 
-## 1. Get your endpoint
+## 1. Get your endpoint and key
 
-Sign up at [platform.getimpala.ai](https://platform.getimpala.ai) to get a serverless endpoint. New accounts are reviewed before they are activated, so if you need it sooner, talk to your Impala contact.
+Sign up at [platform.getimpala.ai](https://platform.getimpala.ai) or talk to your Impala contact to get a serverless endpoint with the details below.
 
 | Value | What it is |
 | --- | --- |
-| `BASE_URL` | Your inference endpoint |
-| `MODEL` | The model your endpoint serves |
+| `BASE_URL` | Your inference endpoint, including the trailing `/v1` |
+| `MODEL` | The model your endpoint is provisioned for |
+| `API_KEY` | Your account's API key. Send it as a bearer token on every request. |
 
-Both come from Impala. If you cannot find them, ask your Impala contact.
+You can create more keys in **Settings** on the platform.
 
-## 2. Create an API key
-
-Create a key in **Settings** on [platform.getimpala.ai](https://platform.getimpala.ai), and send it as a bearer token on every request.
-
-## 3. Point your client at Impala
-
-The endpoint is OpenAI-compatible, so the change is the base URL, the key, and the model name.
-
-<CodeGroup>
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="<BASE_URL>",
-    api_key="<API_KEY>",
-    timeout=600.0,
-)
-```
-
-```typescript TypeScript
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  baseURL: "<BASE_URL>",
-  apiKey: "<API_KEY>",
-  timeout: 600_000,
-});
-```
-
-```bash Environment
-export OPENAI_BASE_URL="<BASE_URL>"
-export OPENAI_API_KEY="<API_KEY>"
-```
-
-</CodeGroup>
-
-The long timeout is deliberate. SDK defaults are tuned for interactive providers and will abort early — see [Run async and open source](/async-inference).
-
-## 4. Confirm it works
+## 2. Confirm it works
 
 ```bash
 curl "$BASE_URL/chat/completions" \
-  -H "Authorization: Bearer $IMPALA_API_KEY" \
+  -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   --max-time 600 \
   -d '{
@@ -72,7 +34,7 @@ A response with no error means your endpoint, key and model are working end to e
 
 <CardGroup cols={2}>
   <Card title="Send a request" icon="bolt" href="/send-a-request">
-    Streaming, timeouts, and what each part does.
+    The same call from the SDK, with streaming and timeouts.
   </Card>
   <Card title="Run a batch" icon="layer-group" href="/run-your-first-batch">
     File in, results out, at the lowest cost per token.
