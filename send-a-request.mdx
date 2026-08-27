@@ -83,7 +83,7 @@ for chunk in stream:
 
 ## What each part does
 
-- `base_url` routes your requests to Impala instead of `api.openai.com`. It already ends in `/v1`, so pass it as given.
+- `base_url` routes your requests to Impala instead of `api.openai.com`. Pass it exactly as provided — endpoints differ between accounts.
 - `api_key` authenticates you.
 - `model` names the model your endpoint is provisioned for.
 - `messages` is the standard OpenAI chat format — a system message sets behavior, the user message is the prompt.
