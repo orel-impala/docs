@@ -1,6 +1,6 @@
 ---
 title: "LiteLLM"
-description: "Point your LiteLLM gateway at your Impala Batch endpoint."
+description: "Point your LiteLLM gateway at your Impala endpoint."
 ---
 
 ## Prerequisites
@@ -43,6 +43,10 @@ YAML
 ---
 
 ## Run batch workloads
+
+<Info>
+  Impala supports LiteLLM for serverless inference as well. Talk to your Impala contact.
+</Info>
 
 Batch runs through the same proxy using pass-through routes. Add these to your `config.yaml` alongside the `model_list` entry, then restart the proxy. `IMPALA_API_KEY` must be set in the environment where the proxy runs.
 
