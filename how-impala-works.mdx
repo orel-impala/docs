@@ -1,0 +1,59 @@
+---
+title: "How Impala works"
+description: "Impala schedules inference instead of serving it. That trade is where the cost advantage comes from."
+---
+
+Impala treats inference as a scheduling problem, not a web service. Work is packed to keep GPUs saturated rather than held ready for the next request.
+
+That is the whole trade: **you give up latency, and you get throughput and cost per token.**
+
+## What that means in practice
+
+- A single request takes seconds, and can take minutes under load. There is no pre-warming and no reserved headroom per caller.
+- There are no rate limits to design around.
+- Throughput across a run is the number to plan against, not the time any one request took.
+
+If a workload genuinely needs sub-second responses, Impala is the wrong tool and we would rather say so early.
+
+## Two ways to send work
+
+**Batch** is the primary path. Upload a JSONL file of requests, create a batch against a job, collect results when the run finishes. This is where the economics land — ETL enrichment, classification and labeling, document processing, embedding backfills, synthetic data, eval rollouts.
+
+**Single requests** go to `/v1/chat/completions`, with optional streaming. Each call returns its own response, which is what you need when the next step depends on the last — agent loops, tool calling — or when a framework only speaks chat completions.
+
+| | Batch | Single requests |
+| --- | --- | --- |
+| Input | JSONL file | Request body |
+| Results | Output file, keyed by `custom_id` | Returned inline |
+| Model selection | `job_id` | `model` name |
+| Cost per token | Lowest | Higher |
+
+Both speak the OpenAI API. If you have OpenAI code, what changes is the base URL, the credential, and the model or job identifier.
+
+## Working with the latency
+
+- Raise your client timeouts. SDK defaults are tuned for fast providers and will abort early.
+- Turn off automatic retries. Retrying a slow request multiplies load without helping.
+- Stream if a person is watching. It doesn't finish sooner, but tokens start moving.
+- If you're driving concurrency to get through a *fixed* set of requests whose results you could collect later, Batch will do it cheaper. If each call depends on the one before it, single requests are the right shape.
+
+## Vocabulary
+
+**Job** — a model plus a configuration, provisioned for your account and identified by a `job_id`. Batch requests are addressed to a job. See [Jobs and job IDs](/jobs-and-job-ids).
+
+**Run** — one execution of a batch against a job.
+
+**Data plane** — the components that actually run inference: model servers, scheduler, and the storage they read and write.
+
+You may also hear **serverless** (single requests in Impala's cloud) and **BYOC** (Impala running in your own cloud).
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Run your first batch" href="/run-your-first-batch">
+    File in, results out.
+  </Card>
+  <Card title="Where Impala runs" href="/deployment-options">
+    Our cloud or yours.
+  </Card>
+</CardGroup>

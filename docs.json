@@ -3,51 +3,105 @@
   "theme": "mint",
   "name": "Impala AI Documentation",
   "colors": {
-    "primary": "#4e181a",
-    "light": "#ffdcaf",
-    "dark": "#460f12"
+    "primary": "#2563eb",
+    "light": "#7aa7f5",
+    "dark": "#1d4ed8"
+  },
+  "background": {
+    "decoration": "gradient"
   },
   "navigation": {
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Blog",
-          "icon": "newspaper",
-          "href": "https://getimpala.ai/blog"
-        }
-      ]
-    },
     "tabs": [
       {
-        "tab": "Product Updates",
+        "tab": "Overview",
+        "icon": "compass",
+        "pages": [
+          "introduction",
+          "async-inference",
+          "deployment-options",
+          {
+            "group": "Reference",
+            "icon": "book",
+            "pages": [
+              "security",
+              "further-reading",
+              "glossary"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Product updates",
+        "hidden": true,
+        "icon": "bullhorn",
         "pages": [
           "changelog"
         ]
       },
       {
         "tab": "Guides",
+        "icon": "book-open",
         "pages": [
           {
-            "group": "Getting Started",
+            "group": "Serverless inference",
+            "icon": "bolt",
             "pages": [
-              "introduction",
-              "getting-started-infrastructure-setup",
-              "exposing_the_openai_api_endpoint_service",
-              "aws_service_quotas_for_Impala_data_plane_deployment",
-              "connect-litellm"
+              "impala-cloud-setup",
+              "send-a-request"
             ]
           },
           {
-            "group": "Batch Inference",
+            "group": "Batch inference",
+            "icon": "layer-group",
             "pages": [
               "run-your-first-batch",
+              "jobs-and-job-ids",
               "pass_images_with_image_url"
+            ]
+          },
+          {
+            "group": "Agent orchestration",
+            "icon": "sitemap",
+            "pages": [
+              "swarm"
+            ]
+          },
+          {
+            "group": "Optimization",
+            "icon": "gauge",
+            "pages": [
+              "impala-herd"
+            ]
+          },
+          {
+            "group": "Bring your own model",
+            "icon": "cube",
+            "pages": [
+              "weight-sync"
+            ]
+          },
+          {
+            "group": "Bring your own cloud (BYOC)",
+            "icon": "cloud",
+            "pages": [
+              "getting-started-infrastructure-setup",
+              "exposing_the_openai_api_endpoint_service",
+              "aws_service_quotas_for_Impala_data_plane_deployment"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "icon": "plug",
+            "pages": [
+              "connect-litellm",
+              "anthropic-sdk"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API reference",
+        "icon": "code",
         "openapi": "openai-api-swagger.json"
       }
     ]
@@ -59,33 +113,31 @@
   "navbar": {
     "links": [
       {
+        "label": "Blog",
+        "href": "https://www.getimpala.ai/blog"
+      },
+      {
         "label": "Support",
         "href": "mailto:orel@getimpala.ai"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
+    ]
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "linkedin": "https://www.linkedin.com/company/impala-ai/",
+      "website": "https://www.getimpala.ai/"
     }
   },
   "fonts": {

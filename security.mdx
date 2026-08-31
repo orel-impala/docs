@@ -1,0 +1,16 @@
+---
+title: "Security & data handling"
+description: "Impala runs single-tenant, in our cloud or in yours. Your data stays isolated and isn't stored."
+---
+
+Every Impala deployment is **single-tenant** and logically isolated from other customers, so your data and operations remain separate and secure. That is true in both [deployment shapes](/deployment-options): an isolated deployment in Impala's cloud, or Impala's data plane inside your own AWS account and VPC, where your prompts, inputs and outputs never leave your account.
+
+Either way, **prompts are not persisted** and **your data is never used for training** — not for model training, not for fine-tuning, not for model improvement. What Impala keeps is the shape of the workload, not what's in it: prompt lengths, concurrency, burstiness, cache reuse. That's what [Herd](/impala-herd) profiles to tune the execution plan.
+
+Impala is certified under **SOC 2 Type II** and security-tested on a regular cadence, including vulnerability assessments and penetration testing.
+
+<Card title="Impala Trust Center" icon="shield-check" href="https://trust.getimpala.ai">
+  SOC 2 Type II status, security controls, subprocessors and documents. Self-serve and current.
+</Card>
+
+For anything specific to your environment, refer to the Trust Center or talk to your Impala contact.

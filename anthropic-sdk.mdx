@@ -1,0 +1,104 @@
+---
+title: "Anthropic SDKs and Claude Code"
+description: "Impala serves the Anthropic Messages API. Point the Anthropic SDKs, the Claude Agent SDK, or Claude Code at your endpoint."
+---
+
+{/* TODO: /v1/messages is not yet in openai-api-swagger.json — add it so this page has a spec to point at. */}
+
+Impala serves **`/v1/messages`** alongside its OpenAI-compatible endpoints, so Anthropic-format
+tooling talks to it directly. That covers the Anthropic SDKs, the **Claude Agent SDK**, and
+**Claude Code**.
+
+## What you need
+
+- `BASE_URL` — your Impala endpoint
+- `API_KEY` — your Impala key
+- `MODEL` — the model your endpoint serves
+
+Either `Authorization: Bearer` or `x-api-key` is accepted, so the SDKs work with their own
+defaults.
+
+<Info>
+  The Anthropic SDKs append `/v1/messages` to whatever base URL you give them. Pass the host root,
+  not a URL that already ends in `/v1`.
+</Info>
+
+## Anthropic SDK
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
+)
+
+message = client.messages.create(
+    model="<MODEL>",
+    max_tokens=256,
+    messages=[{"role": "user", "content": "Summarize this ticket in one line."}],
+)
+print(message.content[0].text)
+```
+
+TypeScript is the same shape:
+
+```javascript
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  baseURL: process.env.BASE_URL,
+  apiKey: process.env.API_KEY,
+});
+
+const message = await client.messages.create({
+  model: process.env.MODEL,
+  max_tokens: 256,
+  messages: [{ role: "user", content: "Summarize this ticket in one line." }],
+});
+```
+
+Or directly:
+
+```bash
+curl -X POST "$BASE_URL/v1/messages" \
+  -H "content-type: application/json" \
+  -H "Authorization: Bearer $API_KEY" \
+  -d '{
+    "model": "'"$MODEL"'",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+## Claude Agent SDK and Claude Code
+
+Both read the standard Anthropic environment variables, so neither needs a code change:
+
+```bash
+export ANTHROPIC_BASE_URL="<BASE_URL>"
+export ANTHROPIC_AUTH_TOKEN="<API_KEY>"
+export ANTHROPIC_MODEL="<MODEL>"
+```
+
+Then run your agent, or launch `claude`, from that same shell.
+
+Set `ANTHROPIC_MODEL` explicitly. Clients that discover available models at startup expect
+Anthropic's own catalog, and naming the model yourself avoids that lookup.
+
+## Things to know
+
+**Raise your timeouts.** A call takes seconds and can take longer under load, and an agent making
+many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn
+counts low — see [Run async and open source](/async-inference).
+
+**This path is per-request.** That suits an agent loop, where each turn depends on the last. Where
+the work is a rollout over a fixed input set, that part is cheaper as a
+[batch](/run-your-first-batch).
+
+Nothing here requires a proxy. If you want one for provider routing, key isolation, or central
+budget controls, see [LiteLLM](/connect-litellm).
+
+## Need help?
+
+Reach out to your Impala contact directly.

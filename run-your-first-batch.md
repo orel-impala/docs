@@ -1,7 +1,16 @@
 ---
-title: "Upload and run your first batch"
+title: "Run a batch"
 description: "This guide shows how to submit batch inference to your Impala endpoint using the OpenAI-compatible API. You’ll upload an input file, then create a batch."
 ---
+
+<iframe
+  className="w-full aspect-video rounded-xl"
+  src="https://www.loom.com/embed/1f544db701954b3bb7775208edc173ae"
+  title="Run a batch on Impala"
+  frameBorder="0"
+  allow="fullscreen; picture-in-picture"
+  allowFullScreen
+/>
 
 ## Prerequisites
 
@@ -9,7 +18,7 @@ Impala will provide these values to you ahead of time:
 
 - **`BASE_URL`** — the hostname of your Impala endpoint
 - **`JOB_ID`** — an identifier reserved for your account (required when creating a batch)
-- Create an API key in Settings on app.getimpala.ai, and send it as a bearer token on every request: `-H "Authorization: Bearer $IMPALA_API_KEY"`. (BYOC deployments can disable API keys; if yours is disabled, omit the header.)
+- Create an API key in Settings on platform.getimpala.ai, and send it as a bearer token on every request: `-H "Authorization: Bearer $IMPALA_API_KEY"`. (BYOC deployments can disable API keys; if yours is disabled, omit the header.)
 
 Use these values exactly as provided.
 

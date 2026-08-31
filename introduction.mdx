@@ -1,21 +1,53 @@
 ---
 title: "Introduction"
-description: "Impala AI is a dynamic inference platform built for enterprises running AI at production scale."
+description: "The most intelligence per dollar on any open-source model, running on your reserved throughput or in your own cloud."
 ---
 
-Unlike inference solutions optimized for chat-speed latency, Impala is purpose-built for high-volume asynchronous workloads. By dynamically adapting to real workload shapes across heterogeneous GPU infrastructure, Impala delivers up to 10x lower cost per token compared to leading inference platforms — no rate limits, no pre-warming.
+Unlike inference solutions optimized for chat-speed latency, Impala is **purpose-built for high-volume asynchronous workloads**. By dynamically adapting to real workload shapes across heterogeneous GPU infrastructure, Impala delivers **up to 10x lower cost per token** compared to leading inference platforms.
 
-Impala is built to adapt to your workloads in real time through async adaptive scheduling. It treats inference as a high-performance computing problem, not a web service problem. It runs on your cloud, in your VPC.
+## Start here
 
-Impala is vertically integrated across the entire stack — optimizing end-to-end from kernels to orchestration.
+<Card title="Start running today" icon="arrow-up-right-from-square" href="https://platform.getimpala.ai">
+  Sign up on the Impala platform, get a serverless endpoint and an API key, and send your first request.
+</Card>
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/impala-cloud-setup">
+    Endpoint, key, one call. The fastest way to start running.
+  </Card>
+  <Card title="Run a batch" icon="layer-group" href="/run-your-first-batch">
+    Upload a JSONL file, create a batch, collect the results.
+  </Card>
+  <Card title="Run async and open source" icon="compass" href="/async-inference">
+    Why our metric is tasks per dollar, and what high latency buys you.
+  </Card>
+  <Card title="Deployments" icon="cloud" href="/deployment-options">
+    Serverless in our cloud, or bring your own cloud.
+  </Card>
+</CardGroup>
+
+## How it works
+
+Impala is built to adapt to your workloads in real time through **async adaptive scheduling**. It treats inference as **a high-performance computing problem**. It runs in Impala's cloud, or inside your own VPC.
+
+Impala is **vertically integrated across the entire stack** — optimizing end-to-end from kernels to orchestration.
 
 ## Use cases
 
-- Nightly ETL with AI-enriched transformations
-- Data curation and labeling pipelines (computer vision, NLP)
-- Compliance report generation (financial services, AML/CTF analysis)
-- Document processing and summarization at volume
-- Web scraping and content enrichment
-- MCP agent orchestration
-- Code review / analysis pipelines
-- Multi-step agentic workflows (planning, executing, evaluating, retrying)
+Agents and multi-step pipelines, where each step is its own request:
+
+- **Background coding agents** — repo-wide refactors, dependency migrations, test generation, automated PR review
+- **Research agents** that plan, search and synthesize across dozens of turns
+- **Agentic pipelines** that plan, execute, evaluate and retry until the task is done
+- **MCP tool orchestration** across many servers and long-running sessions
+- **Subagent fan-out**, where one parent spawns dozens of children over a shared context
+
+Batch work, where the whole input set is known up front:
+
+- **Evaluation sweeps and rollouts** — the same harness over a fixed set, run to completion
+- **Corpus-scale extraction and summarization** across document stores
+- **Classification and enrichment** over millions of records
+- **Training-data curation and labeling**, including synthetic generation
+- **Scheduled reporting** — compliance and risk analysis, AI-enriched nightly ETL
+
+The first is served by [single requests](/send-a-request) at scale and [agent orchestration](/swarm); the second by [Batch](/run-your-first-batch).

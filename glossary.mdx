@@ -1,0 +1,58 @@
+---
+title: "Glossary"
+description: "The vocabulary these docs use for async inference, agent workloads and Impala's own objects."
+---
+
+## Workloads
+
+| Term | Meaning |
+| --- | --- |
+| **Interactive AI** | A person reads tokens as they stream. Measured by interactivity SLOs. |
+| **Async AI** | No human waiting on each token — background agents, research agents, multi-step automations, enrichment jobs. The target is tasks per dollar. |
+| **Agent / harness** | The software running the loop: calls the model, executes tools, branches, retries, fans out, decides when it's done. |
+| **Subagent / fan-out** | A child agent spawned by a parent, usually grounded in a shared parent context and often running alongside siblings. |
+
+## Units of work
+
+| Term | Meaning |
+| --- | --- |
+| **Trace** (rollout) | One full agent run: an ordered sequence of model calls, reasoning and tool executions, where each step's output feeds the next step's input. |
+| **Step** (turn) | A single round inside a trace: one model generation, typically followed by one tool call. |
+| **Tool-call gap** | The idle stretch between issuing a tool call and getting its result back. |
+| **Prefix** | The shared, growing input every step re-reads: system prompt, tool schemas, accumulated trace history. |
+
+## Metrics
+
+| Term | Meaning |
+| --- | --- |
+| **Tasks per dollar** | Cost per completed task. The economic SLO for async work. |
+| **Task completion time** | Wall-clock from submitting a task to completion. |
+| **Throughput** | How fast the cluster turns work out at scale. |
+| **TTFT / TPOT / ITL** | Time to first token, time per output token, inter-token latency. Interactive SLOs — not the target here. |
+
+## Runtime
+
+| Term | Meaning |
+| --- | --- |
+| **KV cache** | The per-request intermediate state the model carries across tokens. |
+| **Prefix caching** | Reusing KV state across steps and traces that share an input prefix, instead of recomputing it. |
+| **Continuous batching** | Requests join and leave a running batch rather than waiting for a batch boundary. |
+| **Tiered memory** | KV blocks live on different memory tiers and move between them as needed. |
+
+## Impala objects
+
+| Term | Meaning |
+| --- | --- |
+| **Herd** | Impala's inference engine. Profiles your live traffic and re-tunes its execution plan against it — kernels, batching, decoding. Every workload runs on it; nothing about it is yours to configure. See [Impala Herd](/impala-herd). |
+| **Leap** | Live weight iteration: swap the weights a running fleet serves, in seconds, with no redeploy. Herd runs your inference; Leap changes your weights. See [Impala Leap](/weight-sync). |
+| **Job** | A model plus a configuration, provisioned for your account, identified by a `job_id`. Batch requests are addressed to a job. See [Jobs](/jobs-and-job-ids). |
+| **Run** | One execution of a batch against a job. What the Run tab lists. |
+| **Batch** | The API object created by `POST /v1/batches`, moving through `validating` → `in_progress` → `finalizing` → `completed`. |
+| **Data plane** | The components that actually run inference: model servers, scheduler, and the storage they read and write. |
+
+## Aliases you may hear
+
+| Term | Meaning |
+| --- | --- |
+| **Serverless** | Inference on Impala's cloud, no install. See [Run in our cloud, or yours](/deployment-options). |
+| **BYOC** | Impala's data plane running inside your own cloud. See [Run in our cloud, or yours](/deployment-options). |

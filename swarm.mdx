@@ -1,0 +1,26 @@
+---
+title: "Impala Swarm"
+description: "Run an agent swarm on Impala — the harness, the fan-out and the model calls in one place, next to your data."
+---
+
+**Impala Swarm** is a way to run an agent swarm on Impala: a parent agent that fans out into many subagents over a shared context, with the loop itself executing on Impala rather than in your application.
+
+## Why run the swarm here
+
+**Prefix reuse across siblings.** Subagents spawned from one parent share a large prompt prefix — system prompt, tool schemas, the parent's accumulated context. When the loop runs next to the fleet, that KV state is already resident rather than being re-sent and recomputed per child. This is the mechanism described in [Impala Herd](/impala-herd), applied to fan-out.
+
+**Swarm state survives capacity changes.** A long-running swarm outlives the machines it starts on. Impala holds the execution state — the parent context, the subagents in flight, what has already completed — so a run continues across scaling events and instance changes in your cloud instead of starting over.
+
+**Cost per completed task, not per call.** A swarm is the clearest case of the argument in [Run async and open source](/async-inference): nobody is reading the intermediate tokens, dozens of children are in flight, and the only number that matters is what the finished task cost.
+
+## Where it runs
+
+Swarm runs in [Bring your own cloud](/getting-started-infrastructure-setup) deployments, so the swarm's state and every intermediate result stay inside your own VPC and buckets — see [Security & data handling](/security).
+
+## Need help?
+
+Reach out to your Impala contact directly.
+
+{/* Still to add once the API reference lands: how a swarm is specified, endpoints,
+     how a run is observed, and limits. Also confirm the failure semantics behind the
+     state-survival claim above — what happens to an individual subagent that dies. */}

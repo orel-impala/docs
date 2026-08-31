@@ -1,0 +1,16 @@
+---
+title: "Run in our cloud, or yours"
+description: "Impala runs in our cloud or inside your own AWS account."
+---
+
+## Serverless
+
+We source the GPUs and run your inference on them. You get an endpoint and an API key.
+
+Pick this to be running today, or when you'd rather not own capacity planning. Sign up at [platform.getimpala.ai](https://platform.getimpala.ai) to get an endpoint and a key, then see the [Quickstart](/impala-cloud-setup).
+
+## Bring Your Own Cloud
+
+Impala's data plane is installed into your own AWS account and VPC. Your prompts, inputs and outputs stay inside your account. Inside your cloud, Impala scales across GPU types and across regions, which keeps availability high and puts each workload on the cheapest capable hardware available at the time.
+
+Pick this when data residency or network isolation is a requirement, or when you have committed GPU capacity to use. Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC](/getting-started-infrastructure-setup).

@@ -1,0 +1,55 @@
+---
+title: "Impala Herd"
+description: "Herd is the inference engine every Impala workload runs on. It reads the shape of your live traffic and reconfigures itself around it — kernels, batching, decoding."
+---
+
+Every workload on Impala runs on **Herd** — batch or single request, our cloud or yours. You don't select it, configure it, or opt into it. It is the reason the cost per token looks the way it does.
+
+Most inference stacks run someone else's defaults: a fixed execution plan chosen at deploy time, tuned for a workload that isn't yours. Herd reads the shape of your live traffic and reconfigures itself around it.
+
+<CardGroup cols={3}>
+  <Card title="Up to 300%">
+    More token throughput on the same hardware.
+  </Card>
+  <Card title="Lower PPMT">
+    Throughput lands directly on price per million tokens.
+  </Card>
+  <Card title="Zero changes">
+    Same models, same API, same prompts.
+  </Card>
+</CardGroup>
+
+## What adapts
+
+**Adaptive engine.** Herd profiles your live traffic — prompt lengths, burstiness, cache reuse, concurrency — and re-tunes its execution plan against what it observes, continuously, rather than fixing a plan at deploy time.
+
+**State-of-the-art kernels.** Kernel tuning, selection and optimization, aimed at using every FLOP and every byte of memory bandwidth the device has.
+
+**Custom speculators.** Herd auto-selects the best speculator for your workload, lifting throughput while preserving your target model's behavior — the outputs are the model's, not the speculator's.
+
+## Why this shows up as cost, not speed
+
+Throughput and unit cost are the same number viewed from two sides: a GPU costs the same per hour saturated or idle, so the tokens it produces per hour set the price of each one. Herd's job is to raise that number on hardware you're already paying for.
+
+What it does not do is make an individual request return faster. That trade is deliberate, and [Run async and open source](/async-inference) explains why it's the right one for async work.
+
+## What you don't have to do
+
+- No engine flags, batch sizes or scheduling policies to tune
+- No prompt rewriting
+- No model changes — Herd serves the model you asked for, with its behavior intact
+- No migration; the API surface is unchanged
+
+Adaptation happens on Impala's side of the endpoint. From your code, Herd is invisible.
+
+Herd runs your inference. [Leap](/weight-sync) changes your weights.
+
+## Benchmark it on your own workload
+
+Impala will benchmark your own traffic and models, no migration required. Send a week of traffic and get the numbers back. Talk to your Impala contact to set it up.
+
+## Further reading
+
+- [Run It Hot](https://www.getimpala.ai/blog/run-it-hot) — why utilization, not electricity price, is the lever on cost per token
+- [DBO, Kernel Crossover, and the Real Hardware Cliff](https://www.getimpala.ai/blog/wide-ep-dbo-deepep-hardware-cliff) — where kernel choice stops scaling
+- [Wide-EP failure modes, load balancing, and portability](https://www.getimpala.ai/blog/wide-ep-load-balancing-portability) — expert parallelism at scale

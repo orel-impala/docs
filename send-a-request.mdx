@@ -1,0 +1,96 @@
+---
+title: "Chat completions"
+description: "The request shape, the parameters that matter for async work, and what changes from OpenAI."
+---
+
+Impala serves an OpenAI-compatible `/chat/completions` endpoint. The change is the base URL, the key, and the model name — see [Quickstart](/impala-cloud-setup) for those three values.
+
+## The request
+
+`model` and `messages` are the only required fields.
+
+```python
+resp = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[{"role": "user", "content": "Summarize this ticket in one line."}],
+)
+print(resp.choices[0].message.content)
+```
+
+`messages` is the standard OpenAI chat format. A `system` message sets behavior, `user` carries the prompt, and `assistant` carries prior model turns when you're replaying a conversation:
+
+```python
+messages=[
+    {"role": "system", "content": "You are a concise assistant."},
+    {"role": "user", "content": "What changed in this diff?"},
+    {"role": "assistant", "content": "Two functions were renamed."},
+    {"role": "user", "content": "Which ones?"},
+]
+```
+
+`base_url` routes your requests to Impala. Pass it exactly as provided — endpoints differ between accounts. `model` names the model your endpoint is provisioned for.
+
+## Timeouts and retries
+
+Two settings matter more here than at an interactive provider.
+
+**Raise your timeouts.** A call takes seconds, and minutes under load. SDK defaults are tuned for interactive providers and will abort a request that would have succeeded.
+
+**Reduce automatic retries.** The SDK can't tell a slow request from a failed one, so its default retries fire on timeouts for requests that are still running — adding load without shortening your wait. Lower the count and raise the timeout instead. Set it to `0` if your own harness handles retries.
+
+```python
+client = OpenAI(
+    base_url="<BASE_URL>",
+    api_key="<API_KEY>",
+    timeout=600.0,
+    max_retries=1,
+)
+```
+
+For an agent, total time is per-step time multiplied by the number of steps, so turn count is usually a bigger lever than any individual call. See [Run async and open source](/async-inference).
+
+## Keep the key out of your source
+
+The OpenAI SDK reads these environment variables automatically:
+
+```bash
+export OPENAI_BASE_URL="<BASE_URL>"
+export OPENAI_API_KEY="<API_KEY>"
+```
+
+Which lets your code drop the explicit arguments:
+
+```python
+from openai import OpenAI
+
+client = OpenAI()  # reads OPENAI_BASE_URL and OPENAI_API_KEY
+
+resp = client.chat.completions.create(
+    model="<MODEL>",
+    messages=[{"role": "user", "content": "Ping"}],
+)
+```
+
+Don't commit your key or share it outside your team. You can rotate it under **API Keys** on the platform.
+
+## Other parameters
+
+The endpoint accepts the standard OpenAI chat completion fields, and everything else works as it does with the OpenAI SDK.
+
+{/* TODO — needs the API reference before we state it:
+     - which optional fields Impala honours (temperature, top_p, max_tokens, stop, seed,
+       response_format, tools/tool_choice, logprobs) and which are accepted but ignored
+     - whether the inference endpoint appears in the API reference tab at all; the OpenAPI
+       spec in this repo covers only /v1/files and /v1/batches
+     - error response shapes and status codes under load */}
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Run a batch" icon="layer-group" href="/run-your-first-batch">
+    File in, results out, at the lowest cost per token.
+  </Card>
+  <Card title="Anthropic SDKs and Claude Code" icon="plug" href="/anthropic-sdk">
+    The same endpoint in Anthropic format.
+  </Card>
+</CardGroup>
