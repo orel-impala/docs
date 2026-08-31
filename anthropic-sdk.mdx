@@ -1,11 +1,13 @@
 ---
 title: "Anthropic SDKs and Claude Code"
-description: "Impala serves the Anthropic Messages API alongside the OpenAI-compatible endpoints. Point the Anthropic SDKs, the Claude Agent SDK, or Claude Code straight at your endpoint."
+description: "Impala serves the Anthropic Messages API. Point the Anthropic SDKs, the Claude Agent SDK, or Claude Code at your endpoint."
 ---
 
-Impala serves **`/v1/messages`**, the Anthropic Messages API, alongside its OpenAI-compatible endpoints. Anthropic-format tooling talks to Impala directly — no proxy, no translation layer, no code changes.
+{/* TODO: /v1/messages is not yet in openai-api-swagger.json — add it so this page has a spec to point at. */}
 
-That covers the Anthropic SDKs, the **Claude Agent SDK**, and **Claude Code**.
+Impala serves **`/v1/messages`** alongside its OpenAI-compatible endpoints, so Anthropic-format
+tooling talks to it directly. That covers the Anthropic SDKs, the **Claude Agent SDK**, and
+**Claude Code**.
 
 ## What you need
 
@@ -13,15 +15,15 @@ That covers the Anthropic SDKs, the **Claude Agent SDK**, and **Claude Code**.
 - `API_KEY` — your Impala key
 - `MODEL` — the model your endpoint serves
 
+Either `Authorization: Bearer` or `x-api-key` is accepted, so the SDKs work with their own
+defaults.
+
 <Info>
-  The Anthropic SDKs append `/v1/messages` to whatever base URL you give them. Pass the host root, not a URL that already ends in `/v1`.
+  The Anthropic SDKs append `/v1/messages` to whatever base URL you give them. Pass the host root,
+  not a URL that already ends in `/v1`.
 </Info>
 
-***
-
 ## Anthropic SDK
-
-Point `base_url` at Impala and use your Impala key:
 
 ```python
 import anthropic
@@ -61,7 +63,7 @@ Or directly:
 ```bash
 curl -X POST "$BASE_URL/v1/messages" \
   -H "content-type: application/json" \
-  -H "x-api-key: $API_KEY" \
+  -H "Authorization: Bearer $API_KEY" \
   -d '{
     "model": "'"$MODEL"'",
     "max_tokens": 256,
@@ -69,11 +71,9 @@ curl -X POST "$BASE_URL/v1/messages" \
   }'
 ```
 
-***
+## Claude Agent SDK and Claude Code
 
-## Claude Agent SDK
-
-The Agent SDK reads the standard Anthropic environment variables, so it needs no code change:
+Both read the standard Anthropic environment variables, so neither needs a code change:
 
 ```bash
 export ANTHROPIC_BASE_URL="<BASE_URL>"
@@ -81,34 +81,23 @@ export ANTHROPIC_AUTH_TOKEN="<API_KEY>"
 export ANTHROPIC_MODEL="<MODEL>"
 ```
 
-Then run your agent as usual. Tool calling works as it does against any Messages API endpoint — the SDK sends Anthropic-format tool definitions and Impala serves them.
+Then run your agent, or launch `claude`, from that same shell.
 
-## Claude Code
-
-Same variables, then launch:
-
-```bash
-export ANTHROPIC_BASE_URL="<BASE_URL>"
-export ANTHROPIC_AUTH_TOKEN="<API_KEY>"
-export ANTHROPIC_MODEL="<MODEL>"
-claude
-```
-
-Export them in the same shell you launch from.
-
-***
+Set `ANTHROPIC_MODEL` explicitly. Clients that discover available models at startup expect
+Anthropic's own catalog, and naming the model yourself avoids that lookup.
 
 ## Things to know
 
-**Set `ANTHROPIC_MODEL` explicitly.** Clients that discover available models at startup expect Anthropic's own catalog. Naming the model yourself avoids that lookup entirely.
+**Raise your timeouts.** A call takes seconds and can take longer under load, and an agent making
+many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn
+counts low — see [Run async and open source](/async-inference).
 
-**Raise your timeouts.** A call takes seconds and can take minutes under load, and an agent making many sequential turns multiplies that. Raise the timeout in whatever runs your agent and keep turn counts low — see [Run async and open source](/async-inference).
+**This path is per-request.** That suits an agent loop, where each turn depends on the last. Where
+the work is a rollout over a fixed input set, that part is cheaper as a
+[batch](/run-your-first-batch).
 
-**This path is per-request, not batched.** That's the right shape for an agent loop, where each turn depends on the last. Where a piece of the work is a rollout over a fixed input set — an eval sweep, a replay — that part is cheaper as a [batch](/run-your-first-batch).
-
-## When you'd still want a gateway
-
-Nothing here requires a proxy. You'd add one for reasons of your own: routing across several providers, keeping the Impala key out of client environments, or central budget and rate controls. See [LiteLLM](/connect-litellm) if that's what you're building.
+Nothing here requires a proxy. If you want one for provider routing, key isolation, or central
+budget controls, see [LiteLLM](/connect-litellm).
 
 ## Need help?
 
