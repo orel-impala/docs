@@ -11,96 +11,82 @@
     "decoration": "gradient"
   },
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "Overview",
+        "group": "Introduction",
         "icon": "compass",
         "pages": [
           "introduction",
           "async-inference",
-          "deployment-options",
-          {
-            "group": "Reference",
-            "icon": "book",
-            "pages": [
-              "security",
-              "further-reading",
-              "glossary"
-            ]
-          }
+          "deployment-options"
         ]
       },
       {
-        "tab": "Product updates",
-        "hidden": true,
-        "icon": "bullhorn",
+        "group": "Serverless inference",
+        "icon": "bolt",
         "pages": [
-          "changelog"
+          "impala-cloud-setup",
+          "send-a-request"
         ]
       },
       {
-        "tab": "Guides",
-        "icon": "book-open",
+        "group": "Batch inference",
+        "icon": "layer-group",
         "pages": [
-          {
-            "group": "Serverless inference",
-            "icon": "bolt",
-            "pages": [
-              "impala-cloud-setup",
-              "send-a-request"
-            ]
-          },
-          {
-            "group": "Batch inference",
-            "icon": "layer-group",
-            "pages": [
-              "run-your-first-batch",
-              "jobs-and-job-ids",
-              "pass_images_with_image_url"
-            ]
-          },
-          {
-            "group": "Agent orchestration",
-            "icon": "sitemap",
-            "pages": [
-              "swarm"
-            ]
-          },
-          {
-            "group": "Optimization",
-            "icon": "gauge",
-            "pages": [
-              "impala-herd"
-            ]
-          },
-          {
-            "group": "Bring your own model",
-            "icon": "cube",
-            "pages": [
-              "weight-sync"
-            ]
-          },
-          {
-            "group": "Bring your own cloud (BYOC)",
-            "icon": "cloud",
-            "pages": [
-              "getting-started-infrastructure-setup",
-              "exposing_the_openai_api_endpoint_service",
-              "aws_service_quotas_for_Impala_data_plane_deployment"
-            ]
-          },
-          {
-            "group": "Integrations",
-            "icon": "plug",
-            "pages": [
-              "connect-litellm",
-              "anthropic-sdk"
-            ]
-          }
+          "run-your-first-batch",
+          "jobs-and-job-ids",
+          "pass_images_with_image_url"
         ]
       },
       {
-        "tab": "API reference",
+        "group": "Agent orchestration",
+        "icon": "sitemap",
+        "pages": [
+          "swarm"
+        ]
+      },
+      {
+        "group": "Optimization",
+        "icon": "gauge",
+        "pages": [
+          "impala-herd"
+        ]
+      },
+      {
+        "group": "Bring your own model",
+        "icon": "cube",
+        "pages": [
+          "weight-sync"
+        ]
+      },
+      {
+        "group": "Bring your own cloud (BYOC)",
+        "icon": "cloud",
+        "pages": [
+          "getting-started-infrastructure-setup",
+          "exposing_the_openai_api_endpoint_service",
+          "aws_service_quotas_for_Impala_data_plane_deployment"
+        ]
+      },
+      {
+        "group": "Integrations",
+        "icon": "plug",
+        "pages": [
+          "connect-litellm",
+          "anthropic-sdk"
+        ]
+      },
+      {
+        "group": "Reference",
+        "icon": "book",
+        "pages": [
+          "security",
+          "further-reading",
+          "glossary"
+        ]
+      },
+      {
+        "group": "API reference",
         "icon": "code",
         "openapi": "openai-api-swagger.json"
       }
