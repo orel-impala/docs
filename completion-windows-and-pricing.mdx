@@ -1,0 +1,47 @@
+---
+title: "Completion windows and pricing"
+description: "Choose how soon you need each result. The longer the window, the lower the price per token."
+---
+
+{/* DRAFT — not in docs.json, so hidden from the sidebar. Decisions pending from the Oct 5 pricing call (Orel, Ron, Boaz). Remove this comment before publishing. */}
+
+Every request runs in a **completion window**: how soon you need the result back. A wider window gives the scheduler more room to batch and place work, and that room is what you pay less for. The model, its weights and its output are the same in every window.
+
+| Window | Use it for | Returns |
+| --- | --- | --- |
+| `asap` | Interactive traffic: chat, a user waiting on a response | Real-time |
+| `standard` | Agent loops and background work where no one reads tokens as they arrive | Typically within minutes |
+| `flex` | Work with no deadline inside the day; lowest cost for async requests | Best effort |
+| `batch` | Bulk jobs submitted as a file through the [Batch API](/run-your-first-batch) | Within 24 hours |
+
+{/* TODO: confirm the default window (proposal: `standard`). */}
+{/* TODO: confirm we publish no turnaround times for asap / standard / flex. Internal per-window targets exist; contractual SLAs are agreed per account. */}
+{/* TODO: batch requests currently use `completion_window: "unlimited"` (see /run-your-first-batch, /jobs-and-job-ids). Decide whether `batch` replaces "unlimited" or maps to it, and update those pages together. */}
+
+## Choosing a window
+
+{/* TODO: document how a request selects its window (request field and/or header). Don't publish until the API supports it and the spec in openai-api-swagger.json covers it. */}
+
+`flex` is for requests sent in the background. Send it with a client timeout long enough to cover the window; see [Timeouts and retries](/send-a-request#timeouts-and-retries).
+
+{/* TODO: confirm whether flex requires background / async submission, and whether synchronous calls to flex are rejected or upgraded. */}
+
+## Prices
+
+Prices are in USD per million tokens. Cached input applies to prompt tokens served from the prefix cache.
+
+{/* TODO: final model list for launch. */}
+{/* TODO: pricing structure. Proposal: one base price per model, with a fixed multiplier per window, and cached input as a fixed share of the input price. */}
+
+| Model | Window | Input | Cached input | Output |
+| --- | --- | --- | --- | --- |
+| {/* TODO: model */} | `asap` | {/* TODO */} | {/* TODO */} | {/* TODO */} |
+| | `standard` | {/* TODO */} | {/* TODO */} | {/* TODO */} |
+| | `flex` | {/* TODO */} | {/* TODO */} | {/* TODO */} |
+| | `batch` | {/* TODO */} | {/* TODO */} | {/* TODO */} |
+
+You're billed for the window a request ran in. Usage per window is on the **Usage** page of the [platform](https://platform.getimpala.ai).
+
+{/* TODO: confirm per-window usage breakdown exists on the platform before publishing the sentence above. */}
+
+For volume pricing or a contractual SLA on a window, contact your Impala representative.
