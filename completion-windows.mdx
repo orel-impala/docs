@@ -1,0 +1,15 @@
+---
+title: "Completion windows"
+description: "Choose per request how soon you need the result. Later costs less."
+---
+
+{/* DRAFT. Published together with /pricing. See the checklist at the top of pricing.mdx. */}
+
+Every request runs in a **completion window**. Windows that return sooner cost more, and windows with more time to finish cost less. The model and its output are the same in every window, so the cheapest window your workload can wait for is usually the right one. [Run async and open source](/async-inference) explains why waiting costs less.
+
+From fastest to lowest cost, the windows are `asap`, `standard`, `flex` and `batch`. Each request is billed at its window's rate; see [Pricing](/pricing).
+
+{/* TODO: state the default window (proposal: `standard`). */}
+{/* TODO: document how a request selects its window (request field and/or header) once the API supports it and openai-api-swagger.json covers it. */}
+{/* TODO: batch requests currently use `completion_window: "unlimited"` (see /run-your-first-batch, /jobs-and-job-ids). Decide whether `batch` replaces "unlimited" or maps to it, and update those pages together. */}
+{/* TODO: no turnaround times are published on purpose. Decide whether batch alone gets "within 24 hours". Internal per-window targets exist; contractual SLAs are agreed per account. */}
