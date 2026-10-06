@@ -3,64 +3,20 @@ title: "Rate limit webhooks"
 description: "Get an event when your team's RPM or TPM limit changes, so your router can follow it."
 ---
 
-{/* DRAFT. Gateway webhooks, built for MagiCare (Tom Adler, live since Sep 23). BEFORE PUBLISHING: (1) add "rate-limit-webhooks" to docs.json, in the Serverless inference group after "send-a-request"; (2) resolve every TODO with Tom; (3) reconcile with how-impala-works.mdx, which says "There are no rate limits to design around"; (4) remove this comment. */}
+Impala can send a webhook to your endpoint whenever we change the RPM or TPM limit on your team. If you route traffic across several providers, your router can follow our capacity as it changes, instead of finding out from `429` responses.
 
-Impala can send a webhook to your endpoint whenever we change the RPM or TPM limit on your team. If you route traffic across several providers, use it to keep Impala's share of traffic within the new limit instead of finding out from `429` responses.
-
-Webhooks are enabled per team on request. Ask your Impala account team to turn them on.
+Webhooks are enabled per team on request. Contact your Impala account team to turn them on.
 
 ## Set up an endpoint
 
 1. Ask your Impala account team to enable webhooks for your team.
-2. In [Settings](https://platform.getimpala.ai/settings), add an HTTPS endpoint that accepts `POST` requests with a JSON body.
+2. In [Settings](https://platform.getimpala.ai/settings), add an HTTPS endpoint that accepts `POST` requests.
 3. Ask us to send a test event and check that it arrives.
 
-{/* TODO: confirm customers set the endpoint themselves in Settings, and whether they can trigger a test event. */}
-
-Before your router acts on events, log a few real ones and check that your update logic would have produced the routing you expect.
-
-## Event payload
-
-{/* TODO: placeholder schema. Replace with the real event type, field names, and whether limits are per model or team-wide. */}
-
-```json
-{
-  "id": "evt_01J9ZK4Q7M2X",
-  "type": "rate_limit.updated",
-  "created_at": "2026-10-06T09:00:00Z",
-  "team_id": "team_8f3a21",
-  "limits": [
-    { "model": "Qwen2.5-72B-Instruct", "rpm": 600, "tpm": 2000000 }
-  ]
-}
-```
-
-<ResponseField name="id" type="string">
-  Unique event ID. Use it to skip events you've already handled.
-</ResponseField>
-<ResponseField name="type" type="string">
-  Event type.
-</ResponseField>
-<ResponseField name="created_at" type="string">
-  When the new limit took effect, in ISO 8601.
-</ResponseField>
-<ResponseField name="team_id" type="string">
-  Your Impala team.
-</ResponseField>
-<ResponseField name="limits" type="array">
-  The new RPM and TPM limits.
-</ResponseField>
-
-## Handle deliveries
-
-Return a `2xx` status within a few seconds and do any slow work afterwards. Store the latest limits so a restart doesn't put your routing back on old values.
-
-{/* TODO: confirm retry count, backoff and timeout. */}
-{/* TODO: confirm whether events can arrive twice or out of order. If so, say: skip seen IDs and apply the event with the latest created_at. */}
-{/* TODO: confirm whether events are signed. If so, document the header, algorithm and where the secret lives in Settings. */}
+Each event carries your team's new RPM and TPM limits. We share the exact event format when we enable webhooks for your team.
 
 ## Route with the limits
 
-Set Impala's weight in your router so your expected peak stays under the new RPM and TPM, and send overflow to another provider. Requests above the limit return `429`.
+Set Impala's weight in your router so your expected peak stays under the new limits, and send overflow to another provider. Requests above the limit return `429`.
 
-{/* TODO: MagiCare runs slightly above the limit on purpose because their traffic is spiky. Decide whether we document that as acceptable. */}
+Before your router acts on events, log a few and check that your update logic would have produced the routing you expect.
