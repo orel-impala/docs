@@ -1,0 +1,22 @@
+---
+title: "Rate limit webhooks"
+description: "Get an event when your team's RPM or TPM limit changes, so your router can follow it."
+---
+
+Impala can send a webhook to your endpoint whenever we change the RPM or TPM limit on your team. If you route traffic across several providers, your router can follow our capacity as it changes, instead of finding out from `429` responses.
+
+Webhooks are enabled per team on request. Contact your Impala account team to turn them on.
+
+## Set up an endpoint
+
+1. Ask your Impala account team to enable webhooks for your team.
+2. In [Settings](https://platform.getimpala.ai/settings), add an HTTPS endpoint that accepts `POST` requests.
+3. Ask us to send a test event and check that it arrives.
+
+Each event carries your team's new RPM and TPM limits. We share the exact event format when we enable webhooks for your team.
+
+## Route with the limits
+
+Set Impala's weight in your router so your expected peak stays under the new limits, and send overflow to another provider. Requests above the limit return `429`.
+
+Before your router acts on events, log a few and check that your update logic would have produced the routing you expect.
