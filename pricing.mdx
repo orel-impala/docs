@@ -4,7 +4,8 @@ description: "Per-token prices by model and completion window."
 ---
 
 {/* DRAFT. Pricing decided Oct 5 (Orel). BEFORE PUBLISHING: (1) add "pricing" and "completion-windows" to docs.json, in the Introduction group after "async-inference"; (2) resolve every TODO here and in completion-windows.mdx; (3) remove this comment. */}
-{/* Pricing rule: asap is set near the lowest published real-time price from async-first providers, rounded. standard = 0.75x, flex = 0.5x, batch = 0.4x of asap. Cached input keeps each model's market ratio to input. Customer deals are discounts off this list. */}
+{/* Pricing rule (sheet tab 1, Oct 6): asap is set at about Valar's Now price, rounded. standard = 0.5x, flex = 0.35x, batch = 0.3x of asap. Cached input keeps each model's market ratio to input. Customer deals are discounts off this list. */}
+{/* TODO before publishing: at real GPU cost ($9.50/GPU-hr B300), Kimi K3 and GLM flex/batch fall below cost (sheet tab 7). Raise their async floor to ~0.45x asap or bar deal discounts on async windows. */}
 {/* TODO: confirm we serve every model below at launch, and the exact model IDs the API accepts. */}
 
 Prices are in USD per million tokens. Each request is billed at the rate of its [completion window](/completion-windows): the longer the window, the lower the price.
@@ -12,21 +13,29 @@ Prices are in USD per million tokens. Each request is billed at the rate of its 
 | Model | [Window](/completion-windows) | Input | Cached input | Output |
 | --- | --- | --- | --- | --- |
 | Kimi K3 | `asap` | \$2.25 | \$0.225 | \$11.25 |
-| | `standard` | \$1.70 | \$0.17 | \$8.40 |
-| | `flex` | \$1.10 | \$0.11 | \$5.60 |
-| | `batch` | \$0.90 | \$0.09 | \$4.50 |
+|  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
+|  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
+|  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
 | GLM-5.3 | `asap` | \$1.10 | \$0.20 | \$3.50 |
-| | `standard` | \$0.82 | \$0.15 | \$2.60 |
-| | `flex` | \$0.55 | \$0.10 | \$1.75 |
-| | `batch` | \$0.44 | \$0.08 | \$1.40 |
+|  | `standard` | \$0.55 | \$0.10 | \$1.75 |
+|  | `flex` | \$0.385 | \$0.07 | \$1.225 |
+|  | `batch` | \$0.33 | \$0.06 | \$1.05 |
+| GLM-5.2 | `asap` | \$0.95 | \$0.11 | \$3.40 |
+|  | `standard` | \$0.475 | \$0.055 | \$1.70 |
+|  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
+|  | `batch` | \$0.285 | \$0.033 | \$1.02 |
 | DeepSeek V4.1 Flash | `asap` | \$0.25 | \$0.025 | \$1.00 |
-| | `standard` | \$0.19 | \$0.019 | \$0.75 |
-| | `flex` | \$0.13 | \$0.013 | \$0.50 |
-| | `batch` | \$0.10 | \$0.010 | \$0.40 |
+|  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
+|  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
+|  | `batch` | \$0.075 | \$0.0075 | \$0.30 |
 | gpt-oss-120b | `asap` | \$0.06 | \$0.03 | \$0.40 |
-| | `standard` | \$0.045 | \$0.023 | \$0.30 |
-| | `flex` | \$0.03 | \$0.015 | \$0.20 |
-| | `batch` | \$0.024 | \$0.012 | \$0.16 |
+|  | `standard` | \$0.03 | \$0.015 | \$0.20 |
+|  | `flex` | \$0.021 | \$0.0105 | \$0.14 |
+|  | `batch` | \$0.018 | \$0.009 | \$0.12 |
+| Gemma 4 31B | `asap` | \$0.14 | \$0.06 | \$0.40 |
+|  | `standard` | \$0.07 | \$0.03 | \$0.20 |
+|  | `flex` | \$0.049 | \$0.021 | \$0.14 |
+|  | `batch` | \$0.042 | \$0.018 | \$0.12 |
 
 Cached input applies to prompt tokens served from the prefix cache.
 
