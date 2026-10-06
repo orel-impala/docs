@@ -26,7 +26,8 @@
         "icon": "bolt",
         "pages": [
           "impala-cloud-setup",
-          "send-a-request"
+          "send-a-request",
+          "rate-limit-webhooks"
         ]
       },
       {
