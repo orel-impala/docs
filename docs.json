@@ -36,7 +36,8 @@
         "pages": [
           "run-your-first-batch",
           "jobs-and-job-ids",
-          "pass_images_with_image_url"
+          "pass_images_with_image_url",
+          "video-input"
         ]
       },
       {
