@@ -1,9 +1,9 @@
 ---
 title: "Jobs"
-description: "A job is a model plus a configuration, provisioned for your account. Batch requests are addressed to a job ID, and the model in your JSONL has to match it."
+description: "A job is a model plus a configuration, provisioned for your account. Passing a job ID is optional; without one, Impala picks the job for you."
 ---
 
-Every batch run on Impala is addressed to a **job**. This is the one place where Impala's API differs from OpenAI's, so it's worth understanding before your first run.
+Every batch run on Impala is served by a **job**. Passing a `job_id` is optional. Without one, Impala picks the job for you, based on the model you request and your agreement with us.
 
 ## What a job is
 
@@ -13,9 +13,9 @@ The configuration is the part that matters for throughput: which model weights a
 
 Practically, this means:
 
-- You don't pick a model and a machine type at request time. You pick a job.
+- You don't pick a model and a machine type at request time. You name the model, and optionally a job.
 - Two jobs can serve the same model with different configurations.
-- A model that isn't bound to one of your jobs can't be batched yet. Ask your Impala contact to provision one.
+- A model that isn't provisioned for your account can't be batched yet. Ask your Impala contact to provision it.
 - Some models have separate reasoning and standard jobs. Others serve both from one job and switch per request. See [Reasoning](/send-a-request#reasoning).
 - A job can include your own [LoRA adapter](/lora-adapters).
 
@@ -25,7 +25,9 @@ The **Run** tab in the Impala console lists every job ID available to your works
 
 ## Using a job ID
 
-Pass `job_id` when you create the batch:
+Pass `job_id` when you want a specific configuration, for example to choose between two jobs that serve the same model. Leave it out and Impala routes the batch for you.
+
+To pin a job, pass `job_id` when you create the batch:
 
 ```bash
 curl -X POST "$BASE_URL/v1/batches" \
@@ -51,7 +53,7 @@ batch = client.batches.create(
 
 ## The model has to match
 
-Every line of your JSONL carries a `model` field, and it must name the same model the job is bound to.
+Every line of your JSONL carries a `model` field. If you pass a `job_id`, it must name the same model the job is bound to.
 
 ```json
 {"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"your-model","messages":[{"role":"user","content":"..."}]}}
