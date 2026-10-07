@@ -17,7 +17,7 @@ description: "This guide shows how to submit batch inference to your Impala endp
 Impala will provide these values to you ahead of time:
 
 - **`BASE_URL`** — the hostname of your Impala endpoint
-- **`JOB_ID`** — an identifier reserved for your account (required when creating a batch)
+- **`JOB_ID`** (optional) — pins the batch to a specific inference configuration. Without it, Impala picks one based on the model and your agreement. See [Jobs](/jobs-and-job-ids).
 - Create an API key in Settings on platform.getimpala.ai, and send it as a bearer token on every request: `-H "Authorization: Bearer $IMPALA_API_KEY"`. (BYOC deployments can disable API keys; if yours is disabled, omit the header.)
 
 Use these values exactly as provided.
@@ -76,14 +76,14 @@ curl -X POST "$BASE_URL/v1/batches" \
   }'
 ```
 
-Required request fields:
+Request fields:
 
 | Field | Value |
 | --- | --- |
 | input\_file\_id | The id returned by Step 2 |
 | endpoint | One of /v1/chat/completions, /v1/completions, /v1/embeddings, /v1/responses — must match the url field in each JSONL line |
 | completion\_window | "unlimited" |
-| job\_id | The Job ID supplied to you by Impala (job-xxxxxxxx) |
+| job\_id | Optional. A Job ID supplied to you by Impala (job-xxxxxxxx) |
 
 The response includes an `id` for the batch (for example, `batch-xyz789`).
 
@@ -151,7 +151,7 @@ if batch.status == "completed":
     f.write(content.content)
 ```
 
-Note: `job_id` is required by Impala. Since the OpenAI SDK doesn’t expose a `job_id` parameter, pass it via `extra_body` as shown.
+Note: `job_id` is optional. If you pass it, the OpenAI SDK doesn’t expose a `job_id` parameter, so use `extra_body` as shown.
 
 ---
 
