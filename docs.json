@@ -57,6 +57,7 @@
         "group": "Bring your own model",
         "icon": "cube",
         "pages": [
+          "lora-adapters",
           "weight-sync"
         ]
       },

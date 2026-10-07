@@ -16,6 +16,8 @@ Practically, this means:
 - You don't pick a model and a machine type at request time. You pick a job.
 - Two jobs can serve the same model with different configurations.
 - A model that isn't bound to one of your jobs can't be batched yet. Ask your Impala contact to provision one.
+- Some models have separate reasoning and standard jobs. Others serve both from one job and switch per request. See [Reasoning](/send-a-request#reasoning).
+- A job can include your own [LoRA adapter](/lora-adapters).
 
 ## Finding your job IDs
 

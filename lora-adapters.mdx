@@ -1,0 +1,29 @@
+---
+title: "LoRA adapters"
+description: "Serve your fine-tuned model on Impala. Bring a LoRA adapter, and we deploy it as a job you call like any other."
+---
+
+Impala serves models fine-tuned with **LoRA** (low-rank adaptation). You bring the adapter, we deploy it with its base model as a [job](/jobs-and-job-ids), and you send requests to that job like any other, through serverless or batch.
+
+## What to send us
+
+Either form works:
+
+- **A separate adapter**, alongside the name of the base model it was trained on.
+- **A merged model**, with the adapter weights already folded into the base model.
+
+Contact your Impala account team to share it and to get a job provisioned.
+
+{/* TODO: confirm the supported handoff formats and locations (S3 path, Hugging Face repo), the base models adapters can target, and any limits on adapter rank or count per job. */}
+
+## How it's served
+
+The adapter is loaded with the model when the job is deployed, so every request to that job uses it. Switching adapters per request isn't supported yet.
+
+{/* TODO: confirm whether one job can hold several adapters, and whether a new adapter version needs a redeploy or can go through Impala Leap. */}
+
+## Using the job
+
+Send requests exactly as you would to any other job. The `model` in each request must match the model the job is bound to. See [Jobs](/jobs-and-job-ids) for batch and [Chat completions](/send-a-request) for serverless.
+
+If you retrain full weights often, [Impala Leap](/weight-sync) swaps new checkpoints onto a running deployment without a redeploy.

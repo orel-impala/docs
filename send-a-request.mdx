@@ -75,14 +75,33 @@ Don't commit your key or share it outside your team. You can rotate it under **A
 
 ## Other parameters
 
-The endpoint accepts the standard OpenAI chat completion fields, and everything else works as it does with the OpenAI SDK.
+The endpoint accepts the standard OpenAI chat completion fields. Sampling parameters in the request body, such as `temperature`, `top_p`, `top_k`, `min_p` and `max_tokens`, are passed through to the inference engine as sent. In a batch, put them in the `body` of each JSONL line.
 
-{/* TODO — needs the API reference before we state it:
-     - which optional fields Impala honours (temperature, top_p, max_tokens, stop, seed,
-       response_format, tools/tool_choice, logprobs) and which are accepted but ignored
+{/* TODO — still open:
+     - whether stop, seed, response_format, tools/tool_choice and logprobs are honoured or accepted but ignored
      - whether the inference endpoint appears in the API reference tab at all; the OpenAPI
        spec in this repo covers only /v1/files and /v1/batches
      - error response shapes and status codes under load */}
+
+## Reasoning
+
+Some models are provisioned as two jobs, one with reasoning and one without. Others, such as Qwen3.8, serve both from one job, with thinking on by default. For those, control it per request through `chat_template_kwargs`.
+
+To turn thinking off:
+
+```json
+{"chat_template_kwargs": {"enable_thinking": false}}
+```
+
+To set how much the model reasons, pass `reasoning_effort`. Supported values are `xhigh` (the default), `medium` and `low`. Any other value, including `high`, returns an error.
+
+```json
+{"chat_template_kwargs": {"reasoning_effort": "medium"}}
+```
+
+With the OpenAI SDK, pass `chat_template_kwargs` through `extra_body`. In a batch, add it to the `body` of each JSONL line.
+
+{/* TODO: confirm with Atsmon or Bensi which models besides Qwen3.8 take these switches. */}
 
 ## Next
 
