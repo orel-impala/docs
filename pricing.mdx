@@ -32,8 +32,11 @@ export const PriceCalculator = () => {
   const sl = [0, 1, 2, 3].map((k) => (k === 0 || k === 3 ? 0 : dd[k - 1] * dd[k] <= 0 ? 0 : 2 / (1 / dd[k - 1] + 1 / dd[k])));
   sl[0] = Math.min(0, 1.5 * dd[0] - 0.5 * sl[1]); sl[3] = Math.min(0, 1.5 * dd[2] - 0.5 * sl[2]);
   const f = (x) => { const k = Math.min(2, Math.floor(x)), u = x - k, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * px[k] + (u3 - 2 * u2 + u) * sl[k] + (-2 * u3 + 3 * u2) * px[k + 1] + (u3 - u2) * sl[k + 1]; };
-  const L = 40, R = 600, TOP = 36, BASE = 176;
-  const max = Math.max(...px) || 1;
+  const L = 56, R = 610, TOP = 36, BASE = 176;
+  const nice = (v) => { const e = Math.pow(10, Math.floor(Math.log10(v))); const n = v / e; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * e; };
+  const max = nice(Math.max(...px) || 1);
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((r) => r * max);
+  const USE = ["interactive", "agents, pipelines", "evals, enrichment", "offline jobs"];
   const X = (x) => L + (x / 3) * (R - L);
   const Y = (v) => BASE - (v / max) * (BASE - TOP);
   const line = Array.from({ length: 121 }, (_, i) => (i ? "L" : "M") + X(i / 40).toFixed(1) + " " + Y(f(i / 40)).toFixed(1)).join(" ");
@@ -68,20 +71,26 @@ export const PriceCalculator = () => {
           {[0, 2].map((k) => <button key={k} type="button" onClick={() => setTok(k)} style={seg(tok === k)}>{k === 0 ? "Input" : "Output"}</button>)}
         </div>
       </div>
-      <svg viewBox="0 0 640 210" onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + (tok ? "output" : "input") + " tokens by window: " + label} style={{ width: "100%", display: "block", marginTop: 8, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
+      <svg viewBox="0 0 640 228" onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + (tok ? "output" : "input") + " tokens by window: " + label} style={{ width: "100%", display: "block", marginTop: 8, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
         <defs>
           <linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="rgb(var(--primary))" stopOpacity="0.22" />
             <stop offset="1" stopColor="rgb(var(--primary))" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <line x1={L} y1={BASE} x2={R} y2={BASE} stroke={hair} />
+        {ticks.map((v, i) => (
+          <g key={i}>
+            <line x1={L} y1={Y(v)} x2={R} y2={Y(v)} stroke={hair} strokeDasharray={i ? "2 4" : "0"} />
+            <text x={L - 8} y={Y(v) + 4} textAnchor="end" fontSize="11" fill={muted}>{"$" + (+v.toPrecision(3))}</text>
+          </g>
+        ))}
         <path d={area} fill="url(#pcfill)" />
         <path d={line} fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" />
         {px.map((v, w) => (
           <g key={w}>
             <circle cx={X(w)} cy={Y(v)} r="3" fill={accent} fillOpacity="0.55" />
             <text x={X(w)} y={BASE + 20} textAnchor={w === 0 ? "start" : w === 3 ? "end" : "middle"} fontSize="12" fill={t === w ? "currentColor" : muted} fontFamily="var(--font-mono, monospace)">{W[w]}</text>
+            <text x={X(w)} y={BASE + 36} textAnchor={w === 0 ? "start" : w === 3 ? "end" : "middle"} fontSize="11" fill={muted}>{USE[w]}</text>
           </g>
         ))}
         <line x1={cx} y1={cy} x2={cx} y2={BASE} stroke={accent} strokeOpacity="0.35" strokeDasharray="2 3" />
@@ -129,7 +138,7 @@ Cached input applies to prompt tokens served from the prefix cache.
 
 ## Custom pricing
 
-The four windows are list prices, not the only options. If your workload needs a window in between, for example faster than `flex` but cheaper than `standard`, we can set one up at a price between its neighbours.
+The four windows are starting points. Tell us how soon your workload really needs results, and we'll price a window for exactly that, so you pay for the speed you use and nothing more.
 
 <PriceCalculator />
 
