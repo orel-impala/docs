@@ -86,8 +86,6 @@ export const PriceCalculator = () => {
 
 Prices are in USD per million tokens. Each request is billed at the rate of its [completion window](/completion-windows): the longer the window, the lower the price.
 
-<PriceCalculator />
-
 | Model | [Window](/completion-windows) | Input | Cached input | Output |
 | --- | --- | --- | --- | --- |
 | <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{fontSize:"0.75em"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
@@ -116,6 +114,8 @@ Prices are in USD per million tokens. Each request is billed at the rate of its 
 |  | `batch` | \$0.042 | \$0.018 | \$0.12 |
 
 Cached input applies to prompt tokens served from the prefix cache.
+
+<PriceCalculator />
 
 ## Custom pricing
 
