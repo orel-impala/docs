@@ -12,12 +12,14 @@ From fastest to lowest cost, the windows are `asap`, `standard`, `flex` and `bat
 
 ## Which window fits
 
-| Window | How it runs | Use it for |
-| --- | --- | --- |
-| `asap` | Starts right away | Chat, interactive apps, anyone waiting on the answer |
-| `standard` | Queued briefly for efficient capacity | Agents, subagents and pipelines running in the background |
-| `flex` | Scheduled when capacity is cheapest | Evals, enrichment, research, back-office |
-| `batch` | Submitted as a batch job | Large offline runs: datasets, backfills, synthetic data |
+The longer a request can wait, the more efficiently we can run it, and the less it costs.
+
+| Window | How it runs | Use it for | Price vs `asap` |
+| --- | --- | --- | --- |
+| `asap` | Starts right away | Chat, interactive apps, anyone waiting on the answer | 100% |
+| `standard` | Queued briefly for efficient capacity | Agents, subagents and pipelines running in the background | 50% |
+| `flex` | Scheduled when capacity is cheapest | Evals, enrichment, research, back-office | 35% |
+| `batch` | Submitted as a batch job | Large offline runs: datasets, backfills, synthetic data | 30% |
 
 Not sure? Start with `standard`, and move work that nobody waits on to `flex` or `batch`.
 
