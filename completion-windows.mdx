@@ -10,6 +10,17 @@ Every request runs in a **completion window**. Windows that return sooner cost m
 
 From fastest to lowest cost, the windows are `asap`, `standard`, `flex` and `batch`. Requests that don't set a window run in `standard`. Each request is billed at its window's rate; see [Pricing](/pricing).
 
+## Which window fits
+
+| Window | How it runs | Use it for |
+| --- | --- | --- |
+| `asap` | Starts right away | Chat, interactive apps, anyone waiting on the answer |
+| `standard` | Queued briefly for efficient capacity | Agents, subagents and pipelines running in the background |
+| `flex` | Scheduled when capacity is cheapest | Evals, enrichment and jobs that can wait |
+| `batch` | Submitted as a batch job | Large offline runs: datasets, backfills, synthetic data |
+
+Not sure? Start with `standard`, and move work that nobody waits on to `flex` or `batch`.
+
 {/* TODO (engineering): `standard` as the default is decided; confirm the API implements it before publishing. */}
 {/* TODO (engineering): how a request selects its window (request field and/or header). Document once the API supports it and openai-api-swagger.json covers it. */}
 {/* TODO (engineering): batch jobs currently send `completion_window: "unlimited"` (see /run-your-first-batch, /jobs-and-job-ids). Decided: keep "unlimited" working and bill it as `batch`; confirm, then update those pages. */}
