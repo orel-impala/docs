@@ -16,7 +16,10 @@ export const PriceCalculator = () => {
   const M = [
     { id: "glm-5-3", n: "GLM-5.3", ic: "zai", mono: true, p: [[1.1, 0.2, 3.5], [0.55, 0.1, 1.75], [0.385, 0.07, 1.225], [0.33, 0.06, 1.05]] },
     { id: "glm-5-2", n: "GLM-5.2", ic: "zai", mono: true, p: [[0.95, 0.11, 3.4], [0.475, 0.055, 1.7], [0.3325, 0.0385, 1.19], [0.285, 0.033, 1.02]] },
+    { id: "glm-5-3-flash", n: "GLM-5.3-Flash", ic: "zai", mono: true, p: [[0.12, 0.023, 0.4], [0.06, 0.0115, 0.2], [0.042, 0.0081, 0.14], [0.036, 0.0069, 0.12]] },
+    { id: "deepseek-v4-pro", n: "DeepSeek V4 Pro", ic: "deepseek-color", p: [[1.05, 0.035, 3.15], [0.525, 0.0175, 1.575], [0.3675, 0.0123, 1.1025], [0.315, 0.0105, 0.945]] },
     { id: "deepseek-v4-1-flash", n: "DeepSeek V4.1 Flash", ic: "deepseek-color", p: [[0.25, 0.025, 1.0], [0.125, 0.0125, 0.5], [0.0875, 0.0088, 0.35], [0.075, 0.0028, 0.285]] },
+    { id: "qwen3-6-35b-a3b", n: "Qwen3.6 35B-A3B", ic: "qwen-color", p: [[0.22, 0.045, 0.9], [0.11, 0.0225, 0.45], [0.077, 0.0158, 0.315], [0.066, 0.0135, 0.27]] },
     { id: "gemma-4-31b", n: "Gemma 4 31B", ic: "gemini-color", p: [[0.14, 0.06, 0.4], [0.07, 0.03, 0.2], [0.049, 0.021, 0.14], [0.042, 0.018, 0.12]] },
     { id: "gpt-oss-120b", n: "gpt-oss-120b", ic: "openai", mono: true, p: [[0.06, 0.03, 0.4], [0.03, 0.015, 0.2], [0.021, 0.0105, 0.14], [0.018, 0.0071, 0.12]] },
     { id: "kimi-k3", n: "Kimi K3", ic: "moonshot", mono: true, p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
@@ -167,10 +170,22 @@ Prices are in USD per million tokens. Each request is billed at the rate of its 
 |  | `standard` | \$0.475 | \$0.055 | \$1.70 |
 |  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
 |  | `batch` | \$0.285 | \$0.033 | \$1.02 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**GLM-5.3-Flash**](#calc-glm-5-3-flash)<br /><a href="https://huggingface.co/zai-org/GLM-5.3-Flash"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3-Flash</code></a> | `asap` | \$0.12 | \$0.023 | \$0.40 |
+|  | `standard` | \$0.06 | \$0.0115 | \$0.20 |
+|  | `flex` | \$0.042 | \$0.0081 | \$0.14 |
+|  | `batch` | \$0.036 | \$0.0069 | \$0.12 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>[**DeepSeek V4 Pro**](#calc-deepseek-v4-pro)<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4-Pro</code></a> | `asap` | \$1.05 | \$0.035 | \$3.15 |
+|  | `standard` | \$0.525 | \$0.0175 | \$1.575 |
+|  | `flex` | \$0.3675 | \$0.0123 | \$1.1025 |
+|  | `batch` | \$0.315 | \$0.0105 | \$0.945 |
 | <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>[**DeepSeek V4.1 Flash**](#calc-deepseek-v4-1-flash)<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
 |  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
 |  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
 |  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/qwen-color.svg" alt="Qwen" width="16" height="16" noZoom style={{margin:0}} /></span>[**Qwen3.6 35B-A3B**](#calc-qwen3-6-35b-a3b)<br /><a href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B"><code style={{fontSize:"0.75em"}}>Qwen/Qwen3.6-35B-A3B</code></a> | `asap` | \$0.22 | \$0.045 | \$0.90 |
+|  | `standard` | \$0.11 | \$0.0225 | \$0.45 |
+|  | `flex` | \$0.077 | \$0.0158 | \$0.315 |
+|  | `batch` | \$0.066 | \$0.0135 | \$0.27 |
 | <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{margin:0}} /></span>[**Gemma 4 31B**](#calc-gemma-4-31b)<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code style={{fontSize:"0.75em"}}>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
 |  | `standard` | \$0.07 | \$0.03 | \$0.20 |
 |  | `flex` | \$0.049 | \$0.021 | \$0.14 |
@@ -188,7 +203,7 @@ Cached input applies to prompt tokens served from the prefix cache.
 
 ## Custom pricing
 
-Impala schedules every request around its deadline and places it on the most efficient capacity available. The more we know about your workload, the more we can optimize it, and the lower your price. Tell us how soon you need results and how much you run, and we'll price your exact workload instead of the nearest window.
+Impala fits every request to its deadline on the most efficient capacity. Tell us how soon you need results and how much you run, and we'll price your exact workload.
 
 <PriceCalculator />
 
