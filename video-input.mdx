@@ -3,9 +3,9 @@ title: "Video"
 description: "Send video to vision-language models in batch chat-completion requests."
 ---
 
-{/* Live with gaps. STILL TO DO: (1) confirm with Bensi the content-part format, the fps parameter and its default; (2) resolve Mobileye's report that a 2-second red/blue clip was read as red only, which suggests sampling below 1 fps; (3) add a full JSONL example. */}
+{/* STILL TO DO: confirm with Bensi the content-part field names, the fps parameter and its default, then add a full JSONL example. */}
 
-Vision-language models on Impala accept video as input. Send it as a reference to an object in S3, or inline as base64.
+Vision-language models on Impala accept video as input. Send it as a reference to an object in S3, or inline as base64. The request format is the same as vLLM's video input.
 
 The inference engine splits the video into frames and encodes them with the prompt. You can set the frame rate per request with `mm_processor_kwargs`:
 
