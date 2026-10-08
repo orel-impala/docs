@@ -26,6 +26,8 @@ export const PriceCalculator = () => {
   const [tok, setTok] = useState(2);
   const [t, setT] = useState(1);
   const box = useRef(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => { if (!box.current || typeof IntersectionObserver === "undefined") { setSeen(true); return; } const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { setSeen(true); io.disconnect(); } }, { threshold: 0.3 }); io.observe(box.current); return () => io.disconnect(); }, []);
   useEffect(() => {
     const pick = () => {
       const h = (window.location.hash || "").replace("#calc-", "");
@@ -72,7 +74,7 @@ export const PriceCalculator = () => {
   const cx = X(t), cy = Y(val);
   const l1 = "$" + (val >= 0.1 ? val.toFixed(2) : (+val.toPrecision(2)).toString());
   const pct = Math.round((1 - val / px[0]) * 100);
-  const l2 = pct >= 1 ? pct + "% less than asap" : "";
+  const l2 = pct >= 1 ? pct + "% cheaper than asap" : "";
   const lw = Math.max(l1.length * 8, l2.length * 6) + 22;
   const lh = l2 ? 42 : 26;
   const lx = Math.max(L - 10, Math.min(R + 10 - lw, cx - lw / 2));
@@ -114,6 +116,7 @@ export const PriceCalculator = () => {
       </div>
       <svg viewBox={"0 0 " + VW + " " + VH} onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + ["input", "cached input", "output"][tok] + " tokens: " + l1 + (l2 ? ", " + l2 : "")} style={{ width: "100%", display: "block", marginTop: 10, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
         <defs>
+          <style>{"@keyframes pcdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}@keyframes pcfade{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion: reduce){.pcanim{animation:none!important;opacity:1!important;stroke-dashoffset:0!important}}"}</style>
           <linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="rgb(var(--primary-light))" stopOpacity="0.32" />
             <stop offset="1" stopColor="rgb(var(--primary-light))" stopOpacity="0" />
@@ -125,8 +128,8 @@ export const PriceCalculator = () => {
             <text x={L - 8} y={Y(v) + 4} textAnchor="end" fontSize="11" fill={muted}>{"$" + (+v.toPrecision(3))}</text>
           </g>
         ))}
-        <path d={area} fill="url(#pcfill)" />
-        <path d={line} fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" />
+        <path key={"a" + mi + tok} className="pcanim" d={area} fill="url(#pcfill)" style={{ opacity: seen ? undefined : 0, animation: seen ? "pcfade .9s ease .2s both" : "none" }} />
+        <path key={"l" + mi + tok} className="pcanim" d={line} pathLength="1" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" style={{ strokeDasharray: 1, strokeDashoffset: seen ? 0 : 1, animation: seen ? "pcdraw 1.1s cubic-bezier(.22,1,.36,1) both" : "none" }} />
         {px.map((v, w) => (
           <g key={w}>
             <circle cx={X(w)} cy={Y(v)} r="3.5" fill={accent} fillOpacity="0.6" />
@@ -134,12 +137,14 @@ export const PriceCalculator = () => {
             <text x={X(w)} y={BASE + 44} textAnchor={w === 0 ? "start" : w === 3 ? "end" : "middle"} fontSize="11" fill={muted}>{USE[w]}</text>
           </g>
         ))}
+        <g key={"c" + mi + tok} className="pcanim" style={{ opacity: seen ? undefined : 0, animation: seen ? "pcfade .4s ease .8s both" : "none" }}>
         <line x1={cx} y1={cy} x2={cx} y2={BASE} stroke={accent} strokeOpacity="0.35" strokeDasharray="2 3" />
         <circle cx={cx} cy={cy} r="6" fill={accent} stroke="rgb(var(--primary-light) / 0.3)" strokeWidth="6" />
         <g transform={"translate(" + lx + "," + ly + ")"}>
           <rect width={lw} height={lh} rx="7" fill="rgb(var(--gray-500) / 0.16)" />
           <text x={lw / 2} y="18" textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor">{l1}</text>
           {l2 && <text x={lw / 2} y="34" textAnchor="middle" fontSize="11" fill={muted}>{l2}</text>}
+        </g>
         </g>
       </svg>
       <div style={{ color: muted, fontSize: 12, textAlign: "center", marginTop: 12, paddingBottom: 4 }}>USD per 1M {["input", "cached input", "output"][tok]} tokens</div>
