@@ -18,67 +18,65 @@ export const PriceCalculator = () => {
     { n: "gpt-oss-120b", p: [[0.06, 0.03, 0.4], [0.03, 0.015, 0.2], [0.021, 0.0105, 0.14], [0.018, 0.0071, 0.12]] },
     { n: "Kimi K3", p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
   ];
+  const TALK = "https://meetings-eu1.hubspot.com/ran-friedman";
   const [mi, setMi] = useState(0);
-  const [wi, setWi] = useState(1);
-  const [inM, setInM] = useState(10);
-  const [outM, setOutM] = useState(2);
+  const [tok, setTok] = useState(2);
+  const [pos, setPos] = useState(100);
   const m = M[mi];
-  const cost = (w) => (Number(inM) || 0) * m.p[w][0] + (Number(outM) || 0) * m.p[w][2];
-  const costs = W.map((_, w) => cost(w));
-  const fmt = (v) => {
-    if (v >= 1) return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    let s = v.toFixed(4).replace(/0+$/, "");
-    if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
-    return "$" + s;
-  };
+  const px = W.map((_, w) => m.p[w][tok]);
   const fp = (v) => {
     let s = v.toFixed(4).replace(/0+$/, "");
     if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
     return "$" + s;
   };
-  const max = Math.max(...costs) || 1;
-  const X = (w) => 40 + w * 160;
-  const Y = (v) => 150 - (v / max) * 120;
-  const line = costs.map((v, w) => (w ? "L" : "M") + X(w) + " " + Y(v)).join(" ");
-  const line2 = line + " L" + X(3) + " 150 L" + X(0) + " 150 Z";
+  const snap = (v) => { const t = Math.round(v / 100); return Math.abs(v - t * 100) <= 6 ? t * 100 : v; };
+  const at = pos / 100;
+  const lo = Math.floor(at), hi = Math.min(3, Math.ceil(at));
+  const onTier = lo === hi;
+  const max = Math.max(...px) || 1;
+  const X = (t) => 50 + t * 150;
+  const Y = (v) => 150 - (v / max) * 115;
+  const yAt = onTier ? px[lo] : px[lo] + (px[hi] - px[lo]) * (at - lo);
+  const line = px.map((v, w) => (w ? "L" : "M") + X(w) + " " + Y(v)).join(" ");
+  const area = line + " L" + X(3) + " 150 L" + X(0) + " 150 Z";
   const muted = "rgb(var(--gray-500))";
   const border = "1px solid rgb(var(--gray-500) / 0.3)";
   const accent = "rgb(var(--primary))";
-  const pill = (on) => ({ padding: "4px 14px", borderRadius: 999, border: on ? "1px solid " + accent : border, background: on ? "rgb(var(--primary) / 0.12)" : "transparent", color: "inherit", fontSize: 14, fontFamily: "var(--font-mono, monospace)", cursor: "pointer" });
-  const field = { padding: "6px 10px", borderRadius: 8, border: border, background: "transparent", color: "inherit", fontSize: 14 };
+  const pill = (on) => ({ padding: "4px 14px", borderRadius: 999, border: on ? "1px solid " + accent : border, background: on ? "rgb(var(--primary) / 0.12)" : "transparent", color: "inherit", fontSize: 14, cursor: "pointer" });
+  const TOK = ["input", "cached input", "output"];
   return (
     <div className="not-prose" style={{ border: border, borderRadius: 16, padding: 24, margin: "16px 0" }}>
-      <div style={{ fontSize: 20, fontWeight: 600 }}>How much would you pay?</div>
-      <div style={{ color: muted, fontSize: 14, marginTop: 4 }}>Choose a model and a completion window. The longer the window, the lower the price.</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16, alignItems: "center" }}>
-        <select value={mi} onChange={(e) => setMi(Number(e.target.value))} style={field} aria-label="Model">
+      <div style={{ fontSize: 20, fontWeight: 600 }}>Price per window</div>
+      <div style={{ color: muted, fontSize: 14, marginTop: 4 }}>Drag along the curve. The four windows have list prices; anything in between is a custom window we can set up for you.</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, alignItems: "center" }}>
+        <select value={mi} onChange={(e) => setMi(Number(e.target.value))} aria-label="Model" style={{ padding: "6px 10px", borderRadius: 8, border: border, background: "transparent", color: "inherit", fontSize: 14 }}>
           {M.map((x, i) => <option key={x.n} value={i}>{x.n}</option>)}
         </select>
-        <label style={{ fontSize: 14, color: muted }}>Input <input type="number" min="0" value={inM} onChange={(e) => setInM(e.target.value)} style={{ ...field, width: 80 }} /> M tokens</label>
-        <label style={{ fontSize: 14, color: muted }}>Output <input type="number" min="0" value={outM} onChange={(e) => setOutM(e.target.value)} style={{ ...field, width: 80 }} /> M tokens</label>
+        {[0, 2].map((t) => <button key={t} type="button" onClick={() => setTok(t)} style={pill(tok === t)}>{TOK[t]}</button>)}
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
-        {W.map((w, i) => <button key={w} type="button" onClick={() => setWi(i)} style={pill(i === wi)}>{w}</button>)}
-      </div>
-      <svg viewBox="0 0 560 180" style={{ width: "100%", maxWidth: 560, marginTop: 16, display: "block" }} role="img" aria-label="Estimated cost by completion window">
-        <path d={line2} fill="rgb(var(--primary) / 0.12)" />
-        <path d={line} fill="none" stroke={accent} strokeWidth="2" />
-        <line x1="40" y1="150" x2="520" y2="150" stroke="rgb(var(--gray-500) / 0.4)" />
-        {costs.map((v, w) => (
-          <g key={w} onClick={() => setWi(w)} style={{ cursor: "pointer" }}>
-            <circle cx={X(w)} cy={Y(v)} r={w === wi ? 6 : 4} fill={w === wi ? accent : "rgb(var(--gray-500))"} />
+      <svg viewBox="0 0 560 185" style={{ width: "100%", maxWidth: 560, marginTop: 16, display: "block" }} role="img" aria-label="Price per million tokens by completion window">
+        <path d={area} fill="rgb(var(--primary) / 0.10)" />
+        <path d={line} fill="none" stroke={accent} strokeWidth="2" strokeDasharray="5 4" />
+        <line x1={X(0)} y1="150" x2={X(3)} y2="150" stroke="rgb(var(--gray-500) / 0.4)" />
+        {px.map((v, w) => (
+          <g key={w} onClick={() => setPos(w * 100)} style={{ cursor: "pointer" }}>
+            <circle cx={X(w)} cy={Y(v)} r="5" fill={accent} />
+            <text x={X(w)} y={Y(v) - 10} textAnchor="middle" fontSize="12" fill="currentColor">{fp(v)}</text>
             <text x={X(w)} y="170" textAnchor="middle" fontSize="12" fill="rgb(var(--gray-500))" fontFamily="monospace">{W[w]}</text>
-            {w === wi && <text x={X(w)} y={Y(v) - 12} textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor">{fmt(v)}</text>}
           </g>
         ))}
+        {!onTier && <line x1={X(at)} y1={Y(yAt)} x2={X(at)} y2="150" stroke={accent} strokeOpacity="0.5" />}
+        {!onTier && <circle cx={X(at)} cy={Y(yAt)} r="7" fill="none" stroke={accent} strokeWidth="2" />}
+        {onTier && <circle cx={X(lo)} cy={Y(px[lo])} r="9" fill="none" stroke={accent} strokeWidth="2" />}
       </svg>
-      <input type="range" min="0" max="3" step="1" value={wi} onChange={(e) => setWi(Number(e.target.value))} aria-label="Completion window" style={{ width: "100%", maxWidth: 480, margin: "4px 0 0 40px", accentColor: accent }} />
-      <div style={{ marginTop: 16, fontSize: 15 }}>
-        Estimated cost: <span style={{ fontSize: 22, fontWeight: 700 }}>{fmt(costs[wi])}</span>
-        {wi > 0 && costs[0] > 0 && <span style={{ color: muted }}> · {Math.round((1 - costs[wi] / costs[0]) * 100)}% less than asap</span>}
-      </div>
-      <div style={{ color: muted, fontSize: 13, marginTop: 4 }}>
-        {m.n} on <code>{W[wi]}</code>: {fp(m.p[wi][0])} input · {fp(m.p[wi][1])} cached input · {fp(m.p[wi][2])} output, per 1M tokens. Cached input not included in the estimate.
+      <input type="range" min="0" max="300" step="1" value={pos} onChange={(e) => setPos(snap(Number(e.target.value)))} aria-label="Completion window" style={{ width: "calc(100% - 20px)", maxWidth: 470, margin: "0 0 0 45px", accentColor: accent }} />
+      <div style={{ marginTop: 16, fontSize: 15, minHeight: 48 }}>
+        {onTier ? (
+          <span><code>{W[lo]}</code> · <span style={{ fontSize: 22, fontWeight: 700 }}>{fp(px[lo])}</span> <span style={{ color: muted }}>per 1M {TOK[tok]} tokens, list price</span></span>
+        ) : (
+          <span>Custom window between <code>{W[lo]}</code> and <code>{W[hi]}</code> · <span style={{ fontSize: 22, fontWeight: 700 }}>{fp(px[hi])}–{fp(px[lo])}</span> <span style={{ color: muted }}>per 1M {TOK[tok]} tokens</span>
+            <br /><a href={TALK} target="_blank" style={{ color: accent, fontWeight: 600 }}>Talk to us to set a custom window →</a></span>
+        )}
       </div>
     </div>
   );
