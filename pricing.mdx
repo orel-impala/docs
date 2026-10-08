@@ -70,13 +70,16 @@ export const PriceCalculator = () => {
   };
   const val = f(t);
   const cx = X(t), cy = Y(val);
-  const l1 = "$" + (val >= 1 ? val.toFixed(2) : val >= 0.1 ? val.toFixed(3) : (+val.toPrecision(2)).toString());
-  const lw = l1.length * 8 + 20;
+  const l1 = "$" + (val >= 0.1 ? val.toFixed(2) : (+val.toPrecision(2)).toString());
+  const pct = Math.round((1 - val / px[0]) * 100);
+  const l2 = pct >= 1 ? pct + "% less than asap" : "";
+  const lw = Math.max(l1.length * 8, l2.length * 6) + 22;
+  const lh = l2 ? 42 : 26;
   const lx = Math.max(L - 10, Math.min(R + 10 - lw, cx - lw / 2));
-  const ly = cy - 38 < 2 ? cy + 14 : cy - 38;
+  const ly = cy - lh - 12 < 2 ? cy + 14 : cy - lh - 12;
   const muted = "rgb(var(--gray-500))";
   const hair = "rgb(var(--gray-500) / 0.25)";
-  const accent = "rgb(var(--primary))";
+  const accent = "rgb(var(--primary-light))";
   const Logo = ({ x, size }) => x.mono ? (
     <span style={{ display: "inline-flex", flex: "none" }}>
       <img src={P + "light/" + x.ic + ".png"} width={size} height={size} alt="" className="dark:hidden" style={{ margin: 0 }} />
@@ -106,14 +109,14 @@ export const PriceCalculator = () => {
           )}
         </div>
         <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 8, border: "1px solid " + hair }}>
-          {[0, 2].map((k) => <button key={k} type="button" onClick={() => setTok(k)} style={seg(tok === k)}>{k === 0 ? "Input" : "Output"}</button>)}
+          {[0, 1, 2].map((k) => <button key={k} type="button" onClick={() => setTok(k)} style={seg(tok === k)}>{["Input", "Cached", "Output"][k]}</button>)}
         </div>
       </div>
-      <svg viewBox={"0 0 " + VW + " " + VH} onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + (tok ? "output" : "input") + " tokens: " + l1} style={{ width: "100%", display: "block", marginTop: 10, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
+      <svg viewBox={"0 0 " + VW + " " + VH} onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + ["input", "cached input", "output"][tok] + " tokens: " + l1 + (l2 ? ", " + l2 : "")} style={{ width: "100%", display: "block", marginTop: 10, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
         <defs>
           <linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="rgb(var(--primary))" stopOpacity="0.28" />
-            <stop offset="1" stopColor="rgb(var(--primary))" stopOpacity="0" />
+            <stop offset="0" stopColor="rgb(var(--primary-light))" stopOpacity="0.32" />
+            <stop offset="1" stopColor="rgb(var(--primary-light))" stopOpacity="0" />
           </linearGradient>
         </defs>
         {ticks.map((v, i) => (
@@ -132,13 +135,14 @@ export const PriceCalculator = () => {
           </g>
         ))}
         <line x1={cx} y1={cy} x2={cx} y2={BASE} stroke={accent} strokeOpacity="0.35" strokeDasharray="2 3" />
-        <circle cx={cx} cy={cy} r="6" fill={accent} stroke="rgb(var(--primary) / 0.25)" strokeWidth="6" />
+        <circle cx={cx} cy={cy} r="6" fill={accent} stroke="rgb(var(--primary-light) / 0.3)" strokeWidth="6" />
         <g transform={"translate(" + lx + "," + ly + ")"}>
-          <rect width={lw} height="26" rx="7" fill="rgb(var(--gray-500) / 0.16)" />
+          <rect width={lw} height={lh} rx="7" fill="rgb(var(--gray-500) / 0.16)" />
           <text x={lw / 2} y="18" textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor">{l1}</text>
+          {l2 && <text x={lw / 2} y="34" textAnchor="middle" fontSize="11" fill={muted}>{l2}</text>}
         </g>
       </svg>
-      <div style={{ color: muted, fontSize: 12, textAlign: "center", marginTop: 12, paddingBottom: 4 }}>USD per 1M {tok ? "output" : "input"} tokens</div>
+      <div style={{ color: muted, fontSize: 12, textAlign: "center", marginTop: 12, paddingBottom: 4 }}>USD per 1M {["input", "cached input", "output"][tok]} tokens</div>
     </div>
   );
 };
@@ -176,7 +180,7 @@ Cached input applies to prompt tokens served from the prefix cache.
 
 ## Custom pricing
 
-The four windows are starting points. Tell us how soon your workload really needs results, and we'll price a window for exactly that, so you pay for the speed you use and nothing more.
+Impala schedules every request around its deadline and places it on the most efficient capacity available. The more we know about your workload, the more we can optimize it, and the lower your price. Tell us how soon you need results and how much you run, and we'll price your exact workload instead of the nearest window.
 
 <PriceCalculator />
 
