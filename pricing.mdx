@@ -31,6 +31,11 @@ export const PriceCalculator = () => {
     if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
     return "$" + s;
   };
+  const fp = (v) => {
+    let s = v.toFixed(4).replace(/0+$/, "");
+    if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
+    return "$" + s;
+  };
   const max = Math.max(...costs) || 1;
   const X = (w) => 40 + w * 160;
   const Y = (v) => 150 - (v / max) * 120;
@@ -73,7 +78,7 @@ export const PriceCalculator = () => {
         {wi > 0 && costs[0] > 0 && <span style={{ color: muted }}> · {Math.round((1 - costs[wi] / costs[0]) * 100)}% less than asap</span>}
       </div>
       <div style={{ color: muted, fontSize: 13, marginTop: 4 }}>
-        {m.n} on <code>{W[wi]}</code>: {fmt(m.p[wi][0])} input · {fmt(m.p[wi][1])} cached input · {fmt(m.p[wi][2])} output, per 1M tokens. Cached input not included in the estimate.
+        {m.n} on <code>{W[wi]}</code>: {fp(m.p[wi][0])} input · {fp(m.p[wi][1])} cached input · {fp(m.p[wi][2])} output, per 1M tokens. Cached input not included in the estimate.
       </div>
     </div>
   );
@@ -85,27 +90,27 @@ Prices are in USD per million tokens. Each request is billed at the rate of its 
 
 | Model | [Window](/completion-windows) | Input | Cached input | Output |
 | --- | --- | --- | --- | --- |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{whiteSpace:"nowrap"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{fontSize:"0.75em"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
 |  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
 |  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
 |  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{whiteSpace:"nowrap"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
 |  | `standard` | \$0.55 | \$0.10 | \$1.75 |
 |  | `flex` | \$0.385 | \$0.07 | \$1.225 |
 |  | `batch` | \$0.33 | \$0.06 | \$1.05 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{whiteSpace:"nowrap"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
 |  | `standard` | \$0.475 | \$0.055 | \$1.70 |
 |  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
 |  | `batch` | \$0.285 | \$0.033 | \$1.02 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{whiteSpace:"nowrap"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
 |  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
 |  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
 |  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/openai.png" alt="OpenAI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/openai.png" alt="OpenAI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**gpt-oss-120b**<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code style={{whiteSpace:"nowrap"}}>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/openai.png" alt="OpenAI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/openai.png" alt="OpenAI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**gpt-oss-120b**<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code style={{fontSize:"0.75em"}}>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
 |  | `standard` | \$0.03 | \$0.015 | \$0.20 |
 |  | `flex` | \$0.021 | \$0.0105 | \$0.14 |
 |  | `batch` | \$0.018 | \$0.0071 | \$0.12 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{margin:0}} /></span>**Gemma 4 31B**<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code style={{whiteSpace:"nowrap"}}>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{margin:0}} /></span>**Gemma 4 31B**<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code style={{fontSize:"0.75em"}}>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
 |  | `standard` | \$0.07 | \$0.03 | \$0.20 |
 |  | `flex` | \$0.049 | \$0.021 | \$0.14 |
 |  | `batch` | \$0.042 | \$0.018 | \$0.12 |
