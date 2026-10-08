@@ -114,6 +114,7 @@ export const PriceCalculator = () => {
           {[0, 1, 2].map((k) => <button key={k} type="button" onClick={() => setTok(k)} style={seg(tok === k)}>{["Input", "Cached", "Output"][k]}</button>)}
         </div>
       </div>
+      <div style={{ position: "relative" }}>
       <svg viewBox={"0 0 " + VW + " " + VH} onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + ["input", "cached input", "output"][tok] + " tokens: " + l1 + (l2 ? ", " + l2 : "")} style={{ width: "100%", display: "block", marginTop: 10, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
         <defs>
           <style>{"@keyframes pcdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}@keyframes pcfade{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion: reduce){.pcanim{animation:none!important;opacity:1!important;stroke-dashoffset:0!important}}"}</style>
@@ -140,13 +141,15 @@ export const PriceCalculator = () => {
         <g key={"c" + mi + tok} className="pcanim" style={{ opacity: seen ? undefined : 0, animation: seen ? "pcfade .4s ease .8s both" : "none" }}>
         <line x1={cx} y1={cy} x2={cx} y2={BASE} stroke={accent} strokeOpacity="0.35" strokeDasharray="2 3" />
         <circle cx={cx} cy={cy} r="6" fill={accent} stroke="rgb(var(--primary-light) / 0.3)" strokeWidth="6" />
-        <g transform={"translate(" + lx + "," + ly + ")"}>
-          <rect width={lw} height={lh} rx="7" fill="rgb(var(--gray-500) / 0.16)" />
-          <text x={lw / 2} y="18" textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor">{l1}</text>
-          {l2 && <text x={lw / 2} y="34" textAnchor="middle" fontSize="11" fill={muted}>{l2}</text>}
-        </g>
         </g>
       </svg>
+      {(() => { const tx = t < 0.35 ? "-12%" : t > 2.65 ? "-88%" : "-50%"; const below = cy < 90; return (
+        <div key={"t" + mi + tok} className="bg-background-light dark:bg-background-dark pcanim" style={{ position: "absolute", left: (cx / VW) * 100 + "%", top: (cy / VH) * 100 + "%", transform: "translate(" + tx + ", " + (below ? "16px" : "calc(-100% - 16px)") + ")", padding: "6px 12px", borderRadius: 8, border: "1px solid " + hair, boxShadow: "0 6px 20px rgb(0 0 0 / 0.2)", textAlign: "center", pointerEvents: "none", whiteSpace: "nowrap", lineHeight: 1.35, opacity: seen ? undefined : 0, animation: seen ? "pcfade .4s ease .8s both" : "none" }}>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{l1}</div>
+          {l2 && <div style={{ fontSize: 12, color: muted }}>{l2}</div>}
+        </div>
+      ); })()}
+      </div>
       <div style={{ color: muted, fontSize: 12, textAlign: "center", marginTop: 12, paddingBottom: 4 }}>USD per 1M {["input", "cached input", "output"][tok]} tokens</div>
     </div>
   );
