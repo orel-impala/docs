@@ -6,33 +6,106 @@ description: "Per-token prices by model and completion window."
 {/* DRAFT. Pricing decided Oct 5 (Orel). BEFORE PUBLISHING: (1) add "pricing" and "completion-windows" to docs.json, in the Introduction group after "async-inference"; (2) resolve every TODO here and in completion-windows.mdx; (3) remove this comment. */}
 {/* Pricing rule (sheet tab 1, Oct 6): asap is set at about Valar's Now price, rounded. standard = 0.5x, flex = 0.35x, batch = 0.3x of asap, capped at 5% under the cheapest competitor's slow window per token type (Valar Flex, Sail Flex, Fireworks Batch), so batch is always the cheapest on the market. Cached input keeps each model's market ratio to input. Customer deals are discounts off this list. */}
 {/* TODO before publishing: at real GPU cost ($9.50/GPU-hr B300), Kimi K3 and GLM flex/batch fall below cost (sheet tab 7). Raise their async floor to ~0.45x asap or bar deal discounts on async windows. */}
-{/* TODO: confirm we serve every model below at launch, and the exact model IDs the API accepts. Under each name: its Hugging Face repo. Logos: LobeHub icons, the same set app.getimpala.ai uses on the Run tab. */}
+{/* TODO: confirm we serve every model below at launch, and the exact model IDs the API accepts. Under each name: its Hugging Face repo. Logos: LobeHub icons, the same set app.getimpala.ai uses on the Run tab (black/white pair for mono logos so they read in light and dark mode). Calculator below follows Yael's Figma (Impala website > Pricing, node 626-9919); its prices are hardcoded, keep in sync with the table. */}
+
+export const PriceCalculator = () => {
+  const W = ["asap", "standard", "flex", "batch"];
+  const M = [
+    { n: "Kimi K3", p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
+    { n: "GLM-5.3", p: [[1.1, 0.2, 3.5], [0.55, 0.1, 1.75], [0.385, 0.07, 1.225], [0.33, 0.06, 1.05]] },
+    { n: "GLM-5.2", p: [[0.95, 0.11, 3.4], [0.475, 0.055, 1.7], [0.3325, 0.0385, 1.19], [0.285, 0.033, 1.02]] },
+    { n: "DeepSeek V4.1 Flash", p: [[0.25, 0.025, 1.0], [0.125, 0.0125, 0.5], [0.0875, 0.0088, 0.35], [0.075, 0.0028, 0.285]] },
+    { n: "gpt-oss-120b", p: [[0.06, 0.03, 0.4], [0.03, 0.015, 0.2], [0.021, 0.0105, 0.14], [0.018, 0.0071, 0.12]] },
+    { n: "Gemma 4 31B", p: [[0.14, 0.06, 0.4], [0.07, 0.03, 0.2], [0.049, 0.021, 0.14], [0.042, 0.018, 0.12]] },
+  ];
+  const [mi, setMi] = useState(0);
+  const [wi, setWi] = useState(1);
+  const [inM, setInM] = useState(10);
+  const [outM, setOutM] = useState(2);
+  const m = M[mi];
+  const cost = (w) => (Number(inM) || 0) * m.p[w][0] + (Number(outM) || 0) * m.p[w][2];
+  const costs = W.map((_, w) => cost(w));
+  const fmt = (v) => {
+    if (v >= 1) return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let s = v.toFixed(4).replace(/0+$/, "");
+    if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
+    return "$" + s;
+  };
+  const max = Math.max(...costs) || 1;
+  const X = (w) => 40 + w * 160;
+  const Y = (v) => 150 - (v / max) * 120;
+  const line = costs.map((v, w) => (w ? "L" : "M") + X(w) + " " + Y(v)).join(" ");
+  const line2 = line + " L" + X(3) + " 150 L" + X(0) + " 150 Z";
+  const muted = "rgb(var(--gray-500))";
+  const border = "1px solid rgb(var(--gray-500) / 0.3)";
+  const accent = "rgb(var(--primary))";
+  const pill = (on) => ({ padding: "4px 14px", borderRadius: 999, border: on ? "1px solid " + accent : border, background: on ? "rgb(var(--primary) / 0.12)" : "transparent", color: "inherit", fontSize: 14, fontFamily: "var(--font-mono, monospace)", cursor: "pointer" });
+  const field = { padding: "6px 10px", borderRadius: 8, border: border, background: "transparent", color: "inherit", fontSize: 14 };
+  return (
+    <div className="not-prose" style={{ border: border, borderRadius: 16, padding: 24, margin: "16px 0" }}>
+      <div style={{ fontSize: 20, fontWeight: 600 }}>How much would you pay?</div>
+      <div style={{ color: muted, fontSize: 14, marginTop: 4 }}>Choose a model and a completion window. The longer the window, the lower the price.</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16, alignItems: "center" }}>
+        <select value={mi} onChange={(e) => setMi(Number(e.target.value))} style={field} aria-label="Model">
+          {M.map((x, i) => <option key={x.n} value={i}>{x.n}</option>)}
+        </select>
+        <label style={{ fontSize: 14, color: muted }}>Input <input type="number" min="0" value={inM} onChange={(e) => setInM(e.target.value)} style={{ ...field, width: 80 }} /> M tokens</label>
+        <label style={{ fontSize: 14, color: muted }}>Output <input type="number" min="0" value={outM} onChange={(e) => setOutM(e.target.value)} style={{ ...field, width: 80 }} /> M tokens</label>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+        {W.map((w, i) => <button key={w} type="button" onClick={() => setWi(i)} style={pill(i === wi)}>{w}</button>)}
+      </div>
+      <svg viewBox="0 0 560 180" style={{ width: "100%", maxWidth: 560, marginTop: 16, display: "block" }} role="img" aria-label="Estimated cost by completion window">
+        <path d={line2} fill="rgb(var(--primary) / 0.12)" />
+        <path d={line} fill="none" stroke={accent} strokeWidth="2" />
+        <line x1="40" y1="150" x2="520" y2="150" stroke="rgb(var(--gray-500) / 0.4)" />
+        {costs.map((v, w) => (
+          <g key={w} onClick={() => setWi(w)} style={{ cursor: "pointer" }}>
+            <circle cx={X(w)} cy={Y(v)} r={w === wi ? 6 : 4} fill={w === wi ? accent : "rgb(var(--gray-500))"} />
+            <text x={X(w)} y="170" textAnchor="middle" fontSize="12" fill="rgb(var(--gray-500))" fontFamily="monospace">{W[w]}</text>
+            {w === wi && <text x={X(w)} y={Y(v) - 12} textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor">{fmt(v)}</text>}
+          </g>
+        ))}
+      </svg>
+      <input type="range" min="0" max="3" step="1" value={wi} onChange={(e) => setWi(Number(e.target.value))} aria-label="Completion window" style={{ width: "100%", maxWidth: 480, margin: "4px 0 0 40px", accentColor: accent }} />
+      <div style={{ marginTop: 16, fontSize: 15 }}>
+        Estimated cost: <span style={{ fontSize: 22, fontWeight: 700 }}>{fmt(costs[wi])}</span>
+        {wi > 0 && costs[0] > 0 && <span style={{ color: muted }}> · {Math.round((1 - costs[wi] / costs[0]) * 100)}% less than asap</span>}
+      </div>
+      <div style={{ color: muted, fontSize: 13, marginTop: 4 }}>
+        {m.n} on <code>{W[wi]}</code>: {fmt(m.p[wi][0])} input · {fmt(m.p[wi][1])} cached input · {fmt(m.p[wi][2])} output, per 1M tokens. Cached input not included in the estimate.
+      </div>
+    </div>
+  );
+};
 
 Prices are in USD per million tokens. Each request is billed at the rate of its [completion window](/completion-windows): the longer the window, the lower the price.
 
+<PriceCalculator />
+
 | Model | [Window](/completion-windows) | Input | Cached input | Output |
 | --- | --- | --- | --- | --- |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/moonshot.svg" alt="Moonshot AI" width="16" height="16" noZoom className="dark:invert" style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{whiteSpace:"nowrap"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
 |  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
 |  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
 |  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/zai.svg" alt="Z.ai" width="16" height="16" noZoom className="dark:invert" style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{whiteSpace:"nowrap"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
 |  | `standard` | \$0.55 | \$0.10 | \$1.75 |
 |  | `flex` | \$0.385 | \$0.07 | \$1.225 |
 |  | `batch` | \$0.33 | \$0.06 | \$1.05 |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/zai.svg" alt="Z.ai" width="16" height="16" noZoom className="dark:invert" style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{whiteSpace:"nowrap"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
 |  | `standard` | \$0.475 | \$0.055 | \$1.70 |
 |  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
 |  | `batch` | \$0.285 | \$0.033 | \$1.02 |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{whiteSpace:"nowrap"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
 |  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
 |  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
 |  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/openai.svg" alt="OpenAI" width="16" height="16" noZoom className="dark:invert" style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**gpt-oss-120b**<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/openai.png" alt="OpenAI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/openai.png" alt="OpenAI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**gpt-oss-120b**<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code style={{whiteSpace:"nowrap"}}>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
 |  | `standard` | \$0.03 | \$0.015 | \$0.20 |
 |  | `flex` | \$0.021 | \$0.0105 | \$0.14 |
 |  | `batch` | \$0.018 | \$0.0071 | \$0.12 |
-| <img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{display:"inline",margin:"0 6px 0 0",verticalAlign:"-3px"}} />**Gemma 4 31B**<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{margin:0}} /></span>**Gemma 4 31B**<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code style={{whiteSpace:"nowrap"}}>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
 |  | `standard` | \$0.07 | \$0.03 | \$0.20 |
 |  | `flex` | \$0.049 | \$0.021 | \$0.14 |
 |  | `batch` | \$0.042 | \$0.018 | \$0.12 |
