@@ -11,12 +11,12 @@ description: "Per-token prices by model and completion window."
 export const PriceCalculator = () => {
   const W = ["asap", "standard", "flex", "batch"];
   const M = [
-    { n: "Kimi K3", p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
-    { n: "GLM-5.3", p: [[1.1, 0.2, 3.5], [0.55, 0.1, 1.75], [0.385, 0.07, 1.225], [0.33, 0.06, 1.05]] },
-    { n: "GLM-5.2", p: [[0.95, 0.11, 3.4], [0.475, 0.055, 1.7], [0.3325, 0.0385, 1.19], [0.285, 0.033, 1.02]] },
-    { n: "DeepSeek V4.1 Flash", p: [[0.25, 0.025, 1.0], [0.125, 0.0125, 0.5], [0.0875, 0.0088, 0.35], [0.075, 0.0028, 0.285]] },
     { n: "gpt-oss-120b", p: [[0.06, 0.03, 0.4], [0.03, 0.015, 0.2], [0.021, 0.0105, 0.14], [0.018, 0.0071, 0.12]] },
     { n: "Gemma 4 31B", p: [[0.14, 0.06, 0.4], [0.07, 0.03, 0.2], [0.049, 0.021, 0.14], [0.042, 0.018, 0.12]] },
+    { n: "DeepSeek V4.1 Flash", p: [[0.25, 0.025, 1.0], [0.125, 0.0125, 0.5], [0.0875, 0.0088, 0.35], [0.075, 0.0028, 0.285]] },
+    { n: "GLM-5.2", p: [[0.95, 0.11, 3.4], [0.475, 0.055, 1.7], [0.3325, 0.0385, 1.19], [0.285, 0.033, 1.02]] },
+    { n: "GLM-5.3", p: [[1.1, 0.2, 3.5], [0.55, 0.1, 1.75], [0.385, 0.07, 1.225], [0.33, 0.06, 1.05]] },
+    { n: "Kimi K3", p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
   ];
   const [mi, setMi] = useState(0);
   const [wi, setWi] = useState(1);
@@ -86,24 +86,10 @@ export const PriceCalculator = () => {
 
 Prices are in USD per million tokens. Each request is billed at the rate of its [completion window](/completion-windows): the longer the window, the lower the price.
 
+<PriceCalculator />
+
 | Model | [Window](/completion-windows) | Input | Cached input | Output |
 | --- | --- | --- | --- | --- |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{fontSize:"0.75em"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
-|  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
-|  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
-|  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
-|  | `standard` | \$0.55 | \$0.10 | \$1.75 |
-|  | `flex` | \$0.385 | \$0.07 | \$1.225 |
-|  | `batch` | \$0.33 | \$0.06 | \$1.05 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
-|  | `standard` | \$0.475 | \$0.055 | \$1.70 |
-|  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
-|  | `batch` | \$0.285 | \$0.033 | \$1.02 |
-| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
-|  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
-|  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
-|  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
 | <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/openai.png" alt="OpenAI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/openai.png" alt="OpenAI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**gpt-oss-120b**<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code style={{fontSize:"0.75em"}}>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
 |  | `standard` | \$0.03 | \$0.015 | \$0.20 |
 |  | `flex` | \$0.021 | \$0.0105 | \$0.14 |
@@ -112,10 +98,24 @@ Prices are in USD per million tokens. Each request is billed at the rate of its 
 |  | `standard` | \$0.07 | \$0.03 | \$0.20 |
 |  | `flex` | \$0.049 | \$0.021 | \$0.14 |
 |  | `batch` | \$0.042 | \$0.018 | \$0.12 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>**DeepSeek V4.1 Flash**<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
+|  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
+|  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
+|  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.2**<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
+|  | `standard` | \$0.475 | \$0.055 | \$1.70 |
+|  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
+|  | `batch` | \$0.285 | \$0.033 | \$1.02 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**GLM-5.3**<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
+|  | `standard` | \$0.55 | \$0.10 | \$1.75 |
+|  | `flex` | \$0.385 | \$0.07 | \$1.225 |
+|  | `batch` | \$0.33 | \$0.06 | \$1.05 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>**Kimi K3**<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{fontSize:"0.75em"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
+|  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
+|  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
+|  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
 
 Cached input applies to prompt tokens served from the prefix cache.
-
-<PriceCalculator />
 
 ## Custom pricing
 
