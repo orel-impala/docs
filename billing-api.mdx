@@ -1,0 +1,257 @@
+---
+title: "Billing API"
+description: "Pull your usage, spend and prices programmatically, with the same API key you use for inference."
+---
+
+The Billing API returns your team's usage and spend as JSON, so you can track costs, charge usage back to internal teams, or feed your own dashboards. It's read-only and scoped to the team that owns the calling key. Spend figures update within about a minute of a request.
+
+| Method | Path | Returns |
+| --- | --- | --- |
+| `GET` | `/v1/account` | Team, plan and the calling key; on pay-as-you-go, also lifetime spend and wallet |
+| `GET` | `/v1/account/keys` | Your team's API keys, metadata only |
+| `GET` | `/v1/account/spend` | Spend, requests and tokens in daily buckets |
+| `GET` | `/v1/account/prices` | Per-token prices for your models (pay-as-you-go only) |
+
+Base URL: `https://api.platform.getimpala.ai`
+
+## Authentication
+
+Send the API key you already use for inference as a bearer token. No separate key is needed.
+
+```bash
+-H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+## Plan differences
+
+| | Pay-as-you-go | Committed or enterprise |
+| --- | --- | --- |
+| `/v1/account`: team, plan, calling key | Yes | Yes |
+| `/v1/account`: `budget` (lifetime spend, blocked) | Yes | Not returned |
+| `/v1/account`: `wallet` (funded, spent, balance) | Yes | Not returned |
+| `/v1/account/keys` | Yes | Yes |
+| `/v1/account/spend` | Yes | Yes |
+| `/v1/account/prices` | Yes | `404` |
+
+Check for `budget` and `wallet` before reading them, and treat a `404` from `/v1/account/prices` as "not applicable on this plan".
+
+## Endpoints
+
+<Note>
+  Response examples on this page are illustrative. Values and some field sets will differ from your account.
+</Note>
+
+{/* TODO: replace every response example with real output from a live call, and confirm with Tom the full field sets for /v1/account/keys and /v1/account/prices. */}
+
+### Get account
+
+`GET /v1/account`
+
+Returns your team, billing plan and the key that made the call. On pay-as-you-go, it also returns `budget` and `wallet`.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "team_alias": "acme-research",
+  "customer_id": "cus_8f3a21",
+  "billing_plan": "pay_as_you_go",
+  "key": {
+    "alias": "prod-batch",
+    "masked": "sk-...4f2a",
+    "spend_usd": 412.37
+  },
+  "budget": {
+    "spend_usd": 1820.55,
+    "blocked": false
+  },
+  "wallet": {
+    "funded_cents": 250000,
+    "spent_cents": 182055,
+    "balance_cents": 67945
+  }
+}
+```
+
+<ResponseField name="team_alias" type="string">Your team's name.</ResponseField>
+<ResponseField name="customer_id" type="string">Your customer ID.</ResponseField>
+<ResponseField name="billing_plan" type="string">Your billing plan.</ResponseField>
+<ResponseField name="key" type="object">The calling key: `alias`, `masked` (the key with most characters hidden) and `spend_usd`.</ResponseField>
+<ResponseField name="budget" type="object">Pay-as-you-go only. Lifetime `spend_usd`, and `blocked`.</ResponseField>
+<ResponseField name="wallet" type="object">Pay-as-you-go only. `funded_cents`, `spent_cents` and `balance_cents`, in US cents.</ResponseField>
+
+{/* TODO: confirm the possible billing_plan values and what sets budget.blocked. */}
+
+### List keys
+
+`GET /v1/account/keys`
+
+Returns your team's API keys. Only metadata is returned, never the key itself.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account/keys \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "keys": [
+    { "alias": "prod-batch" },
+    { "alias": "staging" }
+  ]
+}
+```
+
+{/* TODO: add the remaining key fields (id, masked, created, per-key spend?) once confirmed. */}
+
+### Get spend
+
+`GET /v1/account/spend`
+
+Returns spend, requests and tokens for a date range, in one bucket per UTC day.
+
+<ParamField query="start" type="string">
+  First day, as `YYYY-MM-DD`. Defaults to the first day of the current month.
+</ParamField>
+<ParamField query="end" type="string">
+  Last day, as `YYYY-MM-DD`. Defaults to today. The window can span up to 400 days.
+</ParamField>
+<ParamField query="group_by" type="string">
+  Breaks each day down by `model`, `api_key`, or both (`model,api_key`).
+</ParamField>
+<ParamField query="api_key_ids" type="string">
+  Only include these keys, as a comma-separated list of key IDs.
+</ParamField>
+<ParamField query="models" type="string">
+  Only include these models, as a comma-separated list. Use the model names on your plan.
+</ParamField>
+
+```bash
+curl "https://api.platform.getimpala.ai/v1/account/spend?start=2026-10-01&end=2026-10-07&group_by=model,api_key" \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "start": "2026-10-01",
+  "end": "2026-10-07",
+  "totals": {
+    "spend_usd": 96.4211,
+    "requests": 48210,
+    "total_tokens": 312455120
+  },
+  "buckets": [
+    {
+      "start": "2026-10-01",
+      "totals": {
+        "spend_usd": 13.9024,
+        "requests": 6950,
+        "total_tokens": 45102877
+      },
+      "results": [
+        {
+          "model": "glm-5.2",
+          "api_key_alias": "prod-batch",
+          "api_key_id": "key_01J9ZK4Q7M2X",
+          "spend_usd": 11.2051,
+          "requests": 5402
+        },
+        {
+          "model": "kimi-k3",
+          "api_key_alias": "staging",
+          "api_key_id": "key_01J9ZM8T3B6R",
+          "spend_usd": 2.6973,
+          "requests": 1548
+        }
+      ]
+    }
+  ]
+}
+```
+
+<ResponseField name="start, end" type="string">The window the report covers.</ResponseField>
+<ResponseField name="totals" type="object">`spend_usd`, `requests` and `total_tokens` for the whole window.</ResponseField>
+<ResponseField name="buckets" type="array">One entry per UTC day, each with its `start` date, day `totals`, and `results`: one row per model and key, with `model`, `api_key_alias`, `api_key_id`, `spend_usd` and `requests`. `api_key_alias` can be empty, so fall back to `api_key_id`.</ResponseField>
+
+### Get prices
+
+`GET /v1/account/prices`
+
+Returns the per-token prices for the models on your plan, in USD per 1M tokens. Pay-as-you-go only; other plans get a `404`.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account/prices \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+The response holds your prices under `models`.
+
+{/* TODO: add a real response example once we have one; the per-model field names aren't confirmed yet. */}
+
+## Errors
+
+Errors return JSON with a `code` field.
+
+| `code` | Meaning |
+| --- | --- |
+| `invalid_api_key` | The API key isn't valid. |
+| `invalid_window` | `start` or `end` isn't a valid date window. |
+| `window_too_large` | The window is longer than 400 days. |
+| `invalid_group_by` | `group_by` has a value other than `model` or `api_key`. |
+| `unknown_api_key_ids` | `api_key_ids` includes a key that isn't on your team. |
+
+{/* TODO: confirm the HTTP status for each code, the rest of the error body, and that api_key_ids and models take comma-separated lists. */}
+
+## Full example
+
+Prints your plan and key, wallet if you have one, month-to-date spend by day, model and key, your keys, and your prices where they apply.
+
+```python
+import os
+from datetime import date
+
+import requests
+
+BASE = "https://api.platform.getimpala.ai"
+API_KEY = os.environ["IMPALA_API_KEY"]  # your inference key
+
+s = requests.Session()
+s.headers["Authorization"] = f"Bearer {API_KEY}"
+
+
+def get(path, **params):
+    r = s.get(f"{BASE}{path}", params=params, timeout=30)
+    if r.status_code == 404:
+        return None  # e.g. prices/budget are pay-as-you-go only
+    r.raise_for_status()
+    return r.json()
+
+
+# Account: plan, your key, and (pay-as-you-go) lifetime spend + wallet
+acct = get("/v1/account")
+print(f"team: {acct['team_alias']} ({acct['customer_id']})   plan: {acct['billing_plan']}")
+print(f"this key: {acct['key']['alias']} {acct['key']['masked']}   spent ${acct['key']['spend_usd']:.2f}")
+if "budget" in acct:
+    print(f"lifetime spend: ${acct['budget']['spend_usd']:.2f}   blocked: {acct['budget']['blocked']}")
+if "wallet" in acct:
+    w = acct["wallet"]
+    print(f"wallet: funded ${w['funded_cents']/100:.2f}  spent ${w['spent_cents']/100:.2f}  balance ${w['balance_cents']/100:.2f}")
+
+# Spend report: one bucket per UTC day, grouped by model and key (defaults to month-to-date)
+report = get("/v1/account/spend", start=date.today().replace(day=1).isoformat(), group_by="model,api_key")
+t = report["totals"]
+print(f"\n{report['start']} → {report['end']}: ${t['spend_usd']:.4f}  {t['requests']} requests  {t['total_tokens']:,} tokens")
+for day in report["buckets"]:
+    print(f"  {day['start']}  ${day['totals']['spend_usd']:.4f}")
+    for row in day["results"]:
+        key = row["api_key_alias"] or row["api_key_id"][:12]
+        print(f"      {row['model']:<14} {key:<16} ${row['spend_usd']:.4f}  {row['requests']} req")
+
+# Your keys (metadata only) and your per-token prices (USD per 1M tokens)
+print("\nkeys:", [k["alias"] for k in get("/v1/account/keys")["keys"]])
+prices = get("/v1/account/prices")
+print("prices:", prices["models"] if prices else "not applicable on this plan")
+```
