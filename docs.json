@@ -91,7 +91,36 @@
       {
         "group": "API reference",
         "icon": "code",
-        "openapi": "openai-api-swagger.json"
+        "openapi": "openai-api-swagger.json",
+        "pages": [
+          "billing-api",
+          {
+            "group": "Files",
+            "pages": [
+              "POST /v1/files",
+              "GET /v1/files",
+              "GET /v1/files/{file_id}",
+              "DELETE /v1/files/{file_id}",
+              "GET /v1/files/{file_id}/content"
+            ]
+          },
+          {
+            "group": "Batches",
+            "pages": [
+              "POST /v1/batches",
+              "GET /v1/batches",
+              "GET /v1/batches/{batch_id}",
+              "POST /v1/batches/{batch_id}/cancel"
+            ]
+          },
+          {
+            "group": "System",
+            "pages": [
+              "GET /health",
+              "GET /ready"
+            ]
+          }
+        ]
       }
     ]
   },
