@@ -34,8 +34,6 @@ On pay-as-you-go, `/v1/account` includes `wallet`, and `/v1/account/prices` retu
   Values in the response examples are illustrative.
 </Note>
 
-{/* TODO: replace the response examples with output from a live call once /v1/account is deployed. */}
-
 ### Get account
 
 `GET /v1/account`
@@ -61,7 +59,7 @@ curl https://api.platform.getimpala.ai/v1/account \
     "max_budget_usd": 500.0,
     "budget_remaining_usd": 87.63,
     "blocked": false,
-    "created_at": "2026-08-02T09:14:00Z",
+    "created_at": "2026-08-02T09:14:00.212000+00:00",
     "is_caller": true
   },
   "wallet": {
@@ -125,7 +123,7 @@ curl https://api.platform.getimpala.ai/v1/account/keys \
       "max_budget_usd": 500.0,
       "budget_remaining_usd": 87.63,
       "blocked": false,
-      "created_at": "2026-08-02T09:14:00Z",
+      "created_at": "2026-08-02T09:14:00.212000+00:00",
       "is_caller": true
     },
     {
@@ -136,7 +134,7 @@ curl https://api.platform.getimpala.ai/v1/account/keys \
       "max_budget_usd": null,
       "budget_remaining_usd": null,
       "blocked": false,
-      "created_at": "2026-09-14T16:02:41Z",
+      "created_at": "2026-09-14T16:02:41.508000+00:00",
       "is_caller": false
     }
   ],
