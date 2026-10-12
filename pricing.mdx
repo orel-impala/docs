@@ -1,0 +1,216 @@
+---
+title: "Pricing"
+description: "Per-token prices by model and completion window."
+---
+
+{/* DRAFT. Pricing decided Oct 5 (Orel). BEFORE PUBLISHING: (1) add "pricing" and "completion-windows" to docs.json, in the Introduction group after "async-inference"; (2) resolve every TODO here and in completion-windows.mdx; (3) remove this comment. */}
+{/* Pricing rule (sheet tab 1, Oct 6): asap is set at about Valar's Now price, rounded. standard = 0.5x, flex = 0.35x, batch = 0.3x of asap, capped at 5% under the cheapest competitor's slow window per token type (Valar Flex, Sail Flex, Fireworks Batch), so batch is always the cheapest on the market. Cached input keeps each model's market ratio to input. Customer deals are discounts off this list. */}
+{/* TODO before publishing: at real GPU cost ($9.50/GPU-hr B300), Kimi K3 and GLM flex/batch fall below cost (sheet tab 7). Raise their async floor to ~0.45x asap or bar deal discounts on async windows. */}
+{/* TODO: confirm we serve every model below at launch, and the exact model IDs the API accepts. Under each name: its Hugging Face repo. Logos: LobeHub icons, the same set app.getimpala.ai uses on the Run tab (black/white pair for mono logos so they read in light and dark mode). Calculator below follows Yael's Figma (Impala website > Pricing, node 626-9919); its prices are hardcoded, keep in sync with the table. */}
+
+export const PriceCalculator = () => {
+  const W = ["asap", "standard", "flex", "batch"];
+  const USE = ["interactive", "agents, pipelines", "evals, research, back-office", "offline jobs"];
+  const P = "https://unpkg.com/@lobehub/icons-static-png@1.97.1/";
+  const S = "https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/";
+  const M = [
+    { id: "glm-5-3", n: "GLM-5.3", ic: "zai", mono: true, p: [[1.1, 0.2, 3.5], [0.55, 0.1, 1.75], [0.385, 0.07, 1.225], [0.33, 0.06, 1.05]] },
+    { id: "glm-5-2", n: "GLM-5.2", ic: "zai", mono: true, p: [[0.95, 0.11, 3.4], [0.475, 0.055, 1.7], [0.3325, 0.0385, 1.19], [0.285, 0.033, 1.02]] },
+    { id: "glm-5-3-flash", n: "GLM-5.3-Flash", ic: "zai", mono: true, p: [[0.12, 0.023, 0.4], [0.06, 0.0115, 0.2], [0.042, 0.0081, 0.14], [0.036, 0.0069, 0.12]] },
+    { id: "deepseek-v4-pro", n: "DeepSeek V4 Pro", ic: "deepseek-color", p: [[1.05, 0.035, 3.15], [0.525, 0.0175, 1.575], [0.3675, 0.0123, 1.1025], [0.315, 0.0105, 0.945]] },
+    { id: "deepseek-v4-1-flash", n: "DeepSeek V4.1 Flash", ic: "deepseek-color", p: [[0.25, 0.025, 1.0], [0.125, 0.0125, 0.5], [0.0875, 0.0088, 0.35], [0.075, 0.0028, 0.285]] },
+    { id: "qwen3-6-35b-a3b", n: "Qwen3.6 35B-A3B", ic: "qwen-color", p: [[0.22, 0.045, 0.9], [0.11, 0.0225, 0.45], [0.077, 0.0158, 0.315], [0.066, 0.0135, 0.27]] },
+    { id: "gemma-4-31b", n: "Gemma 4 31B", ic: "gemini-color", p: [[0.14, 0.06, 0.4], [0.07, 0.03, 0.2], [0.049, 0.021, 0.14], [0.042, 0.018, 0.12]] },
+    { id: "gpt-oss-120b", n: "gpt-oss-120b", ic: "openai", mono: true, p: [[0.06, 0.03, 0.4], [0.03, 0.015, 0.2], [0.021, 0.0105, 0.14], [0.018, 0.0071, 0.12]] },
+    { id: "kimi-k3", n: "Kimi K3", ic: "moonshot", mono: true, p: [[2.25, 0.225, 11.25], [1.125, 0.1125, 5.625], [0.7875, 0.0788, 3.9375], [0.675, 0.0675, 3.375]] },
+  ];
+  const [mi, setMi] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [tok, setTok] = useState(2);
+  const [t, setT] = useState(1);
+  const box = useRef(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => { if (!box.current || typeof IntersectionObserver === "undefined") { setSeen(true); return; } const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { setSeen(true); io.disconnect(); } }, { threshold: 0.3 }); io.observe(box.current); return () => io.disconnect(); }, []);
+  useEffect(() => {
+    const pick = () => {
+      const h = (window.location.hash || "").replace("#calc-", "");
+      const i = M.findIndex((x) => x.id === h);
+      if (i >= 0) { setMi(i); setT(1); if (box.current) box.current.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    };
+    pick();
+    window.addEventListener("hashchange", pick);
+    const close = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("pointerdown", close);
+    return () => { window.removeEventListener("hashchange", pick); document.removeEventListener("pointerdown", close); };
+  }, []);
+  const m = M[mi];
+  const px = W.map((_, w) => m.p[w][tok]);
+  const fp = (v) => {
+    let s = v.toFixed(4).replace(/0+$/, "");
+    if ((s.split(".")[1] || "").length < 2) s = v.toFixed(2);
+    return "$" + s;
+  };
+  const dd = [0, 1, 2].map((k) => px[k + 1] - px[k]);
+  const sl = [0, 1, 2, 3].map((k) => (k === 0 || k === 3 ? 0 : dd[k - 1] * dd[k] <= 0 ? 0 : 2 / (1 / dd[k - 1] + 1 / dd[k])));
+  sl[0] = Math.min(0, 1.5 * dd[0] - 0.5 * sl[1]); sl[3] = Math.min(0, 1.5 * dd[2] - 0.5 * sl[2]);
+  const f = (x) => { const k = Math.min(2, Math.floor(x)), u = x - k, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * px[k] + (u3 - 2 * u2 + u) * sl[k] + (-2 * u3 + 3 * u2) * px[k + 1] + (u3 - u2) * sl[k + 1]; };
+  const VW = 640, VH = 296, L = 56, R = 610, TOP = 54, BASE = 240;
+  const top = Math.max(...px) || 1;
+  const max = top * 1.04;
+  const step = (() => { const r = top / 4, e = Math.pow(10, Math.floor(Math.log10(r))), n = r / e; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * e; })();
+  const ticks = []; for (let v = 0; v <= max + 1e-9; v += step) ticks.push(+v.toPrecision(6));
+  const X = (x) => L + (x / 3) * (R - L);
+  const Y = (v) => BASE - (v / max) * (BASE - TOP);
+  const line = Array.from({ length: 121 }, (_, i) => (i ? "L" : "M") + X(i / 40).toFixed(1) + " " + Y(f(i / 40)).toFixed(1)).join(" ");
+  const area = line + " L" + R + " " + BASE + " L" + L + " " + BASE + " Z";
+  const snapT = (x) => x;
+  const move = (e) => {
+    const b = e.currentTarget.getBoundingClientRect();
+    const vx = ((e.clientX - b.left) / b.width) * VW;
+    setT(snapT(Math.max(0, Math.min(3, ((vx - L) / (R - L)) * 3))));
+  };
+  const key = (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); setT((v) => snapT(Math.min(3, v + 0.25))); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); setT((v) => snapT(Math.max(0, v - 0.25))); }
+  };
+  const val = f(t);
+  const cx = X(t), cy = Y(val);
+  const l1 = "$" + (val >= 0.1 ? val.toFixed(2) : (+val.toPrecision(2)).toString());
+  const pct = Math.round((1 - val / px[0]) * 100);
+  const l2 = pct >= 1 ? pct + "% cheaper than asap" : "";
+  const lw = Math.max(l1.length * 8, l2.length * 6) + 22;
+  const lh = l2 ? 42 : 26;
+  const lx = Math.max(L - 10, Math.min(R + 10 - lw, cx - lw / 2));
+  const ly = cy - lh - 12 < 2 ? cy + 14 : cy - lh - 12;
+  const muted = "rgb(var(--gray-500))";
+  const hair = "rgb(var(--gray-500) / 0.25)";
+  const accent = "rgb(var(--primary-light))";
+  const Logo = ({ x, size }) => x.mono ? (
+    <span style={{ display: "inline-flex", flex: "none" }}>
+      <img src={P + "light/" + x.ic + ".png"} width={size} height={size} alt="" className="dark:hidden" style={{ margin: 0 }} />
+      <img src={P + "dark/" + x.ic + ".png"} width={size} height={size} alt="" className="hidden dark:block" style={{ margin: 0 }} />
+    </span>
+  ) : <img src={S + x.ic + ".svg"} width={size} height={size} alt="" style={{ margin: 0, flex: "none" }} />;
+  const seg = (on) => ({ padding: "4px 12px", borderRadius: 6, border: "none", background: on ? "rgb(var(--gray-500) / 0.18)" : "transparent", color: on ? "inherit" : muted, fontSize: 13, cursor: "pointer" });
+  return (
+    <div ref={box} id="calc" className="not-prose" style={{ border: "1px solid " + hair, borderRadius: 14, padding: "18px 20px 10px", margin: "20px 0", position: "relative" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ position: "relative" }}>
+          <button type="button" onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", borderRadius: 10, border: "1px solid " + hair, background: "rgb(var(--gray-500) / 0.06)", color: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer", minWidth: 220 }}>
+            <Logo x={m} size={18} />
+            <span style={{ flex: 1, textAlign: "left" }}>{m.n}</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .15s" }}><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+          {open && (
+            <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 20, minWidth: 260, padding: 6, borderRadius: 12, border: "1px solid " + hair, boxShadow: "0 12px 32px rgb(0 0 0 / 0.25)" }} className="bg-background-light dark:bg-background-dark">
+              {M.map((x, i) => (
+                <button key={x.id} type="button" role="option" aria-selected={i === mi} onClick={() => { setMi(i); setOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 10px", borderRadius: 8, border: "none", background: i === mi ? "rgb(var(--primary) / 0.12)" : "transparent", color: "inherit", fontSize: 14, cursor: "pointer", textAlign: "left" }}>
+                  <Logo x={x} size={16} />
+                  <span style={{ flex: 1 }}>{x.n}</span>
+                  <span style={{ color: muted, fontSize: 12 }}>{"from " + fp(x.p[3][2])}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 8, border: "1px solid " + hair }}>
+          {[0, 1, 2].map((k) => <button key={k} type="button" onClick={() => setTok(k)} style={seg(tok === k)}>{["Input", "Cached", "Output"][k]}</button>)}
+        </div>
+      </div>
+      <div style={{ position: "relative" }}>
+      <svg viewBox={"0 0 " + VW + " " + VH} onPointerMove={move} onPointerDown={move} onKeyDown={key} tabIndex={0} role="img" aria-label={"Price per 1M " + ["input", "cached input", "output"][tok] + " tokens: " + l1 + (l2 ? ", " + l2 : "")} style={{ width: "100%", display: "block", marginTop: 10, cursor: "crosshair", touchAction: "pan-y", outline: "none" }}>
+        <defs>
+          <style>{"@keyframes pcdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}@keyframes pcfade{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion: reduce){.pcanim{animation:none!important;opacity:1!important;stroke-dashoffset:0!important}}"}</style>
+          <linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="rgb(var(--primary-light))" stopOpacity="0.32" />
+            <stop offset="1" stopColor="rgb(var(--primary-light))" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {ticks.map((v, i) => (
+          <g key={i}>
+            <line x1={L} y1={Y(v)} x2={R} y2={Y(v)} stroke={hair} strokeDasharray={i ? "2 4" : "0"} />
+            <text x={L - 8} y={Y(v) + 4} textAnchor="end" fontSize="11" fill={muted}>{"$" + (+v.toPrecision(3))}</text>
+          </g>
+        ))}
+        <path key={"a" + mi + tok} className="pcanim" d={area} fill="url(#pcfill)" style={{ opacity: seen ? undefined : 0, animation: seen ? "pcfade .9s ease .2s both" : "none" }} />
+        <path key={"l" + mi + tok} className="pcanim" d={line} pathLength="1" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" style={{ strokeDasharray: 1, strokeDashoffset: seen ? 0 : 1, animation: seen ? "pcdraw 1.1s cubic-bezier(.22,1,.36,1) both" : "none" }} />
+        {px.map((v, w) => (
+          <g key={w}>
+            <circle cx={X(w)} cy={Y(v)} r="3.5" fill={accent} fillOpacity="0.6" />
+            <text x={X(w)} y={BASE + 26} textAnchor={w === 0 ? "start" : w === 3 ? "end" : "middle"} fontSize="12" fill={muted} fontFamily="var(--font-mono, monospace)">{W[w]}</text>
+            <text x={X(w)} y={BASE + 44} textAnchor={w === 0 ? "start" : w === 3 ? "end" : "middle"} fontSize="11" fill={muted}>{USE[w]}</text>
+          </g>
+        ))}
+        <g key={"c" + mi + tok} className="pcanim" style={{ opacity: seen ? undefined : 0, animation: seen ? "pcfade .4s ease .8s both" : "none" }}>
+        <line x1={cx} y1={cy} x2={cx} y2={BASE} stroke={accent} strokeOpacity="0.35" strokeDasharray="2 3" />
+        <circle cx={cx} cy={cy} r="6" fill={accent} stroke="rgb(var(--primary-light) / 0.3)" strokeWidth="6" />
+        </g>
+      </svg>
+      {(() => { const tx = t < 0.35 ? "-12%" : t > 2.65 ? "-88%" : "-50%"; const below = cy < 90; return (
+        <div key={"t" + mi + tok} className="bg-background-light dark:bg-background-dark pcanim" style={{ position: "absolute", left: (cx / VW) * 100 + "%", top: (cy / VH) * 100 + "%", transform: "translate(" + tx + ", " + (below ? "16px" : "calc(-100% - 16px)") + ")", padding: "6px 12px", borderRadius: 8, border: "1px solid " + hair, boxShadow: "0 6px 20px rgb(0 0 0 / 0.2)", textAlign: "center", pointerEvents: "none", whiteSpace: "nowrap", lineHeight: 1.35, opacity: seen ? undefined : 0, animation: seen ? "pcfade .4s ease .8s both" : "none" }}>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{l1}</div>
+          {l2 && <div style={{ fontSize: 12, color: muted }}>{l2}</div>}
+        </div>
+      ); })()}
+      </div>
+      <div style={{ color: muted, fontSize: 12, textAlign: "center", marginTop: 12, paddingBottom: 4 }}>USD per 1M {["input", "cached input", "output"][tok]} tokens</div>
+    </div>
+  );
+};
+
+Prices are in USD per million tokens. Each request is billed at the rate of its [completion window](/completion-windows): the longer the window, the lower the price.
+
+| Model | [Window](/completion-windows) | Input | Cached input | Output |
+| --- | --- | --- | --- | --- |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**GLM-5.3**](#calc-glm-5-3)<br /><a href="https://huggingface.co/zai-org/GLM-5.3"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3</code></a> | `asap` | \$1.10 | \$0.20 | \$3.50 |
+|  | `standard` | \$0.55 | \$0.10 | \$1.75 |
+|  | `flex` | \$0.385 | \$0.07 | \$1.225 |
+|  | `batch` | \$0.33 | \$0.06 | \$1.05 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**GLM-5.2**](#calc-glm-5-2)<br /><a href="https://huggingface.co/zai-org/GLM-5.2"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.2</code></a> | `asap` | \$0.95 | \$0.11 | \$3.40 |
+|  | `standard` | \$0.475 | \$0.055 | \$1.70 |
+|  | `flex` | \$0.3325 | \$0.0385 | \$1.19 |
+|  | `batch` | \$0.285 | \$0.033 | \$1.02 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/zai.png" alt="Z.ai" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/zai.png" alt="Z.ai" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**GLM-5.3-Flash**](#calc-glm-5-3-flash)<br /><a href="https://huggingface.co/zai-org/GLM-5.3-Flash"><code style={{fontSize:"0.75em"}}>zai-org/GLM-5.3-Flash</code></a> | `asap` | \$0.12 | \$0.023 | \$0.40 |
+|  | `standard` | \$0.06 | \$0.0115 | \$0.20 |
+|  | `flex` | \$0.042 | \$0.0081 | \$0.14 |
+|  | `batch` | \$0.036 | \$0.0069 | \$0.12 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>[**DeepSeek V4 Pro**](#calc-deepseek-v4-pro)<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4-Pro</code></a> | `asap` | \$1.05 | \$0.035 | \$3.15 |
+|  | `standard` | \$0.525 | \$0.0175 | \$1.575 |
+|  | `flex` | \$0.3675 | \$0.0123 | \$1.1025 |
+|  | `batch` | \$0.315 | \$0.0105 | \$0.945 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg" alt="DeepSeek" width="16" height="16" noZoom style={{margin:0}} /></span>[**DeepSeek V4.1 Flash**](#calc-deepseek-v4-1-flash)<br /><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash"><code style={{fontSize:"0.75em"}}>deepseek-ai/DeepSeek-V4.1-Flash</code></a> | `asap` | \$0.25 | \$0.025 | \$1.00 |
+|  | `standard` | \$0.125 | \$0.0125 | \$0.50 |
+|  | `flex` | \$0.0875 | \$0.0088 | \$0.35 |
+|  | `batch` | \$0.075 | \$0.0028 | \$0.285 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/qwen-color.svg" alt="Qwen" width="16" height="16" noZoom style={{margin:0}} /></span>[**Qwen3.6 35B-A3B**](#calc-qwen3-6-35b-a3b)<br /><a href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B"><code style={{fontSize:"0.75em"}}>Qwen/Qwen3.6-35B-A3B</code></a> | `asap` | \$0.22 | \$0.045 | \$0.90 |
+|  | `standard` | \$0.11 | \$0.0225 | \$0.45 |
+|  | `flex` | \$0.077 | \$0.0158 | \$0.315 |
+|  | `batch` | \$0.066 | \$0.0135 | \$0.27 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg" alt="Google" width="16" height="16" noZoom style={{margin:0}} /></span>[**Gemma 4 31B**](#calc-gemma-4-31b)<br /><a href="https://huggingface.co/google/gemma-4-31B-it"><code style={{fontSize:"0.75em"}}>google/gemma-4-31B-it</code></a> | `asap` | \$0.14 | \$0.06 | \$0.40 |
+|  | `standard` | \$0.07 | \$0.03 | \$0.20 |
+|  | `flex` | \$0.049 | \$0.021 | \$0.14 |
+|  | `batch` | \$0.042 | \$0.018 | \$0.12 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/openai.png" alt="OpenAI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/openai.png" alt="OpenAI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**gpt-oss-120b**](#calc-gpt-oss-120b)<br /><a href="https://huggingface.co/openai/gpt-oss-120b"><code style={{fontSize:"0.75em"}}>openai/gpt-oss-120b</code></a> | `asap` | \$0.06 | \$0.03 | \$0.40 |
+|  | `standard` | \$0.03 | \$0.015 | \$0.20 |
+|  | `flex` | \$0.021 | \$0.0105 | \$0.14 |
+|  | `batch` | \$0.018 | \$0.0071 | \$0.12 |
+| <span style={{display:"inline-flex",verticalAlign:"-3px",marginRight:"6px"}}><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/light/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="dark:hidden" style={{margin:0}} /><img src="https://unpkg.com/@lobehub/icons-static-png@1.97.1/dark/moonshot.png" alt="Moonshot AI" width="16" height="16" noZoom className="hidden dark:block" style={{margin:0}} /></span>[**Kimi K3**](#calc-kimi-k3)<br /><a href="https://huggingface.co/moonshotai/Kimi-K3"><code style={{fontSize:"0.75em"}}>moonshotai/Kimi-K3</code></a> | `asap` | \$2.25 | \$0.225 | \$11.25 |
+|  | `standard` | \$1.125 | \$0.1125 | \$5.625 |
+|  | `flex` | \$0.7875 | \$0.0788 | \$3.9375 |
+|  | `batch` | \$0.675 | \$0.0675 | \$3.375 |
+
+Cached input applies to prompt tokens served from the prefix cache.
+
+## Custom pricing
+
+Impala fits every request to its deadline on the most efficient capacity. Tell us how soon you need results and how much you run, and we'll price your exact workload.
+
+<PriceCalculator />
+
+We also price committed volume, turnaround guarantees, dedicated capacity, models not listed here and deployment in your own cloud.
+
+{/* TODO: confirm the button destination (currently the scheduling link behind "Talk to us" on getimpala.ai). */}
+
+<div className="not-prose mt-4">
+  <a href="https://meetings-eu1.hubspot.com/ran-friedman" target="_blank" className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white no-underline hover:opacity-90">Talk to us</a>
+</div>

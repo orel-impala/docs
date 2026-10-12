@@ -1,0 +1,28 @@
+---
+title: "Completion windows"
+description: "Choose per request how soon you need the result. Later costs less."
+---
+
+{/* DRAFT. Published together with /pricing. See the checklist at the top of pricing.mdx. */}
+{/* Decided Oct 5: no turnaround times are published for any window, batch included. Internal per-window targets live with engineering; contractual SLAs are agreed per account. */}
+
+Every request runs in a **completion window**. Windows that return sooner cost more, and windows with more time to finish cost less. The model and its output are the same in every window, so the cheapest window your workload can wait for is usually the right one. [Run async and open source](/async-inference) explains why waiting costs less.
+
+From fastest to lowest cost, the windows are `asap`, `standard`, `flex` and `batch`. Requests that don't set a window run in `standard`. Each request is billed at its window's rate; see [Pricing](/pricing).
+
+## Which window fits
+
+The longer a request can wait, the more efficiently we can run it, and the less it costs.
+
+| Window | How it runs | Use it for | Price vs `asap` |
+| --- | --- | --- | --- |
+| `asap` | Starts right away | Chat, interactive apps, anyone waiting on the answer | 100% |
+| `standard` | Queued briefly for efficient capacity | Agents, subagents and pipelines running in the background | 50% |
+| `flex` | Scheduled when capacity is cheapest | Evals, enrichment, research, back-office | 35% |
+| `batch` | Submitted as a batch job | Large offline runs: datasets, backfills, synthetic data | 30% |
+
+Not sure? Start with `standard`, and move work that nobody waits on to `flex` or `batch`.
+
+{/* TODO (engineering): `standard` as the default is decided; confirm the API implements it before publishing. */}
+{/* TODO (engineering): how a request selects its window (request field and/or header). Document once the API supports it and openai-api-swagger.json covers it. */}
+{/* TODO (engineering): batch jobs currently send `completion_window: "unlimited"` (see /run-your-first-batch, /jobs-and-job-ids). Decided: keep "unlimited" working and bill it as `batch`; confirm, then update those pages. */}

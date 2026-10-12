@@ -18,6 +18,8 @@
         "pages": [
           "introduction",
           "async-inference",
+          "pricing",
+          "completion-windows",
           "deployment-options"
         ]
       },
