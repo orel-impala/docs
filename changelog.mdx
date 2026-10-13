@@ -2,6 +2,12 @@
 title: "Product updates"
 ---
 
+<Update label="October 11, 2026">
+  ### Billing API
+
+  Pull your usage, spend and prices as JSON with the same API key you use for inference. See [Billing API](/billing-api).
+</Update>
+
 <Update label="October 7, 2026">
   ### Spend by model
 
@@ -11,9 +17,9 @@ title: "Product updates"
 
   The Settings billing card also plots your cumulative spend for this month against last month. When an estimate is available, the chart adds a projected month-end total so you can see where the month is heading.
 
-  ### Usage counts your requests, not retries
+  ### Usage counts each request once
 
-  The Usage page now counts each request you send once. Internal retries and fallbacks no longer inflate your request or failure totals.
+  The Usage page now counts each request you send once.
 
   Failed requests are split into two groups:
 
@@ -24,7 +30,7 @@ title: "Product updates"
 
   ### Rate-limited requests on the Usage page
 
-  Requests rejected with HTTP `429` by your API key's or team's rate limit now appear on the Usage page as request errors. Impala attributes these rejections to the model you requested, so each model's figures include its own rate-limited requests. The failure breakdown also lists rate-limited requests as their own row. When Impala knows the limit, the page shows it in requests per minute. Use this to spot traffic that goes over your limit. To follow limit changes automatically, see [Rate limit webhooks](/rate-limit-webhooks).
+  Requests rejected with HTTP `429` by your API key's or team's rate limit now appear on the Usage page as request errors. Impala attributes these rejections to the model you requested, so each model's figures include its own rate-limited requests. The failure breakdown also lists rate-limited requests as their own row. To follow limit changes automatically, see [Rate limit webhooks](/rate-limit-webhooks).
 </Update>
 
 <Update label="May 17, 2026">
