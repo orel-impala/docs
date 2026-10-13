@@ -18,6 +18,7 @@
         "pages": [
           "introduction",
           "async-inference",
+          "completion-windows",
           "deployment-options"
         ]
       },
@@ -27,7 +28,8 @@
         "pages": [
           "impala-cloud-setup",
           "send-a-request",
-          "rate-limit-webhooks"
+          "rate-limit-webhooks",
+          "billing-api"
         ]
       },
       {

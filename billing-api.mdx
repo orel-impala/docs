@@ -1,0 +1,402 @@
+---
+title: "Billing API"
+description: "Pull your usage, spend and prices programmatically, with the same API key you use for inference."
+---
+
+The Billing API returns your team's usage and spend as JSON, so you can track costs, charge usage back to internal teams, or feed your own dashboards. It's read-only and scoped to the team that owns the calling key: any key on your team reads all of the team's figures. Spend figures update within about a minute of a request.
+
+| Method | Path | Returns |
+| --- | --- | --- |
+| `GET` | `/v1/account` | Team, plan and the calling key; on pay-as-you-go, also the wallet |
+| `GET` | `/v1/account/keys` | Your team's API keys, metadata only |
+| `GET` | `/v1/account/spend` | Spend, requests and tokens in daily buckets |
+| `GET` | `/v1/account/prices` | Your per-token price list (pay-as-you-go only) |
+
+Base URL: `https://api.platform.getimpala.ai`
+
+## Authentication
+
+Send the API key you already use for inference as a bearer token. No separate key is needed.
+
+```bash
+-H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+A blocked or expired key gets a `401`. Billing reads keep working when your wallet is empty and inference requests are refused.
+
+## Plan differences
+
+On pay-as-you-go, `/v1/account` includes `wallet`, and `/v1/account/prices` returns your price list. On other plans, `wallet` is left out of the response (the field is absent, not `null`) and `/v1/account/prices` returns `404`. `/v1/account/spend` reports `spend_usd` on pay-as-you-go and committed-usage plans; on contract plans it's `null`. `/v1/account/keys` works the same on every plan.
+
+## Endpoints
+
+<Note>
+  Values in the response examples are illustrative.
+</Note>
+
+### Get account
+
+`GET /v1/account`
+
+Returns your team, billing plan and the key that made the call. On pay-as-you-go, it also returns `wallet`.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "customer_id": "acme-research",
+  "team_alias": "acme-research",
+  "billing_plan": "pay_as_you_go",
+  "key": {
+    "id": "7faeb355f584484a0e051892a69b58290ac927f8d0b858539564ae196ff9f2e0",
+    "alias": "prod-batch",
+    "masked": "sk-...4f2a",
+    "spend_usd": 412.37,
+    "max_budget_usd": 500.0,
+    "budget_remaining_usd": 87.63,
+    "blocked": false,
+    "created_at": "2026-08-02T09:14:00.212000+00:00",
+    "is_caller": true
+  },
+  "wallet": {
+    "currency": "usd",
+    "balance_cents": 67945,
+    "funded_cents": 250000,
+    "deposited_cents": 250000,
+    "adjustments_cents": 0,
+    "spent_cents": 182055,
+    "overdraft_cents": 0,
+    "floor_cents": 0,
+    "blocked": false,
+    "spend_as_of": 1791727200
+  }
+}
+```
+
+<ResponseField name="customer_id" type="string | null">Your customer ID.</ResponseField>
+<ResponseField name="team_alias" type="string | null">Your team's name.</ResponseField>
+<ResponseField name="billing_plan" type="string | null">`pay_as_you_go`, `contract` or `committed_usage`. `null` if your team has no plan on record.</ResponseField>
+<ResponseField name="key" type="object">
+  The calling key, with the same fields as an entry in [`/v1/account/keys`](#list-keys).
+</ResponseField>
+<ResponseField name="wallet" type="object">
+  Pay-as-you-go only. Your prepaid wallet, in integer US cents.
+
+  <Expandable title="properties">
+    <ResponseField name="currency" type="string">Always `usd`.</ResponseField>
+    <ResponseField name="balance_cents" type="integer">`funded_cents` minus `spent_cents`. Can be negative.</ResponseField>
+    <ResponseField name="funded_cents" type="integer">`deposited_cents` plus `adjustments_cents`.</ResponseField>
+    <ResponseField name="deposited_cents" type="integer">Top-ups and credit grants.</ResponseField>
+    <ResponseField name="adjustments_cents" type="integer">Refunds and corrections, either sign.</ResponseField>
+    <ResponseField name="spent_cents" type="integer">Usage charged to the wallet since you enrolled. Lags the last request by about a minute.</ResponseField>
+    <ResponseField name="overdraft_cents" type="integer">How far below zero the balance may go.</ResponseField>
+    <ResponseField name="floor_cents" type="integer">Minus `overdraft_cents`. Inference requests are refused once `balance_cents` drops below it.</ResponseField>
+    <ResponseField name="blocked" type="boolean">`true` while nothing has been funded (`funded_cents` is `0` or less). A funded wallet that runs past the floor still reads `false`, so compare `balance_cents` with `floor_cents` to tell whether requests are being refused.</ResponseField>
+    <ResponseField name="spend_as_of" type="integer">When `spent_cents` was read, as Unix seconds.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### List keys
+
+`GET /v1/account/keys`
+
+Returns your team's API keys. Only metadata is returned, never the key itself.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account/keys \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "keys": [
+    {
+      "id": "7faeb355f584484a0e051892a69b58290ac927f8d0b858539564ae196ff9f2e0",
+      "alias": "prod-batch",
+      "masked": "sk-...4f2a",
+      "spend_usd": 412.37,
+      "max_budget_usd": 500.0,
+      "budget_remaining_usd": 87.63,
+      "blocked": false,
+      "created_at": "2026-08-02T09:14:00.212000+00:00",
+      "is_caller": true
+    },
+    {
+      "id": "9977ac6a31d4bbd6981498c00796240500012473ae7299425ec69d0b05a43698",
+      "alias": "staging",
+      "masked": "sk-...91bc",
+      "spend_usd": 38.05,
+      "max_budget_usd": null,
+      "budget_remaining_usd": null,
+      "blocked": false,
+      "created_at": "2026-09-14T16:02:41.508000+00:00",
+      "is_caller": false
+    }
+  ],
+  "count": 2
+}
+```
+
+<ResponseField name="keys" type="object[]">
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">An opaque ID for the key. This is the value `api_key_ids` takes on [`/v1/account/spend`](#get-spend).</ResponseField>
+    <ResponseField name="alias" type="string | null">The key's name.</ResponseField>
+    <ResponseField name="masked" type="string | null">The key with most characters hidden.</ResponseField>
+    <ResponseField name="spend_usd" type="number">Spend metered on this key, in USD.</ResponseField>
+    <ResponseField name="max_budget_usd" type="number | null">This key's own spending cap in USD, separate from your wallet. `null` if the key has no cap.</ResponseField>
+    <ResponseField name="budget_remaining_usd" type="number | null">`max_budget_usd` minus `spend_usd`. `null` if the key has no cap.</ResponseField>
+    <ResponseField name="blocked" type="boolean">Whether the key is blocked.</ResponseField>
+    <ResponseField name="created_at" type="string | null">When the key was created, as an ISO 8601 timestamp.</ResponseField>
+    <ResponseField name="is_caller" type="boolean">`true` for the key that made this request.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="count" type="integer">The number of keys.</ResponseField>
+
+### Get spend
+
+`GET /v1/account/spend`
+
+Returns spend, requests and tokens for a date range, in one bucket per UTC day. `spend_usd` is the figure your Billing page shows for the same days and models.
+
+<ParamField query="start" type="string">
+  First day, as `YYYY-MM-DD`. Defaults to the first day of the current month.
+</ParamField>
+<ParamField query="end" type="string">
+  Last day, inclusive, as `YYYY-MM-DD`. Defaults to today, and a future date is treated as today. The window can span up to 400 days.
+</ParamField>
+<ParamField query="group_by" type="string">
+  Breaks each day down by `model`, `api_key`, or both (`model,api_key`). Without it, each day has a single row.
+</ParamField>
+<ParamField query="api_key_ids" type="string">
+  Only include these keys, as a comma-separated list of key `id`s from [`/v1/account/keys`](#list-keys). Every ID must be a current key on your team.
+</ParamField>
+<ParamField query="models" type="string">
+  Only include these models, as a comma-separated list of model names as the report shows them. Any other name matches nothing.
+</ParamField>
+
+```bash
+curl "https://api.platform.getimpala.ai/v1/account/spend?start=2026-10-01&end=2026-10-01&group_by=model" \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "start": "2026-10-01",
+  "end": "2026-10-01",
+  "bucket_width": "1d",
+  "currency": "usd",
+  "group_by": ["model"],
+  "totals": {
+    "spend_usd": 13.91,
+    "prompt_tokens": 41323993,
+    "completion_tokens": 3778884,
+    "cache_read_input_tokens": 29292113,
+    "total_tokens": 45102877,
+    "requests": 6950,
+    "successful_requests": 6946,
+    "failed_requests": 4
+  },
+  "buckets": [
+    {
+      "start": "2026-10-01",
+      "end": "2026-10-02",
+      "totals": {
+        "spend_usd": 13.91,
+        "prompt_tokens": 41323993,
+        "completion_tokens": 3778884,
+        "cache_read_input_tokens": 29292113,
+        "total_tokens": 45102877,
+        "requests": 6950,
+        "successful_requests": 6946,
+        "failed_requests": 4
+      },
+      "results": [
+        {
+          "spend_usd": 11.21,
+          "prompt_tokens": 30120442,
+          "completion_tokens": 2914330,
+          "cache_read_input_tokens": 21880104,
+          "total_tokens": 33034772,
+          "requests": 5402,
+          "successful_requests": 5398,
+          "failed_requests": 4,
+          "model": "glm-5.2",
+          "api_key_id": null,
+          "api_key_alias": null
+        },
+        {
+          "spend_usd": 2.7,
+          "prompt_tokens": 11203551,
+          "completion_tokens": 864554,
+          "cache_read_input_tokens": 7412009,
+          "total_tokens": 12068105,
+          "requests": 1548,
+          "successful_requests": 1548,
+          "failed_requests": 0,
+          "model": "kimi-k3",
+          "api_key_id": null,
+          "api_key_alias": null
+        }
+      ]
+    }
+  ]
+}
+```
+
+<ResponseField name="start, end" type="string">The inclusive window the report covers. `start` can be later than requested when your account's history starts later.</ResponseField>
+<ResponseField name="bucket_width" type="string">Always `1d`.</ResponseField>
+<ResponseField name="currency" type="string">Always `usd`.</ResponseField>
+<ResponseField name="group_by" type="string[]">The dimensions applied, in the order `model`, `api_key`.</ResponseField>
+<ResponseField name="totals" type="object">
+  The sum of every row in the report.
+
+  <Expandable title="properties">
+    <ResponseField name="spend_usd" type="number | null">Your billed spend in USD, as your Billing page shows it. `null` on rows split by API key, when `api_key_ids` narrows the report, and on contract plans.</ResponseField>
+    <ResponseField name="prompt_tokens" type="integer">Input tokens.</ResponseField>
+    <ResponseField name="completion_tokens" type="integer">Output tokens.</ResponseField>
+    <ResponseField name="cache_read_input_tokens" type="integer">Input tokens served from cache. Included in `prompt_tokens`.</ResponseField>
+    <ResponseField name="total_tokens" type="integer">Input plus output tokens.</ResponseField>
+    <ResponseField name="requests" type="integer">All requests.</ResponseField>
+    <ResponseField name="successful_requests" type="integer">Requests that succeeded.</ResponseField>
+    <ResponseField name="failed_requests" type="integer">Requests that failed.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="buckets" type="object[]">
+  One entry per UTC day with usage. Days with no usage are left out rather than reported as zeros.
+
+  <Expandable title="properties">
+    <ResponseField name="start" type="string">The day.</ResponseField>
+    <ResponseField name="end" type="string">The next day (exclusive).</ResponseField>
+    <ResponseField name="totals" type="object">The day's totals, with the same fields as the report's `totals`.</ResponseField>
+    <ResponseField name="results" type="object[]">One row per group, with the same metrics as `totals` plus `model`, `api_key_id` and `api_key_alias`. A dimension you didn't group by is `null`. `api_key_alias` is also `null` for a key with no alias or a deleted key, so fall back to `api_key_id`. Model names are the ones your dashboard shows; usage that doesn't map to one of them is reported as `(other)`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+Token and request counts come from the usage meter, and the API key breakdown is usage only: grouping by `api_key` or filtering with `api_key_ids` returns `spend_usd: null`. Days before your billing started show their usage at `0`.
+
+### Get prices
+
+`GET /v1/account/prices`
+
+Returns your price list in USD per 1M tokens, the one your Billing page shows. Pay-as-you-go only; other plans get a `404`.
+
+```bash
+curl https://api.platform.getimpala.ai/v1/account/prices \
+  -H "Authorization: Bearer $IMPALA_API_KEY"
+```
+
+```json
+{
+  "currency": "usd",
+  "models": [
+    {
+      "model": "glm-5.2",
+      "input_price_per_1m": 0.4,
+      "cached_input_price_per_1m": 0.038,
+      "output_price_per_1m": 1.6
+    },
+    {
+      "model": "kimi-k3",
+      "input_price_per_1m": 0.6,
+      "cached_input_price_per_1m": null,
+      "output_price_per_1m": 2.5
+    }
+  ]
+}
+```
+
+<ResponseField name="currency" type="string">Always `usd`.</ResponseField>
+<ResponseField name="models" type="object[]">
+  One row per model on your price list.
+
+  <Expandable title="properties">
+    <ResponseField name="model" type="string">The model name.</ResponseField>
+    <ResponseField name="input_price_per_1m" type="number">Price per 1M input tokens.</ResponseField>
+    <ResponseField name="cached_input_price_per_1m" type="number | null">Price per 1M input tokens served from cache. `null` means cached tokens are billed at the input price.</ResponseField>
+    <ResponseField name="output_price_per_1m" type="number">Price per 1M output tokens.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+Errors return JSON with a `detail` message. Errors specific to this API also carry a `code`:
+
+```json
+{
+  "detail": "window is 412 days; the maximum is 400",
+  "code": "window_too_large"
+}
+```
+
+| Status | `code` | Meaning |
+| --- | --- | --- |
+| `401` | `invalid_api_key` | The key is missing, unknown, blocked or expired. |
+| `409` | `key_has_no_team` | The key isn't attached to a team. Contact Impala to attach it. |
+| `422` | `invalid_window` | `end` is before `start`. |
+| `422` | `window_too_large` | The window is longer than 400 days. |
+| `422` | `invalid_group_by` | `group_by` has a value other than `model` or `api_key`. |
+| `422` | `unknown_api_key_ids` | `api_key_ids` includes an ID that isn't a current key on your team. The body lists the offending IDs in `api_key_ids`. |
+
+Other errors carry no `code`. A date that isn't `YYYY-MM-DD` returns `422` with a list of validation errors in `detail`. `/v1/account/prices` returns `404` on plans other than pay-as-you-go. A `502` means an upstream service didn't answer; retry the request.
+
+## Full example
+
+Prints your plan and key, your wallet if you have one, month-to-date spend by day and model, your keys, and your prices where they apply.
+
+```python
+import os
+
+import requests
+
+BASE = "https://api.platform.getimpala.ai"
+API_KEY = os.environ["IMPALA_API_KEY"]  # your inference key
+
+s = requests.Session()
+s.headers["Authorization"] = f"Bearer {API_KEY}"
+
+
+def get(path, **params):
+    r = s.get(f"{BASE}{path}", params=params, timeout=30)
+    if r.status_code == 404:
+        return None  # prices are pay-as-you-go only
+    r.raise_for_status()
+    return r.json()
+
+
+def usd(value):
+    return "n/a" if value is None else f"${value:,.2f}"  # spend_usd is null on contract plans
+
+
+# Account: plan, your key, and (pay-as-you-go) wallet
+acct = get("/v1/account")
+print(f"team: {acct['team_alias']} ({acct['customer_id']})   plan: {acct['billing_plan']}")
+k = acct["key"]
+print(f"this key: {k['alias']} {k['masked']}   spent ${k['spend_usd']:.2f}")
+if "wallet" in acct:
+    w = acct["wallet"]
+    print(f"wallet: funded ${w['funded_cents']/100:.2f}  spent ${w['spent_cents']/100:.2f}  balance ${w['balance_cents']/100:.2f}")
+
+# Spend report: one bucket per UTC day, grouped by model (defaults to month-to-date)
+report = get("/v1/account/spend", group_by="model")
+t = report["totals"]
+print(f"\n{report['start']} → {report['end']}: {usd(t['spend_usd'])}  {t['requests']} requests  {t['total_tokens']:,} tokens")
+for day in report["buckets"]:
+    print(f"  {day['start']}  {usd(day['totals']['spend_usd'])}")
+    for row in day["results"]:
+        print(f"      {row['model']:<14} {usd(row['spend_usd']):>12}  {row['requests']} req")
+
+# Your keys (metadata only) and your per-token prices (USD per 1M tokens)
+print("\nkeys:")
+for key in get("/v1/account/keys")["keys"]:
+    print(f"  {key['alias'] or key['id'][:12]:<16} ${key['spend_usd']:.2f}")
+prices = get("/v1/account/prices")
+if prices is None:
+    print("prices: not applicable on this plan")
+else:
+    print("prices:")
+    for p in prices["models"]:
+        print(f"  {p['model']:<14} in {p['input_price_per_1m']}  cached {p['cached_input_price_per_1m']}  out {p['output_price_per_1m']}")
+```
