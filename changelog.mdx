@@ -24,7 +24,7 @@ title: "Product updates"
 
   ### Rate-limited requests on the Usage page
 
-  Requests rejected with HTTP `429` by your API key's or team's rate limit now appear on the Usage page as request errors. When Impala knows the limit, the page shows it in requests per minute. Use this to spot traffic that goes over your limit. To follow limit changes automatically, see [Rate limit webhooks](/rate-limit-webhooks).
+  Requests rejected with HTTP `429` by your API key's or team's rate limit now appear on the Usage page as request errors. Impala attributes these rejections to the model you requested, so each model's figures include its own rate-limited requests. The failure breakdown also lists rate-limited requests as their own row. When Impala knows the limit, the page shows it in requests per minute. Use this to spot traffic that goes over your limit. To follow limit changes automatically, see [Rate limit webhooks](/rate-limit-webhooks).
 </Update>
 
 <Update label="May 17, 2026">
