@@ -104,6 +104,10 @@
   "navbar": {
     "links": [
       {
+        "label": "Product updates",
+        "href": "/changelog"
+      },
+      {
         "label": "Blog",
         "href": "https://www.getimpala.ai/blog"
       },
