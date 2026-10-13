@@ -17,6 +17,6 @@ Each event carries your team's new RPM and TPM limits. We share the exact event 
 
 ## Route with the limits
 
-Set Impala's weight in your router so your expected peak stays under the new limits, and send overflow to another provider. Requests above the limit return `429`.
+Set Impala's weight in your router so your expected peak stays under the new limits, and send overflow to another provider. Requests above the limit return `429`. Rejected requests appear as request errors on the Usage page.
 
 Before your router acts on events, log a few and check that your update logic would have produced the routing you expect.

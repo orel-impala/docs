@@ -2,6 +2,37 @@
 title: "Product updates"
 ---
 
+<Update label="October 11, 2026">
+  ### Billing API
+
+  Pull your usage, spend and prices as JSON with the same API key you use for inference. See [Billing API](/billing-api).
+</Update>
+
+<Update label="October 7, 2026">
+  ### Spend by model
+
+  The billing card in [Settings](https://platform.getimpala.ai/settings) now includes a **Spend by model** table. It shows your spend per model for this month and last month, plus each model's share of the total. Pay-as-you-go spend is visible to team admins only.
+
+  ### Cumulative spend chart
+
+  The Settings billing card also plots your cumulative spend for this month against last month. When an estimate is available, the chart adds a projected month-end total so you can see where the month is heading.
+
+  ### Usage counts each request once
+
+  The Usage page now counts each request you send once.
+
+  Failed requests are split into two groups:
+
+  - **Request errors**: `4xx` responses caused by the request itself.
+  - **Service errors**: failures on Impala's side, including timeouts.
+
+  The requests chart plots request errors and service errors as separate lines.
+
+  ### Rate-limited requests on the Usage page
+
+  Requests rejected with HTTP `429` by your API key's or team's rate limit now appear on the Usage page as request errors. Impala attributes these rejections to the model you requested, so each model's figures include its own rate-limited requests. The failure breakdown also lists rate-limited requests as their own row. To follow limit changes automatically, see [Rate limit webhooks](/rate-limit-webhooks).
+</Update>
+
 <Update label="May 17, 2026">
   ### Run Tab
 
