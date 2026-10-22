@@ -2,6 +2,12 @@
 title: "Product updates"
 ---
 
+<Update label="October 20, 2026">
+  ### Scale to zero on by default for new BYOC data planes
+
+  New Bring Your Own Cloud data planes now scale to zero when idle. Workloads scale down to zero replicas and no scaler-managed GPU instances keep running. Submitting a batch wakes the region, so the first batch after an idle period waits for it to start. To opt out, contact your Impala account team. See [Scale to zero](/deployment-options#scale-to-zero).
+</Update>
+
 <Update label="October 11, 2026">
   ### Billing API
 
