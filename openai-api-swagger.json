@@ -882,9 +882,16 @@
             "description": "The ID of the file containing the outputs of successfully executed requests."
           },
           "price_1m_tokens": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Price 1M Tokens",
-            "description": "Effective price in USD per 1,000,000 tokens.",
+            "description": "Effective price in USD per 1,000,000 tokens. Null until `cost_status` is `final`. Only returned for customers who are shown pricing.",
             "default": 0.0
           },
           "request_counts": {
@@ -896,10 +903,26 @@
             "description": "The current status of the batch."
           },
           "processing_cost": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Processing Cost",
-            "description": "Total processing cost in USD.",
+            "description": "Total processing cost in USD. While `cost_status` is `pending`, this is the cost so far: the sum of the batch's parts priced yet. Null before any part is priced. Only returned for customers who are shown pricing.",
             "default": 0.0
+          },
+          "cost_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "final"
+            ],
+            "title": "Cost Status",
+            "description": "`pending` while `processing_cost` can still change, so it holds the cost so far. `final` once it never will, about 1–2.5 minutes after the batch's last part ends. Only returned for customers who are shown pricing."
           },
           "usage": {
             "$ref": "#/components/schemas/CompletionUsageModel",
