@@ -20,3 +20,21 @@ Each event carries your team's new RPM and TPM limits. We share the exact event 
 Set Impala's weight in your router so your expected peak stays under the new limits, and send overflow to another provider. Requests above the limit return `429`. Rejected requests appear as request errors on the Usage page.
 
 Before your router acts on events, log a few and check that your update logic would have produced the routing you expect.
+
+## See your limit on the Usage page
+
+The **Throughput** chart on the Usage page draws your RPM limit as a dashed line labeled `Rate limit: <N> req/min`. Use it to check how close your traffic runs to the limit.
+
+- **All models**: the line shows your team's RPM limit.
+- **A single model**: if that model has its own RPM limit, the line shows the lower of the team limit and the model limit. Otherwise, the line shows the team limit, and the chart compares it with your busiest minute across all models.
+
+With the line, the chart also shows:
+
+- **Busiest minute**: the highest request count in any minute, plotted next to the percentiles.
+- **Rejected (429)**: red dots on the time buckets where requests were rejected with `429`.
+
+Hover the ⓘ next to the limit in the legend to see whose limit the line is. On a model's own limit, token limits and the team limit can still reject requests below the line.
+
+Impala counts limits in fixed 60-second windows that start with your first request, not on the clock minute. A minute on the chart can therefore show more requests than the limit. The line shows the current limit. If your limit changed recently, earlier minutes can sit above or below the line.
+
+If your limits are set only on API keys, the chart shows no line. If requests are blocked for your team, the chart shows a note instead of a line.
