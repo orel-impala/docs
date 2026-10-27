@@ -891,7 +891,7 @@
               }
             ],
             "title": "Price 1M Tokens",
-            "description": "Effective price in USD per 1,000,000 tokens. Null until `cost_status` is `final`. Only returned for customers who are shown pricing.",
+            "description": "Effective price in USD per 1,000,000 tokens. While `cost_status` is `pending`, this is the price so far, computed over the batch's parts priced yet. Null before any part is priced. Only returned for customers who are shown pricing.",
             "default": 0.0
           },
           "request_counts": {
