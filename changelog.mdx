@@ -2,6 +2,16 @@
 title: "Product updates"
 ---
 
+<Update label="October 21, 2026">
+  ### Running batches report their cost so far
+
+  A running batch now shows its cost so far instead of null. On the batch object, `processing_cost` is the sum of the batch's parts priced yet while the new `cost_status` field is `pending`. It's null only before any part is priced. `cost_status` turns `final` about 1–2.5 minutes after the batch's last part ends, rather than waiting for every batch that shared its hardware to finish. `price_1m_tokens` likewise shows the price per million tokens so far, computed over the parts priced yet.
+
+  On the dashboard, total cost now includes pending runs' costs so far, so it can still change while any run's cost is pending.
+
+  Cost fields appear only for teams that are shown pricing.
+</Update>
+
 <Update label="October 20, 2026">
   ### Scale to zero on by default for new BYOC data planes
 
