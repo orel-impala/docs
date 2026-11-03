@@ -2,6 +2,12 @@
 title: "Product updates"
 ---
 
+<Update label="November 3, 2026">
+  ### Batches on fine-tuned LoRA adapters
+
+  You can now run a batch on your own LoRA fine-tune. Upload the adapter to your data plane's resources bucket and set `model` to `ft:<base-model>:<adapter-name>`. A fine-tuned batch is billed as its base model, at the base model's rate and size. BYOC data planes need a release that includes this change. See [LoRA adapters in batch](/lora-batch).
+</Update>
+
 <Update label="October 21, 2026">
   ### Running batches report their cost so far
 
