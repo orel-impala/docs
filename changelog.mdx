@@ -2,6 +2,12 @@
 title: "Product updates"
 ---
 
+<Update label="November 5, 2026">
+  ### Unknown job IDs fail the batch
+
+  A batch whose `job_id` names no job now fails with the error code `workload_resolution_rejected` and the message `Job not found: <job_id>`. Before, it ran on a configuration Impala picked from the batch's shape. See [Jobs](/jobs-and-job-ids#using-a-job-id).
+</Update>
+
 <Update label="October 21, 2026">
   ### Running batches report their cost so far
 

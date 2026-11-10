@@ -51,6 +51,8 @@ batch = client.batches.create(
 )
 ```
 
+If `job_id` names no job, the create call still succeeds, but the batch fails when Impala routes it. Its `errors.data` carries the code `workload_resolution_rejected` and the message `Job not found: <job_id>`. Copy job IDs from the **Run** tab to avoid this.
+
 ## The model has to match
 
 Every line of your JSONL carries a `model` field. If you pass a `job_id`, it must name the same model the job is bound to.
