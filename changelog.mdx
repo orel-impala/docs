@@ -14,6 +14,12 @@ title: "Product updates"
   You can now run a batch on your own LoRA fine-tune. Upload the adapter to your data plane's resources bucket and set `model` to `ft:<base-model>:<adapter-name>`. A fine-tuned batch is billed as its base model, at the base model's rate and size. BYOC data planes need a release that includes this change. See [LoRA adapters in batch](/lora-batch).
 </Update>
 
+<Update label="October 22, 2026">
+  ### Rate limit on the Usage page
+
+  The Throughput chart on the Usage page now draws your RPM limit as a dashed line. On a single model, the line shows the lower of your team limit and that model's own limit. The chart also plots your busiest minute and marks time buckets with `429` rejections as red dots. See [See your limit on the Usage page](/rate-limit-webhooks#see-your-limit-on-the-usage-page).
+</Update>
+
 <Update label="October 21, 2026">
   ### Running batches report their cost so far
 
