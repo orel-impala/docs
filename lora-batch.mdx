@@ -65,6 +65,8 @@ curl -X POST "$BASE_URL/v1/batches" \
 
 Poll the batch and download results the same way as any other batch. See [Run a batch](/run-your-first-batch).
 
+On the Usage page, a fine-tuned run shows its base model with a **Fine-tuned · `<adapter-name>`** chip. The run's details add a **Fine-tune** row with the adapter name and a button that copies the full `ft:<base-model>:<adapter-name>` model name.
+
 <Warning>
   Impala doesn't validate the adapter. A missing or invalid adapter doesn't fail the batch. Instead, the batch keeps waiting because no serving setup can load the adapter. Check the adapter path and files before you submit.
 </Warning>
