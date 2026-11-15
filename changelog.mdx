@@ -8,6 +8,24 @@ title: "Product updates"
   Committed-usage plans are now billed per model at the prices on your price list. Once Impala has set up your committed-usage billing, [`GET /v1/account/prices`](/billing-api#get-prices) returns that list, as it does on pay-as-you-go.
 </Update>
 
+<Update label="November 5, 2026">
+  ### Unknown job IDs fail the batch
+
+  A batch whose `job_id` names no job now fails with the error code `workload_resolution_rejected` and the message `Job not found: <job_id>`. Before, it ran on a configuration Impala picked from the batch's shape. See [Jobs](/jobs-and-job-ids#using-a-job-id).
+</Update>
+
+<Update label="November 3, 2026">
+  ### Batches on fine-tuned LoRA adapters
+
+  You can now run a batch on your own LoRA fine-tune. Upload the adapter to your data plane's resources bucket and set `model` to `ft:<base-model>:<adapter-name>`. A fine-tuned batch is billed as its base model, at the base model's rate and size. BYOC data planes need a release that includes this change. See [LoRA adapters in batch](/lora-batch).
+</Update>
+
+<Update label="October 22, 2026">
+  ### Rate limit on the Usage page
+
+  The Throughput chart on the Usage page now draws your RPM limit as a dashed line. On a single model, the line shows the lower of your team limit and that model's own limit. The chart also plots your busiest minute and marks time buckets with `429` rejections as red dots. See [See your limit on the Usage page](/rate-limit-webhooks#see-your-limit-on-the-usage-page).
+</Update>
+
 <Update label="October 21, 2026">
   ### Running batches report their cost so far
 

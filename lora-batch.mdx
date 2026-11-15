@@ -3,10 +3,13 @@ title: "LoRA adapters in batch"
 description: "Run a batch on your own fine-tune. Put the adapter in your data plane's resources bucket and name it in the model field."
 ---
 
-{/* TODO (engineering): this flow depends on backend #1865, #1866 and charts#1334. Until #1866 merges, an ft: batch fails with no_recipe_for_workload. BYOC data planes also need a release that includes all three. */}
 {/* TODO (engineering): LoRA must be enabled in the model's serving recipe (enable_lora). Today only Phi-3.5-mini has it. Confirm the list of supported base models before publishing. */}
 
-A batch on a [LoRA adapter](/lora-adapters) is a normal [batch](/run-your-first-batch) with two differences: the adapter lives in your data plane's resources bucket, and each request names it in `model`.
+A batch on a [LoRA adapter](/lora-adapters) is a normal [batch](/run-your-first-batch) with two differences: the adapter lives in your data plane's resources bucket, and each request names it in `model`. Impala serves the batch with the base model's serving setup and loads your adapter on top of it.
+
+<Note>
+  BYOC data planes need an Impala release that includes LoRA batch support. If your data plane hasn't been upgraded yet, contact your Impala account team.
+</Note>
 
 {/* TODO: this flow assumes a BYOC data plane (Terraform output s3_resources_bucket_name). Confirm whether serverless customers have an equivalent, or scope the page to BYOC. */}
 
@@ -27,6 +30,8 @@ aws s3 cp ./support-classifier-v1/ \
 ```
 
 Adapter names use letters, digits, `.`, `_` and `-`, and start with a letter or digit.
+
+Upload the adapter once, to the resources bucket in your main region. Impala copies it to every region where the batch runs.
 
 ## Name the adapter in `model`
 
@@ -61,8 +66,9 @@ curl -X POST "$BASE_URL/v1/batches" \
 Poll the batch and download results the same way as any other batch. See [Run a batch](/run-your-first-batch).
 
 <Warning>
-  The adapter isn't checked when you create the batch. If it's missing from the bucket or doesn't meet the requirements above, the batch doesn't start. Check the adapter path and files before you submit.
+  Impala doesn't validate the adapter. A missing or invalid adapter doesn't fail the batch. Instead, the batch keeps waiting because no serving setup can load the adapter. Check the adapter path and files before you submit.
 </Warning>
 
-{/* TODO (engineering): what status does a batch with a missing or invalid adapter show, and does it ever fail or expire? Document it once there is a defined behavior. */}
-{/* TODO (billing): is a fine-tune batch billed at the base model's price or a separate price? */}
+## Billing
+
+A fine-tuned batch is billed at its base model's rate. Its tokens count against your monthly token allowance at the base model's size. Usage is still reported under the full `ft:<base-model>:<adapter-name>` name, so each fine-tune appears as its own line. See [Pricing](/pricing).
