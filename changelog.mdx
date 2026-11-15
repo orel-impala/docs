@@ -5,7 +5,13 @@ title: "Product updates"
 <Update label="November 15, 2026">
   ### Price list for committed-usage plans
 
-  Committed-usage plans are now billed per model at the prices on your price list. Once Impala has set up your committed-usage billing, [`GET /v1/account/prices`](/billing-api#get-prices) returns that list, as it does on pay-as-you-go.
+  Committed-usage plans are now billed per model at the prices on your price list. Once Impala has set up your committed-usage billing, [`GET /v1/account/prices`](/billing-api#get-prices) returns that list, as it does on pay-as-you-go. The billing card in [Settings](https://platform.getimpala.ai/settings) shows the same list.
+</Update>
+
+<Update label="November 12, 2026">
+  ### Custom date range for spend by model
+
+  The **Spend by model** table in [Settings](https://platform.getimpala.ai/settings) now has a **Custom** period next to **This month** and **Last month**. Pick a **From (UTC)** and **To (UTC)** day, then click **Apply** to see your spend per model for those whole UTC days. A range can span up to 400 days. If Impala no longer keeps spend for the earliest days you pick, the card notes the day from which its figures are complete.
 </Update>
 
 <Update label="November 5, 2026">

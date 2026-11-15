@@ -281,7 +281,7 @@ Token and request counts come from the usage meter, and the API key breakdown is
 
 `GET /v1/account/prices`
 
-Returns your price list in USD per 1M tokens. On pay-as-you-go, it's the one your Billing page shows. Committed-usage plans are billed per model at these prices too. Contract plans, and committed-usage plans before their billing is set up, get a `404`.
+Returns your price list in USD per 1M tokens, the one your Billing page shows. Committed-usage plans are billed per model at these prices too. Contract plans, and committed-usage plans before their billing is set up, get a `404`.
 
 ```bash
 curl https://api.platform.getimpala.ai/v1/account/prices \
