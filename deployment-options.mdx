@@ -14,3 +14,11 @@ Pick this to be running today, or when you'd rather not own capacity planning. S
 Impala's data plane is installed into your own AWS account and VPC. Your prompts, inputs and outputs stay inside your account. Inside your cloud, Impala scales across GPU types and across regions, which keeps availability high and puts each workload on the cheapest capable hardware available at the time.
 
 Pick this when data residency or network isolation is a requirement, or when you have committed GPU capacity to use. Setup is a Terraform apply, roughly 30 minutes. See [Install Impala in your VPC](/getting-started-infrastructure-setup).
+
+### Scale to zero
+
+New Bring Your Own Cloud data planes have scale to zero turned on by default. When your data plane is idle, its region goes to sleep. Impala scales your workloads down to zero replicas, and no GPU instances managed by Impala's scaler keep running in your account.
+
+When you submit a batch, Impala wakes the region back up. The first batch after an idle period waits while the region starts, so it takes longer to begin processing than batches sent while the region is already running.
+
+To opt out of scale to zero or change the setting for your data plane, contact your Impala account team.

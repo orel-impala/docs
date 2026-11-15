@@ -61,6 +61,7 @@
         "icon": "cube",
         "pages": [
           "lora-adapters",
+          "lora-batch",
           "weight-sync"
         ]
       },
