@@ -10,7 +10,7 @@ The Billing API returns your team's usage and spend as JSON, so you can track co
 | `GET` | `/v1/account` | Team, plan and the calling key; on pay-as-you-go, also the wallet |
 | `GET` | `/v1/account/keys` | Your team's API keys, metadata only |
 | `GET` | `/v1/account/spend` | Spend, requests and tokens in daily buckets |
-| `GET` | `/v1/account/prices` | Your per-token price list (pay-as-you-go only) |
+| `GET` | `/v1/account/prices` | Your per-token price list (pay-as-you-go and committed usage) |
 
 Base URL: `https://api.platform.getimpala.ai`
 
@@ -26,7 +26,7 @@ A blocked or expired key gets a `401`. Billing reads keep working when your wall
 
 ## Plan differences
 
-On pay-as-you-go, `/v1/account` includes `wallet`, and `/v1/account/prices` returns your price list. On other plans, `wallet` is left out of the response (the field is absent, not `null`) and `/v1/account/prices` returns `404`. `/v1/account/spend` reports `spend_usd` on pay-as-you-go and committed-usage plans; on contract plans it's `null`. `/v1/account/keys` works the same on every plan.
+On pay-as-you-go, `/v1/account` includes `wallet`. On other plans, `wallet` is left out of the response (the field is absent, not `null`). `/v1/account/prices` returns your price list on pay-as-you-go and on committed-usage plans once Impala has set up your committed-usage billing. On contract plans, and on committed usage before that setup, it returns `404`. `/v1/account/spend` reports `spend_usd` on pay-as-you-go and committed-usage plans; on contract plans it's `null`. `/v1/account/keys` works the same on every plan.
 
 ## Endpoints
 
@@ -281,7 +281,7 @@ Token and request counts come from the usage meter, and the API key breakdown is
 
 `GET /v1/account/prices`
 
-Returns your price list in USD per 1M tokens, the one your Billing page shows. Pay-as-you-go only; other plans get a `404`.
+Returns your price list in USD per 1M tokens. On pay-as-you-go, it's the one your Billing page shows. Committed-usage plans are billed per model at these prices too. Contract plans, and committed-usage plans before their billing is set up, get a `404`.
 
 ```bash
 curl https://api.platform.getimpala.ai/v1/account/prices \
