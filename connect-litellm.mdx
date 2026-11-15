@@ -83,7 +83,7 @@ Then start (or restart) the proxy in whichever way matches your environment.
 litellm --config ~/litellm-impala.yaml
 ```
 
-Now you can now follow [Upload and run your first batch](https://docs.getimpala.ai/run-your-first-batch). Below is a shortened version of this guide, for your convenience.
+Now you can follow [Upload and run your first batch](/run-your-first-batch). Below is a shortened version of this guide, for your convenience.
 
 ### Step A — Upload the input file
 
@@ -146,7 +146,7 @@ print(result.output_file)
 
 **Tag batches**. Some deployments pass an optional `tags` object when creating a batch, which then surfaces in the Impala console for filtering runs by user, team or use case. Reach out to Impala to set this up.
 
-**Budget guardrails.** If you want to stop a run early — for example because it's burning through a budget you're tracking via LiteLLM — poll `GET /v1/batches/{batch_id}` as usual and call the documented [Cancel Batch](https://docs.getimpala.ai/api-reference/batches/cancel-batch) endpoint once your own threshold is hit. Output produced
+**Budget guardrails.** If you want to stop a run early — for example because it's burning through a budget you're tracking via LiteLLM — poll `GET /v1/batches/{batch_id}` as usual and call the documented [Cancel Batch](/api-reference/batches/cancel-batch) endpoint once your own threshold is hit. Output produced
 
 ---
 
