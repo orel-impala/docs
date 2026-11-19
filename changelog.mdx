@@ -2,6 +2,12 @@
 title: "Product updates"
 ---
 
+<Update label="November 19, 2026">
+  ### Requests stop when your client disconnects
+
+  When your client disconnects before Impala starts sending a response, Impala now stops the request instead of generating to completion. This covers non-streaming requests, and streaming requests before their first chunk. An SDK retry after a timeout therefore starts over, so raise your timeout rather than relying on retries. See [Timeouts and retries](/send-a-request#timeouts-and-retries).
+</Update>
+
 <Update label="November 15, 2026">
   ### Price list for committed-usage plans
 
