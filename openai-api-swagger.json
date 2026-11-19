@@ -991,7 +991,7 @@
           "endpoint": {
             "type": "string",
             "title": "Endpoint",
-            "description": "The endpoint to be used for all requests in the batch. Currently `v1/responses`, `v1/chat/completions`, `v1/embeddings`, and `v1/completions` are supported. Note that `v1/embeddings` batches are also restricted to a maximum of 50,000 embedding inputs across all requests in the batch."
+            "description": "The endpoint to be used for all requests in the batch. Currently `v1/responses`, `v1/chat/completions`, `v1/embeddings`, `v1/completions`, and `v1/systemone` are supported. Note that `v1/embeddings` batches are also restricted to a maximum of 50,000 embedding inputs across all requests in the batch."
           },
           "input_file_id": {
             "type": "string",

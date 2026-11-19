@@ -81,9 +81,11 @@ Request fields:
 | Field | Value |
 | --- | --- |
 | input\_file\_id | The id returned by Step 2 |
-| endpoint | One of /v1/chat/completions, /v1/completions, /v1/embeddings, /v1/responses — must match the url field in each JSONL line |
+| endpoint | One of /v1/chat/completions, /v1/completions, /v1/embeddings, /v1/responses, /v1/systemone. It must match the url field in each JSONL line |
 | completion\_window | "unlimited" |
 | job\_id | Optional. A Job ID supplied to you by Impala (job-xxxxxxxx) |
+
+`/v1/systemone` is for decision models. Each line's `body` carries a `model`, a `state` and a `questions` object, and Impala checks every line against the endpoint's request format before it provisions GPUs. Decision models are available on request; contact your Impala account team.
 
 The response includes an `id` for the batch (for example, `batch-xyz789`).
 
