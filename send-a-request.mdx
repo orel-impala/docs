@@ -36,7 +36,7 @@ Two settings matter more here than at an interactive provider.
 
 **Raise your timeouts.** A call takes seconds, and minutes under load. SDK defaults are tuned for interactive providers and will abort a request that would have succeeded.
 
-**Reduce automatic retries.** The SDK can't tell a slow request from a failed one, so its default retries fire on timeouts for requests that are still running — adding load without shortening your wait. Lower the count and raise the timeout instead. Set it to `0` if your own harness handles retries.
+**Reduce automatic retries.** The SDK can't tell a slow request from a failed one, so its default retries fire on timeouts. When the SDK times out before Impala starts responding, it disconnects and Impala stops the request. Each retry then starts generation over from the beginning, so a short timeout with retries can keep a slow request from ever finishing. Lower the count and raise the timeout instead. Set it to `0` if your own harness handles retries.
 
 ```python
 client = OpenAI(
