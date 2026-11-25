@@ -83,13 +83,13 @@ curl https://api.platform.getimpala.ai/v1/account \
   The calling key, with the same fields as an entry in [`/v1/account/keys`](#list-keys).
 </ResponseField>
 <ResponseField name="wallet" type="object">
-  Pay-as-you-go only. Your prepaid wallet, in integer US cents.
+  Pay-as-you-go only. Your wallet, in integer US cents.
 
   <Expandable title="properties">
     <ResponseField name="currency" type="string">Always `usd`.</ResponseField>
     <ResponseField name="balance_cents" type="integer">`funded_cents` minus `spent_cents`. Can be negative.</ResponseField>
     <ResponseField name="funded_cents" type="integer">`deposited_cents` plus `adjustments_cents`.</ResponseField>
-    <ResponseField name="deposited_cents" type="integer">Top-ups and credit grants.</ResponseField>
+    <ResponseField name="deposited_cents" type="integer">Paid invoices, top-ups and credit grants.</ResponseField>
     <ResponseField name="adjustments_cents" type="integer">Refunds and corrections, either sign.</ResponseField>
     <ResponseField name="spent_cents" type="integer">Usage charged to the wallet since you enrolled. Lags the last request by about a minute.</ResponseField>
     <ResponseField name="overdraft_cents" type="integer">How far below zero the balance may go.</ResponseField>
